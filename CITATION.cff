@@ -8,8 +8,8 @@ authors:
     affiliation: "Independent Researcher, Alicante, Spain"
 version: "1.0.0"
 date-released: "2026-10-16"
-url: "https://github.com/enriquerb32/physics-inspired-qml-ACP"
-repository-code: "https://github.com/enriquerb32/physics-inspired-qml-ACP"
+url: "https://github.com/enriquerb32/limits-of-resolution-qml"
+repository-code: "https://github.com/enriquerb32/limits-of-resolution-qml"
 license: "MIT"
 keywords:
   - "quantum machine learning"
