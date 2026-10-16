@@ -1,0 +1,30 @@
+{
+  "title": "Limits of Resolution in Quantum Machine Learning: A Noise Budget for Small Benchmarks",
+  "upload_type": "publication",
+  "publication_type": "preprint",
+  "description": "Code, spatiotemporal panel data checkpoints, and statistical evaluation scripts accompanying the paper 'Limits of Resolution in Quantum Machine Learning: A Noise Budget for Small Benchmarks'. The repository provides complete reproducibility artifacts for decomposing AUC comparisons into test-set sampling error (DeLong and calendar-year block bootstrap) versus parameter optimization-seed variance on a multi-decadal Western Mediterranean precipitation panel (1938-2026).",
+  "creators": [
+    {
+      "name": "Real, Enrique",
+      "affiliation": "Independent Researcher, Alicante, Spain [AUTHOR PLACEHOLDER: Update Institutional Affiliation]",
+      "orcid": "0000-0000-0000-0000"
+    }
+  ],
+  "access_right": "open",
+  "license": "MIT",
+  "keywords": [
+    "Quantum Machine Learning",
+    "Benchmarking",
+    "Minimum Detectable Effect",
+    "Statistical Power",
+    "Seed Variance",
+    "Precipitation Forecasting",
+    "Climatology"
+  ],
+  "communities": [
+    {
+      "identifier": "zenodo"
+    }
+  ],
+  "notes": "Code is licensed under the MIT License; spatiotemporal dataset checkpoints and paper text are licensed under CC-BY-4.0. Note on hybrid quantum models: per-seed probability vectors were archived only for seed 0; reference multi-seed AUC distributions across 15 seeds are archived in results/json/."
+}

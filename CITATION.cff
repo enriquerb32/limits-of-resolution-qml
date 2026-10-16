@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this benchmark, code, or data in your research, please cite it as below."
+title: "Limits of Resolution in Quantum Machine Learning: A Noise Budget for Small Benchmarks"
+authors:
+  - family-names: "Real"
+    given-names: "Enrique"
+    orcid: "https://orcid.org/0000-0000-0000-0000" # [AUTHOR: Replace with verified ORCID]
+    affiliation: "Independent Researcher, Alicante, Spain"
+version: "1.0.0"
+date-released: "2026-10-16"
+url: "https://github.com/enriquerb32/physics-inspired-qml-ACP"
+repository-code: "https://github.com/enriquerb32/physics-inspired-qml-ACP"
+license: "MIT"
+keywords:
+  - "quantum machine learning"
+  - "benchmarking"
+  - "minimum detectable effect"
+  - "statistical power"
+  - "seed variance"
+  - "precipitation forecasting"
+  - "climatology"

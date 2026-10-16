@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering
+\caption{Extreme-tail recall with 95\% Wilson confidence intervals, single representative run ($n=20$ ACP-flagged exceeding $P_{60}$ out of 25 flagged total; $n=49$ $P_{90}$-exceeding test months).}
+\label{tab:recall_wilson_ci}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Architecture} & \textbf{Rc-ACP [95\% CI]} & \textbf{Rc-$P_{90}$ [95\% CI]} \\
+\midrule
+Logistic Regression & 0.650 [0.433, 0.819] & 0.571 [0.433, 0.700] \\
+Random Forest & 0.900 [0.699, 0.972] & 0.755 [0.619, 0.854] \\
+Gradient Boosting & 0.700 [0.481, 0.855] & 0.592 [0.452, 0.718] \\
+XGBoost & 0.850 [0.640, 0.948] & 0.694 [0.555, 0.805] \\
+Standalone LSTM & 0.950 [0.764, 0.991] & 0.816 [0.686, 0.900] \\
+LSTM+QNN & 0.950 [0.764, 0.991] & 0.796 [0.664, 0.885] \\
+LSTM+PI-QNN & 0.950 [0.764, 0.991] & 0.755 [0.619, 0.854] \\
+LSTM+QTL & 0.850 [0.640, 0.948] & 0.837 [0.710, 0.915] \\
+LbL-QNN & 0.900 [0.699, 0.972] & 0.796 [0.664, 0.885] \\
+QKSVM & 0.600 [0.387, 0.781] & 0.612 [0.472, 0.736] \\
+\bottomrule
+\end{tabular}
+\end{table}

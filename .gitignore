@@ -1,0 +1,48 @@
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Local review & work-in-progress notes
+pass*.txt
+backup_*/
+audit.md
+changes.md
+decisions_pending.md
+unresolved.md
+todo_experiments.md
+summary_for_*.md
+inventory.md
+TODO_AUTOR.md
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Large checkpoints (if hosted on Zenodo instead of Git LFS)
+# checkpoints/*.pt
+
+# Local helper scripts
+*.ps1

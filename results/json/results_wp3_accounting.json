@@ -1,0 +1,924 @@
+{
+  "parameters": {
+    "LSTM+QNN (4q, 2L)": {
+      "total_params": 2613,
+      "trainable_params": 2613,
+      "classical_trainable": 2589,
+      "quantum_params": 24,
+      "shapes": {
+        "W": [
+          2,
+          4,
+          3
+        ],
+        "lstm.weight_ih_l0": [
+          32,
+          1
+        ],
+        "lstm.weight_hh_l0": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l0": [
+          32
+        ],
+        "lstm.bias_hh_l0": [
+          32
+        ],
+        "lstm.weight_ih_l0_reverse": [
+          32,
+          1
+        ],
+        "lstm.weight_hh_l0_reverse": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l0_reverse": [
+          32
+        ],
+        "lstm.bias_hh_l0_reverse": [
+          32
+        ],
+        "lstm.weight_ih_l1": [
+          32,
+          16
+        ],
+        "lstm.weight_hh_l1": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l1": [
+          32
+        ],
+        "lstm.bias_hh_l1": [
+          32
+        ],
+        "lstm.weight_ih_l1_reverse": [
+          32,
+          16
+        ],
+        "lstm.weight_hh_l1_reverse": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l1_reverse": [
+          32
+        ],
+        "lstm.bias_hh_l1_reverse": [
+          32
+        ],
+        "proj.0.weight": [
+          4,
+          51
+        ],
+        "proj.0.bias": [
+          4
+        ],
+        "norm.weight": [
+          4
+        ],
+        "norm.bias": [
+          4
+        ],
+        "clf.weight": [
+          1,
+          4
+        ],
+        "clf.bias": [
+          1
+        ]
+      }
+    },
+    "PI-QNN-LbL (4q, 3L)": {
+      "total_params": 2625,
+      "trainable_params": 2625,
+      "classical_trainable": 2589,
+      "quantum_params": 36,
+      "shapes": {
+        "W": [
+          3,
+          4,
+          3
+        ],
+        "lstm.weight_ih_l0": [
+          32,
+          1
+        ],
+        "lstm.weight_hh_l0": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l0": [
+          32
+        ],
+        "lstm.bias_hh_l0": [
+          32
+        ],
+        "lstm.weight_ih_l0_reverse": [
+          32,
+          1
+        ],
+        "lstm.weight_hh_l0_reverse": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l0_reverse": [
+          32
+        ],
+        "lstm.bias_hh_l0_reverse": [
+          32
+        ],
+        "lstm.weight_ih_l1": [
+          32,
+          16
+        ],
+        "lstm.weight_hh_l1": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l1": [
+          32
+        ],
+        "lstm.bias_hh_l1": [
+          32
+        ],
+        "lstm.weight_ih_l1_reverse": [
+          32,
+          16
+        ],
+        "lstm.weight_hh_l1_reverse": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l1_reverse": [
+          32
+        ],
+        "lstm.bias_hh_l1_reverse": [
+          32
+        ],
+        "proj.0.weight": [
+          4,
+          51
+        ],
+        "proj.0.bias": [
+          4
+        ],
+        "norm.weight": [
+          4
+        ],
+        "norm.bias": [
+          4
+        ],
+        "clf.weight": [
+          1,
+          4
+        ],
+        "clf.bias": [
+          1
+        ]
+      }
+    },
+    "PureLSTM (Standalone)": {
+      "total_params": 10103,
+      "trainable_params": 10103,
+      "classical_trainable": 10103,
+      "quantum_params": 0,
+      "shapes": {
+        "lstm.weight_ih_l0": [
+          64,
+          1
+        ],
+        "lstm.weight_hh_l0": [
+          64,
+          16
+        ],
+        "lstm.bias_ih_l0": [
+          64
+        ],
+        "lstm.bias_hh_l0": [
+          64
+        ],
+        "lstm.weight_ih_l0_reverse": [
+          64,
+          1
+        ],
+        "lstm.weight_hh_l0_reverse": [
+          64,
+          16
+        ],
+        "lstm.bias_ih_l0_reverse": [
+          64
+        ],
+        "lstm.bias_hh_l0_reverse": [
+          64
+        ],
+        "lstm.weight_ih_l1": [
+          64,
+          32
+        ],
+        "lstm.weight_hh_l1": [
+          64,
+          16
+        ],
+        "lstm.bias_ih_l1": [
+          64
+        ],
+        "lstm.bias_hh_l1": [
+          64
+        ],
+        "lstm.weight_ih_l1_reverse": [
+          64,
+          32
+        ],
+        "lstm.weight_hh_l1_reverse": [
+          64,
+          16
+        ],
+        "lstm.bias_ih_l1_reverse": [
+          64
+        ],
+        "lstm.bias_hh_l1_reverse": [
+          64
+        ],
+        "bn.weight": [
+          67
+        ],
+        "bn.bias": [
+          67
+        ],
+        "fc.0.weight": [
+          16,
+          67
+        ],
+        "fc.0.bias": [
+          16
+        ],
+        "fc.3.weight": [
+          16
+        ],
+        "fc.3.bias": [
+          16
+        ],
+        "fc.4.weight": [
+          1,
+          16
+        ],
+        "fc.4.bias": [
+          1
+        ]
+      }
+    },
+    "Amplitude-16D": {
+      "total_params": 3237,
+      "trainable_params": 3237,
+      "classical_trainable": 3213,
+      "quantum_params": 24,
+      "shapes": {
+        "W": [
+          2,
+          4,
+          3
+        ],
+        "lstm.weight_ih_l0": [
+          32,
+          1
+        ],
+        "lstm.weight_hh_l0": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l0": [
+          32
+        ],
+        "lstm.bias_hh_l0": [
+          32
+        ],
+        "lstm.weight_ih_l0_reverse": [
+          32,
+          1
+        ],
+        "lstm.weight_hh_l0_reverse": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l0_reverse": [
+          32
+        ],
+        "lstm.bias_hh_l0_reverse": [
+          32
+        ],
+        "lstm.weight_ih_l1": [
+          32,
+          16
+        ],
+        "lstm.weight_hh_l1": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l1": [
+          32
+        ],
+        "lstm.bias_hh_l1": [
+          32
+        ],
+        "lstm.weight_ih_l1_reverse": [
+          32,
+          16
+        ],
+        "lstm.weight_hh_l1_reverse": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l1_reverse": [
+          32
+        ],
+        "lstm.bias_hh_l1_reverse": [
+          32
+        ],
+        "proj.0.weight": [
+          16,
+          51
+        ],
+        "proj.0.bias": [
+          16
+        ],
+        "norm.weight": [
+          4
+        ],
+        "norm.bias": [
+          4
+        ],
+        "clf.weight": [
+          1,
+          4
+        ],
+        "clf.bias": [
+          1
+        ]
+      }
+    },
+    "Re-uploading-3x4D": {
+      "total_params": 3041,
+      "trainable_params": 3041,
+      "classical_trainable": 3005,
+      "quantum_params": 36,
+      "shapes": {
+        "W": [
+          3,
+          4,
+          3
+        ],
+        "lstm.weight_ih_l0": [
+          32,
+          1
+        ],
+        "lstm.weight_hh_l0": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l0": [
+          32
+        ],
+        "lstm.bias_hh_l0": [
+          32
+        ],
+        "lstm.weight_ih_l0_reverse": [
+          32,
+          1
+        ],
+        "lstm.weight_hh_l0_reverse": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l0_reverse": [
+          32
+        ],
+        "lstm.bias_hh_l0_reverse": [
+          32
+        ],
+        "lstm.weight_ih_l1": [
+          32,
+          16
+        ],
+        "lstm.weight_hh_l1": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l1": [
+          32
+        ],
+        "lstm.bias_hh_l1": [
+          32
+        ],
+        "lstm.weight_ih_l1_reverse": [
+          32,
+          16
+        ],
+        "lstm.weight_hh_l1_reverse": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l1_reverse": [
+          32
+        ],
+        "lstm.bias_hh_l1_reverse": [
+          32
+        ],
+        "proj.0.weight": [
+          12,
+          51
+        ],
+        "proj.0.bias": [
+          12
+        ],
+        "norm.weight": [
+          4
+        ],
+        "norm.bias": [
+          4
+        ],
+        "clf.weight": [
+          1,
+          4
+        ],
+        "clf.bias": [
+          1
+        ]
+      }
+    },
+    "Linear-4D": {
+      "total_params": 2609,
+      "trainable_params": 2609,
+      "classical_trainable": 2609,
+      "quantum_params": 0,
+      "shapes": {
+        "lstm.weight_ih_l0": [
+          32,
+          1
+        ],
+        "lstm.weight_hh_l0": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l0": [
+          32
+        ],
+        "lstm.bias_hh_l0": [
+          32
+        ],
+        "lstm.weight_ih_l0_reverse": [
+          32,
+          1
+        ],
+        "lstm.weight_hh_l0_reverse": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l0_reverse": [
+          32
+        ],
+        "lstm.bias_hh_l0_reverse": [
+          32
+        ],
+        "lstm.weight_ih_l1": [
+          32,
+          16
+        ],
+        "lstm.weight_hh_l1": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l1": [
+          32
+        ],
+        "lstm.bias_hh_l1": [
+          32
+        ],
+        "lstm.weight_ih_l1_reverse": [
+          32,
+          16
+        ],
+        "lstm.weight_hh_l1_reverse": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l1_reverse": [
+          32
+        ],
+        "lstm.bias_hh_l1_reverse": [
+          32
+        ],
+        "proj.0.weight": [
+          4,
+          51
+        ],
+        "proj.0.bias": [
+          4
+        ],
+        "bottleneck.weight": [
+          4,
+          4
+        ],
+        "bottleneck.bias": [
+          4
+        ],
+        "norm.weight": [
+          4
+        ],
+        "norm.bias": [
+          4
+        ],
+        "clf.weight": [
+          1,
+          4
+        ],
+        "clf.bias": [
+          1
+        ]
+      }
+    },
+    "LeakyReLU-4D": {
+      "total_params": 2617,
+      "trainable_params": 2617,
+      "classical_trainable": 2617,
+      "quantum_params": 0,
+      "shapes": {
+        "lstm.weight_ih_l0": [
+          32,
+          1
+        ],
+        "lstm.weight_hh_l0": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l0": [
+          32
+        ],
+        "lstm.bias_hh_l0": [
+          32
+        ],
+        "lstm.weight_ih_l0_reverse": [
+          32,
+          1
+        ],
+        "lstm.weight_hh_l0_reverse": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l0_reverse": [
+          32
+        ],
+        "lstm.bias_hh_l0_reverse": [
+          32
+        ],
+        "lstm.weight_ih_l1": [
+          32,
+          16
+        ],
+        "lstm.weight_hh_l1": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l1": [
+          32
+        ],
+        "lstm.bias_hh_l1": [
+          32
+        ],
+        "lstm.weight_ih_l1_reverse": [
+          32,
+          16
+        ],
+        "lstm.weight_hh_l1_reverse": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l1_reverse": [
+          32
+        ],
+        "lstm.bias_hh_l1_reverse": [
+          32
+        ],
+        "proj.0.weight": [
+          4,
+          51
+        ],
+        "proj.0.bias": [
+          4
+        ],
+        "mlp.0.weight": [
+          2,
+          4
+        ],
+        "mlp.0.bias": [
+          2
+        ],
+        "mlp.2.weight": [
+          2,
+          2
+        ],
+        "mlp.2.bias": [
+          2
+        ],
+        "mlp.4.weight": [
+          4,
+          2
+        ],
+        "mlp.4.bias": [
+          4
+        ],
+        "norm.weight": [
+          4
+        ],
+        "norm.bias": [
+          4
+        ],
+        "clf.weight": [
+          1,
+          4
+        ],
+        "clf.bias": [
+          1
+        ]
+      }
+    },
+    "MLP-4D GELU": {
+      "total_params": 2769,
+      "trainable_params": 2769,
+      "classical_trainable": 2769,
+      "quantum_params": 0,
+      "shapes": {
+        "lstm.weight_ih_l0": [
+          32,
+          1
+        ],
+        "lstm.weight_hh_l0": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l0": [
+          32
+        ],
+        "lstm.bias_hh_l0": [
+          32
+        ],
+        "lstm.weight_ih_l0_reverse": [
+          32,
+          1
+        ],
+        "lstm.weight_hh_l0_reverse": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l0_reverse": [
+          32
+        ],
+        "lstm.bias_hh_l0_reverse": [
+          32
+        ],
+        "lstm.weight_ih_l1": [
+          32,
+          16
+        ],
+        "lstm.weight_hh_l1": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l1": [
+          32
+        ],
+        "lstm.bias_hh_l1": [
+          32
+        ],
+        "lstm.weight_ih_l1_reverse": [
+          32,
+          16
+        ],
+        "lstm.weight_hh_l1_reverse": [
+          32,
+          8
+        ],
+        "lstm.bias_ih_l1_reverse": [
+          32
+        ],
+        "lstm.bias_hh_l1_reverse": [
+          32
+        ],
+        "proj.0.weight": [
+          4,
+          51
+        ],
+        "proj.0.bias": [
+          4
+        ],
+        "mlp.0.weight": [
+          16,
+          4
+        ],
+        "mlp.0.bias": [
+          16
+        ],
+        "mlp.2.weight": [
+          16
+        ],
+        "mlp.2.bias": [
+          16
+        ],
+        "mlp.3.weight": [
+          4,
+          16
+        ],
+        "mlp.3.bias": [
+          4
+        ],
+        "norm.weight": [
+          4
+        ],
+        "norm.bias": [
+          4
+        ],
+        "clf.weight": [
+          1,
+          4
+        ],
+        "clf.bias": [
+          1
+        ]
+      }
+    },
+    "Quantum Transfer Learning (QTL)": {
+      "total_params": 10720,
+      "trainable_params": 617,
+      "classical_trainable": 593,
+      "quantum_params": 24,
+      "shapes": {
+        "W": [
+          2,
+          4,
+          3
+        ],
+        "encoder.lstm.weight_ih_l0": [
+          64,
+          1
+        ],
+        "encoder.lstm.weight_hh_l0": [
+          64,
+          16
+        ],
+        "encoder.lstm.bias_ih_l0": [
+          64
+        ],
+        "encoder.lstm.bias_hh_l0": [
+          64
+        ],
+        "encoder.lstm.weight_ih_l0_reverse": [
+          64,
+          1
+        ],
+        "encoder.lstm.weight_hh_l0_reverse": [
+          64,
+          16
+        ],
+        "encoder.lstm.bias_ih_l0_reverse": [
+          64
+        ],
+        "encoder.lstm.bias_hh_l0_reverse": [
+          64
+        ],
+        "encoder.lstm.weight_ih_l1": [
+          64,
+          32
+        ],
+        "encoder.lstm.weight_hh_l1": [
+          64,
+          16
+        ],
+        "encoder.lstm.bias_ih_l1": [
+          64
+        ],
+        "encoder.lstm.bias_hh_l1": [
+          64
+        ],
+        "encoder.lstm.weight_ih_l1_reverse": [
+          64,
+          32
+        ],
+        "encoder.lstm.weight_hh_l1_reverse": [
+          64,
+          16
+        ],
+        "encoder.lstm.bias_ih_l1_reverse": [
+          64
+        ],
+        "encoder.lstm.bias_hh_l1_reverse": [
+          64
+        ],
+        "encoder.bn.weight": [
+          67
+        ],
+        "encoder.bn.bias": [
+          67
+        ],
+        "encoder.fc.0.weight": [
+          16,
+          67
+        ],
+        "encoder.fc.0.bias": [
+          16
+        ],
+        "encoder.fc.3.weight": [
+          16
+        ],
+        "encoder.fc.3.bias": [
+          16
+        ],
+        "encoder.fc.4.weight": [
+          1,
+          16
+        ],
+        "encoder.fc.4.bias": [
+          1
+        ],
+        "adaptador.0.weight": [
+          8,
+          67
+        ],
+        "adaptador.0.bias": [
+          8
+        ],
+        "adaptador.3.weight": [
+          4,
+          8
+        ],
+        "adaptador.3.bias": [
+          4
+        ],
+        "norm.weight": [
+          4
+        ],
+        "norm.bias": [
+          4
+        ],
+        "clf.weight": [
+          1,
+          4
+        ],
+        "clf.bias": [
+          1
+        ]
+      }
+    }
+  },
+  "circuits": {
+    "LSTM+QNN (4q, 2L)": {
+      "total_gates": 48,
+      "single_qubit": 40,
+      "cnots": 8,
+      "breakdown": {
+        "RY": 16,
+        "RZ": 24,
+        "CNOT": 8
+      }
+    },
+    "PI-QNN-LbL (4q, 3L)": {
+      "total_gates": 72,
+      "single_qubit": 60,
+      "cnots": 12,
+      "breakdown": {
+        "RY": 24,
+        "RZ": 36,
+        "CNOT": 12
+      }
+    },
+    "QTL (4q, 2L)": {
+      "total_gates": 36,
+      "single_qubit": 28,
+      "cnots": 8,
+      "breakdown": {
+        "RY": 12,
+        "RZ": 16,
+        "CNOT": 8
+      }
+    },
+    "Re-uploading (3x4D)": {
+      "total_gates": 72,
+      "single_qubit": 60,
+      "cnots": 12,
+      "breakdown": {
+        "RY": 24,
+        "RZ": 36,
+        "CNOT": 12
+      }
+    },
+    "Amplitude (4q, 2L)": {
+      "total_gates": 50,
+      "single_qubit": 28,
+      "cnots": 22,
+      "breakdown": {
+        "RY": 12,
+        "CNOT": 22,
+        "RZ": 16
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+\begin{table}[htbp]
+\centering
+\caption{Operational metric distributions (mean $\pm$ across-seed sample standard deviation, ddof=1) across 15 training seeds at a default decision threshold of 0.5, for all gradient-optimized and ensemble architectures ($n=20$ ACP months exceeding $P_{60}$, $n=49$ $P_{90}$ months).}
+\label{tab:operational_multiseed}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Architecture} & \textbf{FPR} & \textbf{Rc-ACP} & \textbf{Rc-$P_{90}$} \\
+\midrule
+\textit{Classical Ensembles}\\
+Random Forest & $0.383 \pm 0.011$ & $0.867 \pm 0.041$ & $0.746 \pm 0.022$ \\
+Gradient Boosting & $0.310 \pm 0.006$ & $0.700 \pm 0.000$ & $0.595 \pm 0.007$ \\
+XGBoost & $0.408 \pm 0.013$ & $0.890 \pm 0.047$ & $0.706 \pm 0.024$ \\
+\midrule
+\textit{Deep Learning}\\
+Standalone LSTM & $0.513 \pm 0.066$ & $0.910 \pm 0.081$ & $0.782 \pm 0.031$ \\
+\midrule
+\textit{Quantum-Classical Hybrid}\\
+LSTM+QNN & $0.531 \pm 0.083$ & $0.877 \pm 0.068$ & $0.785 \pm 0.047$ \\
+LSTM+PI-QNN & $0.531 \pm 0.048$ & $0.897 \pm 0.079$ & $0.796 \pm 0.052$ \\
+LSTM+QTL & $0.489 \pm 0.075$ & $0.860 \pm 0.069$ & $0.762 \pm 0.050$ \\
+LbL-QNN & $0.541 \pm 0.079$ & $0.867 \pm 0.070$ & $0.784 \pm 0.045$ \\
+\bottomrule
+\end{tabular}
+\end{table}

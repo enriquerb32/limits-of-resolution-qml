@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering
+\caption{Global AUC distribution across 15 independent training-seed replications (quantum models only), sorted descending by mean AUC. Standard deviation is the sample standard deviation ($n-1$ denominator).}
+\label{tab:quantum_multiseed}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Architecture} & \textbf{Mean AUC} & \textbf{Std. Dev.} & \textbf{Minimum} & \textbf{Maximum} \\
+\midrule
+LbL-QNN & 0.6605 & 0.0089 & 0.645 & 0.681 \\
+LSTM+QNN & 0.6589 & 0.0153 & 0.628 & 0.681 \\
+LSTM+PI-QNN & 0.6555 & 0.0172 & 0.605 & 0.673 \\
+LSTM+QTL & 0.6519 & 0.0128 & 0.632 & 0.679 \\
+\bottomrule
+\end{tabular}
+\end{table}
