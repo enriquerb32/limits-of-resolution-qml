@@ -41,9 +41,6 @@ Evaluated on a Western Mediterranean precipitation panel (1938–2026; 1-month-a
 │       ├── fig_positive_control.pdf        ← Supp Fig. S1: Positive control power curves
 │       └── fig_noise_budget.pdf            ← Noise budget observed gaps vs MDE
 │
-├── data/                                   ← Data release
-│   └── panel_checkpoint.csv                ← Processed monthly station panel (3,363 rows, 1938–2026)
-│
 ├── checkpoints/                            ← Model state checkpoints & binary datasets
 │   ├── 01_data.pt                          ← Canonical preprocessed dataset (N=3,315 windows)
 │   ├── 02_baselines.pt ... 10_*.pt         ← Checkpoints across model tiers
@@ -70,9 +67,14 @@ Evaluated on a Western Mediterranean precipitation panel (1938–2026; 1-month-a
 ├── scripts/                                ← Table & figure generation utilities
 │   ├── make_paper_figs.py                  ← Generates all paper figures directly from results/
 │   ├── make_sim_tables.py                  ← Formats simulation LaTeX rows (Table sim, sim_all)
+│   ├── make_tables.py                      ← Formats supplementary LaTeX tables from results_master.csv
 │   ├── build_traceability.py               ← Verifies all 82 quantitative claims (audit/01_traceability.csv)
 │   ├── verify_parameter_counts.py          ← Exact parameter count decomposition (Table parameter_accounting)
 │   └── build_results_master.py             ← Compiles tidy metrics table results/results_master.csv
+│
+├── tables/                                 ← Formatted LaTeX table snippets
+│   ├── sim_main_rows.tex                   ← Table 4: Simulation main rows
+│   └── sim_supp_rows.tex                   ← Table S13: Simulation all rows
 │
 ├── results/                                ← Archived experimental outputs (JSON & CSV)
 │   ├── json/                               ← Machine-readable result archives

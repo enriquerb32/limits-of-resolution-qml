@@ -69,6 +69,7 @@ code/local_experiments/*.csv
 code/local_experiments/*.npy
 code/local_experiments/make_figs.py
 
-# Exploratory Colab scratch notebooks
-notebooks/*Estudio_Completo*.ipynb
+# Exploratory scratch notebooks
+notebooks/
+*.ipynb
 
