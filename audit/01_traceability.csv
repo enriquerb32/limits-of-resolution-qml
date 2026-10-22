@@ -13,7 +13,7 @@ TR-011,main.tex:67 (Abstract),Incomplete test months share,23 %,results/json/res
 TR-012,main.tex:107,Series span years and station-months,"1938--2026, 4 stations, 3,363 station-months, 3,315 prediction windows",results/json/01_data.json & results/panel_checkpoint.csv,"3,363 rows, 3,315 windowed",VERIFIED
 TR-013,main.tex:109,P60 threshold,28.1 mm,results/json/01_data.json:P60,28.1,VERIFIED
 TR-014,main.tex:109,Split row counts,"Train 2,273; Val 514; Test 528 (41.1% positive, 217 positives)",results/json/01_data.json:split_sizes,"2273, 514, 528; pos=217 (41.098%)",VERIFIED
-TR-015,main.tex:109,Alicante + Barcelona test share,83.5 %,results/panel_checkpoint.csv,(221 + 221) / 528 = 83.71 %,VERIFIED
+TR-015,main.tex:109,Alicante + Barcelona test share,83.7 %,results/panel_checkpoint.csv,(221 + 221) / 528 = 83.71 %,VERIFIED
 TR-016,Table station_coverage (main.tex:111),Alicante Train/Val/Test,"671 / 132 / 221 (Total 1,024, Test pos 29.4%, 65/221)",results/json/results_exp12_coverage.json & 01_data.json,"671, 132, 221 (pos 65/221 = 29.4%)",VERIFIED
 TR-017,Table station_coverage (main.tex:111),Barcelona Train/Val/Test,"378 / 132 / 221 (Total 731, Test pos 50.2%, 111/221)",results/json/results_exp12_coverage.json & 01_data.json,"378, 132, 221 (pos 111/221 = 50.2%)",VERIFIED
 TR-018,Table station_coverage (main.tex:111),San Javier Train/Val/Test,"535 / 132 / 36 (Total 703, Test pos 36.1%, 13/36)",results/json/results_exp12_coverage.json & 01_data.json,"535, 132, 36 (pos 13/36 = 36.1%)",VERIFIED
