@@ -1,0 +1,148 @@
+{
+  "n_station_months_before_filter": 3371,
+  "n_kept_dias_ge_10": 3363,
+  "kept_partial_total": 327,
+  "kept_partial_by_partition": {
+    "test": {
+      "partial": 123,
+      "n": 528
+    },
+    "train": {
+      "partial": 173,
+      "n": 2321
+    },
+    "val": {
+      "partial": 31,
+      "n": 514
+    }
+  },
+  "kept_partial_by_city": {
+    "Alicante": {
+      "partial": 33,
+      "n": 1036
+    },
+    "Barcelona": {
+      "partial": 217,
+      "n": 743
+    },
+    "San_Javier": {
+      "partial": 44,
+      "n": 715
+    },
+    "Valencia": {
+      "partial": 33,
+      "n": 869
+    }
+  },
+  "dias_histogram_kept": {
+    "[10,15)": 9,
+    "[15,20)": 18,
+    "[20,25)": 52,
+    "[25,28)": 56,
+    "[28,32)": 3228
+  },
+  "coverage_ratio_quantiles": {
+    "0.0": 0.323,
+    "0.05": 0.935,
+    "0.25": 1.0,
+    "0.5": 1.0,
+    "0.75": 1.0,
+    "1.0": 1.0
+  },
+  "P60_project": 28.0,
+  "label_sensitivity": {
+    "project: dias>=10, plain sum": {
+      "n_kept": 3363,
+      "n_train": 2321,
+      "prev_train": 0.3998276604911676,
+      "n_val": 514,
+      "prev_val": 0.39299610894941633,
+      "n_test": 528,
+      "prev_test": 0.4109848484848485
+    },
+    "dias>=15, plain sum (P60 recomputed 28.1)": {
+      "n_kept": 3354,
+      "n_train": 2317,
+      "prev_train": 0.40008631851532156,
+      "n_val": 514,
+      "prev_val": 0.39299610894941633,
+      "n_test": 523,
+      "prev_test": 0.4130019120458891,
+      "n_common_with_project": 3354,
+      "label_flips_vs_project": 0,
+      "flips_train": 0,
+      "flips_val": 0,
+      "flips_test": 0
+    },
+    "dias>=20, plain sum (P60 recomputed 28.1)": {
+      "n_kept": 3336,
+      "n_train": 2310,
+      "prev_train": 0.4,
+      "n_val": 514,
+      "prev_val": 0.38910505836575876,
+      "n_test": 512,
+      "prev_test": 0.416015625,
+      "n_common_with_project": 3336,
+      "label_flips_vs_project": 3,
+      "flips_train": 1,
+      "flips_val": 2,
+      "flips_test": 0
+    },
+    "dias>=25, plain sum (P60 recomputed 28.3)": {
+      "n_kept": 3284,
+      "n_train": 2283,
+      "prev_train": 0.3999123959702146,
+      "n_val": 512,
+      "prev_val": 0.384765625,
+      "n_test": 489,
+      "prev_test": 0.4171779141104294,
+      "n_common_with_project": 3284,
+      "label_flips_vs_project": 8,
+      "flips_train": 3,
+      "flips_val": 3,
+      "flips_test": 2
+    },
+    "complete months only (P60 recomputed 27.3)": {
+      "n_kept": 3036,
+      "n_train": 2148,
+      "prev_train": 0.3999068901303538,
+      "n_val": 483,
+      "prev_val": 0.39751552795031053,
+      "n_test": 405,
+      "prev_test": 0.4074074074074074,
+      "n_common_with_project": 3036,
+      "label_flips_vs_project": 17,
+      "flips_train": 10,
+      "flips_val": 5,
+      "flips_test": 2
+    },
+    "dias>=10, coverage-corrected sum (P60 28.4)": {
+      "n_kept": 3363,
+      "n_train": 2321,
+      "prev_train": 0.3993968117190866,
+      "n_val": 514,
+      "prev_val": 0.3832684824902724,
+      "n_test": 528,
+      "prev_test": 0.42992424242424243,
+      "n_common_with_project": 3363,
+      "label_flips_vs_project": 32,
+      "flips_train": 13,
+      "flips_val": 5,
+      "flips_test": 14
+    }
+  },
+  "fragile_labels_plain_vs_corrected": {
+    "n": 18,
+    "by_partition": {
+      "test": 12,
+      "train": 6
+    }
+  },
+  "inner_join": {
+    "months_with_lost_days": 1222,
+    "total_lost_days": 28530,
+    "months_with_lost_precip_mm_gt_0": 950,
+    "total_lost_precip_mm": 34347.6,
+    "months_label_would_change_with_precip_only_sum": 398
+  }
+}

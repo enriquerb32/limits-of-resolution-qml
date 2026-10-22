@@ -1,0 +1,258 @@
+{
+  "n_project_panel_months": 3363,
+  "P60_project_join": 28.0,
+  "P60_recomputed_raw": 28.6,
+  "months_with_L_gt_0": 121,
+  "share_with_L_gt_0": 0.035979779958370504,
+  "months_with_lost_days": 325,
+  "total_lost_days": 1299,
+  "total_L_mm": 1776.6,
+  "max_L_mm": 125.4,
+  "L_quantiles_all_months": {
+    "0.5": 0.0,
+    "0.75": 0.0,
+    "0.9": 0.0,
+    "0.95": 0.0,
+    "0.99": 16.59,
+    "1.0": 125.4
+  },
+  "L_quantiles_months_L_gt_0": {
+    "0.5": 6.8,
+    "0.75": 17.7,
+    "0.9": 34.0,
+    "0.95": 55.4,
+    "0.99": 101.28,
+    "1.0": 125.4
+  },
+  "by_partition": {
+    "test": {
+      "n": 528,
+      "months_L_gt_0": 56,
+      "total_L_mm": 666.2,
+      "max_L_mm": 84.0,
+      "flips_same_thr": 9,
+      "flips_new_thr": 12,
+      "prev_project": 0.4109848484848485,
+      "prev_raw_same_thr": 0.42803030303030304,
+      "prev_raw_new_thr": 0.4185606060606061
+    },
+    "train": {
+      "n": 2321,
+      "months_L_gt_0": 55,
+      "total_L_mm": 982.2,
+      "max_L_mm": 125.4,
+      "flips_same_thr": 11,
+      "flips_new_thr": 24,
+      "prev_project": 0.3998276604911676,
+      "prev_raw_same_thr": 0.40456699698405857,
+      "prev_raw_new_thr": 0.3989659629470056
+    },
+    "val": {
+      "n": 514,
+      "months_L_gt_0": 10,
+      "total_L_mm": 128.2,
+      "max_L_mm": 72.8,
+      "flips_same_thr": 0,
+      "flips_new_thr": 5,
+      "prev_project": 0.39299610894941633,
+      "prev_raw_same_thr": 0.39299610894941633,
+      "prev_raw_new_thr": 0.3832684824902724
+    }
+  },
+  "by_city": {
+    "Alicante": {
+      "n": 1036,
+      "months_L_gt_0": 14,
+      "total_L_mm": 187.1,
+      "max_L_mm": 55.39999999999999,
+      "flips_same_thr": 3,
+      "flips_new_thr": 13,
+      "prev_project": 0.33494208494208494,
+      "prev_raw_same_thr": 0.33783783783783783,
+      "prev_raw_new_thr": 0.3281853281853282
+    },
+    "Barcelona": {
+      "n": 743,
+      "months_L_gt_0": 83,
+      "total_L_mm": 1121.6999999999998,
+      "max_L_mm": 125.4,
+      "flips_same_thr": 12,
+      "flips_new_thr": 15,
+      "prev_project": 0.5585464333781965,
+      "prev_raw_same_thr": 0.5746971736204576,
+      "prev_raw_new_thr": 0.5679676985195155
+    },
+    "San_Javier": {
+      "n": 715,
+      "months_L_gt_0": 9,
+      "total_L_mm": 120.70000000000003,
+      "max_L_mm": 32.89999999999999,
+      "flips_same_thr": 3,
+      "flips_new_thr": 6,
+      "prev_project": 0.3062937062937063,
+      "prev_raw_same_thr": 0.3104895104895105,
+      "prev_raw_new_thr": 0.3062937062937063
+    },
+    "Valencia": {
+      "n": 869,
+      "months_L_gt_0": 15,
+      "total_L_mm": 347.1,
+      "max_L_mm": 105.60000000000001,
+      "flips_same_thr": 2,
+      "flips_new_thr": 7,
+      "prev_project": 0.42117376294591485,
+      "prev_raw_same_thr": 0.4234752589182969,
+      "prev_raw_new_thr": 0.4177215189873418
+    }
+  },
+  "by_city_and_partition": {
+    "Alicante|test": {
+      "n": 221,
+      "months_L_gt_0": 7,
+      "total_L_mm": 29.599999999999994,
+      "max_L_mm": 7.299999999999999,
+      "flips_same_thr": 0,
+      "flips_new_thr": 2,
+      "prev_project": 0.29411764705882354,
+      "prev_raw_same_thr": 0.29411764705882354,
+      "prev_raw_new_thr": 0.2850678733031674
+    },
+    "Alicante|train": {
+      "n": 683,
+      "months_L_gt_0": 7,
+      "total_L_mm": 157.5,
+      "max_L_mm": 55.39999999999999,
+      "flips_same_thr": 3,
+      "flips_new_thr": 10,
+      "prev_project": 0.34553440702781846,
+      "prev_raw_same_thr": 0.34992679355783307,
+      "prev_raw_new_thr": 0.3396778916544656
+    },
+    "Alicante|val": {
+      "n": 132,
+      "months_L_gt_0": 0,
+      "total_L_mm": 0.0,
+      "max_L_mm": 0.0,
+      "flips_same_thr": 0,
+      "flips_new_thr": 1,
+      "prev_project": 0.3484848484848485,
+      "prev_raw_same_thr": 0.3484848484848485,
+      "prev_raw_new_thr": 0.3409090909090909
+    },
+    "Barcelona|test": {
+      "n": 221,
+      "months_L_gt_0": 45,
+      "total_L_mm": 565.4999999999999,
+      "max_L_mm": 84.0,
+      "flips_same_thr": 8,
+      "flips_new_thr": 9,
+      "prev_project": 0.502262443438914,
+      "prev_raw_same_thr": 0.5384615384615384,
+      "prev_raw_new_thr": 0.5248868778280543
+    },
+    "Barcelona|train": {
+      "n": 390,
+      "months_L_gt_0": 29,
+      "total_L_mm": 429.5,
+      "max_L_mm": 125.4,
+      "flips_same_thr": 4,
+      "flips_new_thr": 5,
+      "prev_project": 0.6076923076923076,
+      "prev_raw_same_thr": 0.617948717948718,
+      "prev_raw_new_thr": 0.6153846153846154
+    },
+    "Barcelona|val": {
+      "n": 132,
+      "months_L_gt_0": 9,
+      "total_L_mm": 126.69999999999997,
+      "max_L_mm": 72.8,
+      "flips_same_thr": 0,
+      "flips_new_thr": 1,
+      "prev_project": 0.5075757575757576,
+      "prev_raw_same_thr": 0.5075757575757576,
+      "prev_raw_new_thr": 0.5
+    },
+    "San_Javier|test": {
+      "n": 36,
+      "months_L_gt_0": 4,
+      "total_L_mm": 71.1,
+      "max_L_mm": 32.89999999999999,
+      "flips_same_thr": 1,
+      "flips_new_thr": 1,
+      "prev_project": 0.3611111111111111,
+      "prev_raw_same_thr": 0.3888888888888889,
+      "prev_raw_new_thr": 0.3888888888888889
+    },
+    "San_Javier|train": {
+      "n": 547,
+      "months_L_gt_0": 4,
+      "total_L_mm": 48.10000000000001,
+      "max_L_mm": 22.000000000000004,
+      "flips_same_thr": 2,
+      "flips_new_thr": 3,
+      "prev_project": 0.3071297989031079,
+      "prev_raw_same_thr": 0.31078610603290674,
+      "prev_raw_new_thr": 0.30895795246800734
+    },
+    "San_Javier|val": {
+      "n": 132,
+      "months_L_gt_0": 1,
+      "total_L_mm": 1.5000000000000142,
+      "max_L_mm": 1.5000000000000142,
+      "flips_same_thr": 0,
+      "flips_new_thr": 2,
+      "prev_project": 0.2878787878787879,
+      "prev_raw_same_thr": 0.2878787878787879,
+      "prev_raw_new_thr": 0.2727272727272727
+    },
+    "Valencia|test": {
+      "n": 50,
+      "months_L_gt_0": 0,
+      "total_L_mm": 0.0,
+      "max_L_mm": 0.0,
+      "flips_same_thr": 0,
+      "flips_new_thr": 0,
+      "prev_project": 0.56,
+      "prev_raw_same_thr": 0.56,
+      "prev_raw_new_thr": 0.56
+    },
+    "Valencia|train": {
+      "n": 701,
+      "months_L_gt_0": 15,
+      "total_L_mm": 347.1,
+      "max_L_mm": 105.60000000000001,
+      "flips_same_thr": 2,
+      "flips_new_thr": 6,
+      "prev_project": 0.4094151212553495,
+      "prev_raw_same_thr": 0.4122681883024251,
+      "prev_raw_new_thr": 0.4065620542082739
+    },
+    "Valencia|val": {
+      "n": 118,
+      "months_L_gt_0": 0,
+      "total_L_mm": 0.0,
+      "max_L_mm": 0.0,
+      "flips_same_thr": 0,
+      "flips_new_thr": 1,
+      "prev_project": 0.4322033898305085,
+      "prev_raw_same_thr": 0.4322033898305085,
+      "prev_raw_new_thr": 0.423728813559322
+    }
+  },
+  "overall": {
+    "n": 3363,
+    "months_L_gt_0": 121,
+    "total_L_mm": 1776.6,
+    "max_L_mm": 125.4,
+    "flips_same_thr": 20,
+    "flips_new_thr": 41,
+    "prev_project": 0.4005352363960749,
+    "prev_raw_same_thr": 0.40648230746357417,
+    "prev_raw_new_thr": 0.39964317573595004
+  },
+  "exp12_style_count_precip_only_months": {
+    "denominator_months_raw_ge10": 4260,
+    "label_changes": 398,
+    "of_which_months_not_in_project_panel": 897
+  }
+}
