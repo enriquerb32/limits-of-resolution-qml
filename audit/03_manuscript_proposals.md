@@ -1,0 +1,28 @@
+# Manuscript Proposals (PROPOSE-ONLY Mode)
+
+Audit proposals for `paper/main.tex` and `paper/supp.tex`.  
+**Note:** As per instructions, neither `main.tex` nor `supp.tex` has been modified. Edits will only be applied in a separate commit after approval by ID.
+
+---
+
+## 1. Table of Proposals
+
+| ID | Location (File:Line) | Severity | Current Text | Proposed Text | Reason | Risk to Claim |
+|---|---|---|---|---|---|---|
+| **PROP-01** | `main.tex:109` | nit | `83.5\,\% of test samples come from Alicante and Barcelona (\Cref{tab:station_coverage}).` | `83.7\,\% of test samples come from Alicante and Barcelona (\Cref{tab:station_coverage}).` | Table 1 lists Alicante ($n=221$) and Barcelona ($n=221$) out of $N=528$ test station-months. $(221+221)/528 = 442/528 = 83.712\,\%$, which rounds to 83.7% (83.5% was likely an artifact of earlier roundings). | wording (arithmetic precision) |
+| **PROP-02** | `main.tex:330-344` | should-fix | `\begin{table}[t] \centering\small ... \begin{tabular}{@{}lrrrrll@{}}` | `\begin{table}[t] \centering\small \resizebox{\columnwidth}{!}{ \begin{tabular}{@{}lrrrrll@{}} ... \end{tabular}}` | Table `label_sens` causes a 42.2 pt overfull `\hbox` compilation warning, spilling noticeably into the right margin. Resizing to `\columnwidth` (or reducing `\tabcolsep` to 3.5pt) fixes the layout defect. | none (layout only) |
+| **PROP-03** | `main.tex:152` | nit | `\begin{tabular}{@{}p{0.14\textwidth}p{0.10\textwidth}p{0.17\textwidth}p{0.08\textwidth}p{0.15\textwidth}p{0.20\textwidth}@{}}` | `\begin{tabular}{@{}p{0.14\textwidth}>{\raggedright\arraybackslash}p{0.10\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.08\textwidth}>{\raggedright\arraybackslash}p{0.16\textwidth}>{\raggedright\arraybackslash}p{0.21\textwidth}@{}}` | Table `expmap` produces 13 `Underfull \hbox (badness 10000)` warnings due to strict justified text in narrow p-columns. Using `\raggedright\arraybackslash` eliminates all 13 badness warnings. | none (layout only) |
+| **PROP-04** | `main.tex:537` | should-fix | `Scripts for the analyses of this paper are \path{exp7_noise_budget.py}, \path{exp10_paired_ci.py}, \path{exp11_simulation_known_truth.py}, \path{exp12_monthly_coverage_audit.py}, \path{exp13_label_sensitivity.py} and \path{exp14_innerjoin_audit.py}; the panel-matched check uses \path{exp15_panel_matched_simulation.py} with \path{export_test_meta.py}.` | `Scripts for the analyses of this paper are organized under \path{code/local_experiments/} (\path{exp7_noise_budget.py}, \path{exp10_paired_ci.py}, \path{exp11_simulation_known_truth.py}, \path{exp12_monthly_coverage_audit.py}, \path{exp13_label_sensitivity.py}, \path{exp14_innerjoin_audit.py}, \path{exp15_panel_matched_simulation.py}, \path{export_test_meta.py}); figures are generated from saved results via \path{scripts/make_paper_figs.py}.` | Clarifies the exact relative paths where scripts reside in the public release and adds reference to the figure generation script. | wording |
+| **PROP-05** | `supp.tex:153` | nit | `\caption{Specification of the matched 15-seed QML core experiment (script \texttt{colab\_qml\_core\_trainonly.py}; outputs \texttt{results\_qml\_core\_trainonly.json} and \texttt{results\_qml\_core\_trainonly\_probs.npz}, which store the 528 test probabilities of every seed).}` | `\caption{Specification of the matched 15-seed QML core experiment (script \path{colab_qml_core_trainonly.py}; outputs \path{results_qml_core_trainonly.json} and \path{results_qml_core_trainonly_probs.npz}, storing 528 test probabilities for every seed).}` | Resolves `Underfull \hbox (badness 10000)` in paragraph at line 153 caused by hyphenation failure of long mono-spaced filenames in caption. | none (layout only) |
+| **PROP-06** | `main.tex:537` & `supp.tex:42` | should-fix (author action) | `\todo{archive the release of this repository with a DOI (for example Zenodo) and cite that identifier}` | Retain visible `\todo` marker until final GitHub release tag is created and Zenodo DOI is assigned. | Instructions stipulate not filling placeholder DOIs artificially. | none |
+
+---
+
+## 2. Possible Scientific Issues (Observations without proposed edits)
+
+1. **Test-partition station asymmetry**:
+   - As documented in `main.tex:109` and Section S2.1, 83.7% of the test partition samples originate from only two stations (Alicante and Barcelona) because Valencia's series ends in 2012 and San Javier's ends in 2010 due to missing pressure records in the AEMET raw archives. The manuscript already explicitly states this limitation ("Station records are assembled by an inner join across five daily variable files, so San Javier and Valencia are under-represented..."), so no change in claim is warranted.
+2. **Cluster bootstrap with $K=19$ years**:
+   - The year-block bootstrap estimates for RF vs LSTM yield an MDE of 0.017 (standard error 0.0061), which is approximately half the iid DeLong SE (0.0112). The manuscript discusses this at length in Section 3.2, 4.1, and 5.1 ("Inferential procedures"), noting that with only 19 clusters, cluster-bootstrap standard errors can be noisy and liberal under certain dependence structures. The paper already refrains from declaring RF vs LSTM definitively resolved, which is appropriate and robust.
+3. **Simulation scenarios B–E calibration**:
+   - Scenarios B–E in Table `sim` demonstrate that DeLong type-I error rises (from 0.040 in B up to 0.220 in E) when scorer-specific year effects ($\tau_m > 0$) are present, whereas the year-block bootstrap maintains 0.074–0.084 rejection rates across all scenarios. These numbers are verified against `simB_rerun.json`, `simC_diff.json`, `simD_unequal.json`, and `simE_strong.json`.
