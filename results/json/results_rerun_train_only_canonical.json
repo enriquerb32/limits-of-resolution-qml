@@ -9,7 +9,7 @@
     "canonical_acp_panel": 159,
     "canonical_acp_test_n": 20,
     "train_only_acp_panel": 176,
-    "train_only_acp_test_n": 25
+    "train_only_acp_test_n_positive": 25
   },
   "gate0_status": "PASSED",
   "gate1_canonical_reproduction": {
