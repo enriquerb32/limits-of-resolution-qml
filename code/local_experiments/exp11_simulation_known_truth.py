@@ -31,8 +31,16 @@ def auc(y, p):
     r = rankdata(p); m = int(y.sum()); n = len(y) - m
     return (r[y == 1].sum() - m * (m + 1) / 2) / (m * n)
 
-def gen(rng, N, Y, pi, mu, rho, tau_prev, tau_score):
-    yr = np.repeat(np.arange(Y), int(np.ceil(N / Y)))[:N]
+def gen(rng, N, Y, pi, mu, rho, tau_prev, tau_score, tau_model=0.0, year_conc=None):
+    if year_conc is not None:
+        shares = rng.dirichlet(np.full(Y, float(year_conc)))
+        sizes = rng.multinomial(N, shares)
+        while (sizes < 2).any():
+            shares = rng.dirichlet(np.full(Y, float(year_conc)))
+            sizes = rng.multinomial(N, shares)
+        yr = np.repeat(np.arange(Y), sizes)
+    else:
+        yr = np.repeat(np.arange(Y), int(np.ceil(N / Y)))[:N]
     logit = np.log(pi / (1 - pi)) + tau_prev * rng.standard_normal(Y)
     y = (rng.random(N) < 1 / (1 + np.exp(-logit[yr]))).astype(int)
     w = tau_score * rng.standard_normal(Y)[yr]
@@ -40,11 +48,14 @@ def gen(rng, N, Y, pi, mu, rho, tau_prev, tau_score):
     S = []
     for k in range(2):
         e = np.sqrt(rho) * z + np.sqrt(1 - rho) * rng.standard_normal(N)
-        S.append(y * mu[k] + e + w)
+        v = (tau_model * rng.standard_normal(Y)[yr]) if tau_model > 0 else 0.0
+        S.append(y * mu[k] + e + w + v)
     return y, S[0], S[1], yr
 
-def true_delta(mu, rho, pi, Y, tau_prev, tau_score, rng, Nbig=400000):
-    y, a, b, _ = gen(rng, Nbig, Y * 2000, pi, mu, rho, tau_prev, tau_score)
+def true_delta(mu, rho, pi, Y, tau_prev, tau_score, tau_model, rng, Nbig=400000):
+    if abs(mu[0] - mu[1]) < 1e-12:
+        return 0.65, 0.65
+    y, a, b, _ = gen(rng, Nbig, Y * 2000, pi, mu, rho, tau_prev, tau_score, tau_model, year_conc=None)
     return auc(y, a), auc(y, b)
 
 def run(a):
@@ -53,11 +64,11 @@ def run(a):
     rows = []
     for delta in a.deltas:
         mu_A = np.sqrt(2) * norm.ppf(min(a.auc_b + delta, 0.99))
-        tA, tB = true_delta((mu_A, mu_B), a.rho, a.prev, a.years, a.tau_prev, a.tau_score, rng)
+        tA, tB = true_delta((mu_A, mu_B), a.rho, a.prev, a.years, a.tau_prev, a.tau_score, a.tau_model, rng)
         dtrue = tA - tB
         rej_dl = rej_bb = cov_dl = cov_bb = 0; dh = []; se_dl = []; se_bb = []; t0 = time.time()
         for r in range(a.reps):
-            y, sa, sb, yr = gen(rng, a.n, a.years, a.prev, (mu_A, mu_B), a.rho, a.tau_prev, a.tau_score)
+            y, sa, sb, yr = gen(rng, a.n, a.years, a.prev, (mu_A, mu_B), a.rho, a.tau_prev, a.tau_score, a.tau_model, a.year_conc)
             if y.sum() < 5 or (1 - y).sum() < 5: continue
             A = comp(y, sa); B = comp(y, sb); m, n = A[3], A[4]
             S10 = np.cov(np.vstack([A[1], B[1]])); S01 = np.cov(np.vstack([A[2], B[2]]))
@@ -89,10 +100,12 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('--n', type=int, default=528); ap.add_argument('--years', type=int, default=19)
     ap.add_argument('--prev', type=float, default=0.41); ap.add_argument('--auc_b', type=float, default=0.65)
-    ap.add_argument('--rho', type=float, default=0.75)
+    ap.add_argument('--rho', type=float, default=0.9)
     ap.add_argument('--tau_prev', type=float, default=0.3, help='sd of year effect on prevalence logit')
-    ap.add_argument('--tau_score', type=float, default=0.3, help='sd of year-level score shift shared by both models')
-    ap.add_argument('--deltas', type=float, nargs='+', default=[0, .01, .02, .03, .04, .05])
-    ap.add_argument('--reps', type=int, default=500); ap.add_argument('--B', type=int, default=500)
+    ap.add_argument('--tau_score', type=float, default=0.3, help='sd of shared year-level score shift')
+    ap.add_argument('--tau_model', type=float, default=0.0, help='sd of scorer-specific year effect')
+    ap.add_argument('--year_conc', type=float, default=None, help='Dirichlet concentration for unequal year sizes (e.g. 3.0)')
+    ap.add_argument('--deltas', type=float, nargs='+', default=[0.0, 0.015, 0.03])
+    ap.add_argument('--reps', type=int, default=500); ap.add_argument('--B', type=int, default=300)
     ap.add_argument('--seed', type=int, default=0); ap.add_argument('--out', default='results_exp11_sim.json')
     run(ap.parse_args())

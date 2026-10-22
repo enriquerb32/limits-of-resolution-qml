@@ -84,8 +84,9 @@ if __name__ == '__main__':
         df = pd.read_csv(a.csv, index_col='fecha', parse_dates=['fecha']); pr = pd.read_csv(a.precip_raw, index_col='fecha', parse_dates=['fecha'])
         rows = pd.read_csv(a.rows) if a.rows else None
     res, out_rows = run(df, pr, rows)
-    if out_rows is not None and a.save_rows: out_rows.to_csv(a.save_rows, index=False); print('saved', a.save_rows)
-    json.dump(res, open('/tmp/exp14_selftest.json' if a.selftest else a.out, 'w'), indent=2, default=str)
+    import os, tempfile
+    selftest_out = os.path.join(tempfile.gettempdir(), 'exp14_selftest.json')
+    json.dump(res, open(selftest_out if a.selftest else a.out, 'w'), indent=2, default=str)
     keys = ['n_project_panel_months', 'months_with_L_gt_0', 'months_with_lost_days', 'total_lost_days', 'total_L_mm', 'max_L_mm', 'P60_project_join', 'P60_recomputed_raw']
     print(json.dumps({k: res[k] for k in keys}, indent=2)); print('L quantiles (L>0):', res['L_quantiles_months_L_gt_0'])
     for p, v in res['by_partition'].items(): print(p, v)
