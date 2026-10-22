@@ -46,3 +46,29 @@ Thumbs.db
 
 # Local helper scripts
 *.ps1
+
+# Raw Daily Weather Data (not redistributed; only aggregated monthly panel is redistributed)
+datos_limpios_multiestacion.csv
+**/datos_limpios_multiestacion.csv
+precip_raw.csv
+**/precip_raw.csv
+month_rows.csv
+month_rows_raw.csv
+**/month_rows.csv
+**/month_rows_raw.csv
+test_probe.txt
+**/test_probe.txt
+test_meta.csv
+years_te.npy
+**/years_te.npy
+
+# Local duplicates inside code/local_experiments/
+code/local_experiments/*.json
+code/local_experiments/*.npz
+code/local_experiments/*.csv
+code/local_experiments/*.npy
+code/local_experiments/make_figs.py
+
+# Exploratory Colab scratch notebooks
+notebooks/*Estudio_Completo*.ipynb
+

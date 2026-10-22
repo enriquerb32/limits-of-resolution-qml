@@ -38,8 +38,12 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # ── Application code ─────────────────────────────────────────────────────────
-COPY *.py ./
+COPY code/ ./code/
+COPY scripts/ ./scripts/
+COPY results/ ./results/
+COPY paper/ ./paper/
+COPY make_figs.py .
 COPY README.md .
 
-# ── Default: show help ───────────────────────────────────────────────────────
-CMD ["python", "main.py", "--help"]
+# ── Default: generate figures and verify environment ─────────────────────────
+CMD ["python", "make_figs.py"]
