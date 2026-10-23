@@ -54,3 +54,7 @@ dev = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["code*"]
+
+[tool.uv.extra-build-dependencies]
+ibm-platform-services = ["setuptools<70"]
+

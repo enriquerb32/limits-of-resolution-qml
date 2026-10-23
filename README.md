@@ -32,12 +32,12 @@ Python 3.12 is the version used for the Docker image and the reported results. A
 git clone https://github.com/enriquerb32/limits-of-resolution-qml.git
 cd limits-of-resolution-qml
 
-# Option A: uv (Recommended — ultra-fast)
+# Option A: uv with exact cryptographic lockfile (Recommended)
 uv venv .venv --python 3.12
 source .venv/bin/activate       # On Windows: .venv\Scripts\activate
-uv pip install -r requirements.txt
+uv pip install -r requirements.lock
 
-# Option B: venv + pip
+# Option B: standard pip (flexible)
 python -m venv .venv
 source .venv/bin/activate       # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -47,7 +47,7 @@ conda env create -f environment.yml
 conda activate qml-resolution
 ```
 
-BLAS threading can change floating-point summation order. For the closest match to the archived results set `OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1`; other hardware or library versions may differ in the last digits.
+The lockfile `requirements.lock` fixes exact package versions with SHA-256 hashes generated from `requirements.in`. The lockfile guarantees an identical dependency tree across environments; note that differences in hardware architecture, CPU microcode, and BLAS threading can vary floating-point summation order in the least significant digits. For the closest match to the archived results set `OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1`.
 
 ---
 

@@ -1,0 +1,19 @@
+# Core dependencies
+torch>=2.0
+numpy>=2.0
+pandas>=2.0
+scikit-learn>=1.4
+scipy>=1.12
+matplotlib>=3.8
+seaborn>=0.13
+
+# Quantum computing
+pennylane>=0.40
+pennylane-qiskit>=0.40
+qiskit-aer>=0.14
+
+# Boosting
+xgboost>=2.0
+
+# Time series
+pmdarima>=2.1
