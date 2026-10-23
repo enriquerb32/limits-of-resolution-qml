@@ -899,7 +899,7 @@ def fig_single_run_illusion(data: dict, out_path: Path = None):
             se = abs(d / z)
             p_check = 2 * (1 - norm.cdf(abs(z)))
             if abs(p_check - p) > 1e-3:
-                print(f"AVISO: {key}: p guardado {p:.4f} != p desde Z {p_check:.4f}")
+                print(f"WARNING: {key}: saved p-value {p:.4f} != p-value from Z {p_check:.4f}")
             boot_comparisons.append({
                 'label': key.replace('_vs_', ' vs ').replace('PIQNN', 'PI-QNN').replace('LSTMpura', 'LSTM'),
                 'diff': d, 'ci_low': d - 1.96 * se, 'ci_high': d + 1.96 * se, 'p_value': p})
@@ -1146,9 +1146,9 @@ def qa_before_submission(fig_dir: Path) -> bool:
     """Runs all pre-submission sanity checks. Returns False if ANY blocking
     issue is found — do not compile the final manuscript PDF until this
     passes."""
-    print("\n" + "─" * 68)
+    print("\n" + "-" * 68)
     print("  PRE-SUBMISSION QA CHECKS")
-    print("─" * 68)
+    print("-" * 68)
     all_ok = True
     for pdf in sorted(Path(fig_dir).glob('figura_*.pdf')):
         ok_fonts = check_embedded_fonts(pdf)
@@ -1159,9 +1159,9 @@ def qa_before_submission(fig_dir: Path) -> bool:
             print(f"  [WARN] {pdf.name} is suspiciously small ({size_kb:.1f} KB) — "
                   f"possibly empty/placeholder.")
         all_ok &= (ok_fonts and ok_text and ok_size)
-    print("─" * 68)
-    print("  RESULT:", "ALL CHECKS PASSED ✔" if all_ok else "ISSUES FOUND — DO NOT SUBMIT YET ✘")
-    print("─" * 68 + "\n")
+    print("-" * 68)
+    print("  RESULT:", "ALL CHECKS PASSED [OK]" if all_ok else "ISSUES FOUND — DO NOT SUBMIT YET [FAIL]")
+    print("-" * 68 + "\n")
     return all_ok
 
 
@@ -1221,6 +1221,11 @@ def generar_figuras(agg=None, ds=None, res_base=None, res_qml=None, res_abl=None
                      umbral: float = 28.1, umbral_ext: float = 86.32) -> None:
     """Wrapper preserving the legacy API while enforcing Q1 standards."""
     generar_todas_las_figuras(output_dir=salida)
+
+
+# English aliases for public API
+generate_all_figures = generar_todas_las_figuras
+generate_figures = generar_figuras
 
 
 if __name__ == '__main__':

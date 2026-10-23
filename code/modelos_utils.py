@@ -7,11 +7,79 @@ probability extraction, and extreme-event analysis.
 Both modelos_clasicos.py and modelos_cuanticos.py import from here.
 """
 
+import math
+import random
+from collections import defaultdict
+from contextlib import contextmanager
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Tuple, Any
+
 import numpy as np
 import torch
 import torch.nn as nn
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, recall_score
 from sklearn.impute import SimpleImputer
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Deterministic Seed Isolation & Metric Tracking
+# ──────────────────────────────────────────────────────────────────────────────
+
+@contextmanager
+def deterministic_seed(seed: int):
+    """
+    Context manager to guarantee strict deterministic execution across PyTorch, NumPy, and random.
+    Restores the previous random states upon exit.
+    """
+    np_state = np.random.get_state()
+    torch_state = torch.get_rng_state()
+    py_state = random.getstate()
+    try:
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        random.seed(seed)
+        yield
+    finally:
+        np.random.set_state(np_state)
+        torch.set_rng_state(torch_state)
+        random.setstate(py_state)
+
+
+@dataclass
+class MetricAccumulator:
+    """
+    Thread-safe/stateless accumulator for repeated evaluations (e.g. Monte Carlo seeds).
+    Eliminates duplicated dictionary appending and standard deviation computation.
+    """
+    history: Dict[str, List[float]] = field(default_factory=lambda: defaultdict(list))
+
+    def record(self, **metrics: float) -> None:
+        for k, v in metrics.items():
+            if v is not None and not (isinstance(v, float) and math.isnan(v)):
+                self.history[k].append(float(v))
+
+    def summary(self) -> Dict[str, Dict[str, float]]:
+        res = {}
+        for k, vals in self.history.items():
+            if len(vals) == 0:
+                res[k] = {'mean': float('nan'), 'std': float('nan')}
+            elif len(vals) == 1:
+                res[k] = {'mean': float(vals[0]), 'std': 0.0}
+            else:
+                res[k] = {
+                    'mean': float(np.mean(vals)),
+                    'std': float(np.std(vals, ddof=1))
+                }
+        return res
+
+    def to_flat_dict(self) -> Dict[str, float]:
+        """Flattens summary to {metric: mean, metric_std: std} for backward compatibility."""
+        s = self.summary()
+        out = {}
+        for k, v in s.items():
+            out[k] = v['mean']
+            out[f"{k}_std"] = v['std']
+        return out
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -120,10 +188,10 @@ def _loop(model, dl, X_va, y_va, epochs=25, patience=6, lr=5e-3):
 # ──────────────────────────────────────────────────────────────────────────────
 
 def _extraer_probs(res: dict) -> dict:
-    """Extrae probabilidades predichas de un diccionario de resultados,
-    soportando ambos formatos usados en este módulo:
-      (a) agrupadas bajo la clave '_probs' (entrenar_baselines), o
-      (b) anidadas por modelo bajo '_prob' (entrenar_qml, entrenar_qtl,
+    """Extracts predicted probabilities from a results dictionary,
+    supporting both formats used across this module:
+      (a) grouped under '_probs' key (entrenar_baselines), or
+      (b) nested per model under '_prob' (entrenar_qml, entrenar_qtl,
           entrenar_qnn_layerbylayer, entrenar_qksvm)."""
     out = dict(res.get('_probs', {}))
     for k, v in res.items():
@@ -152,7 +220,7 @@ def analisis_extremos(ds, res_base: dict, res_qml: dict,
 
     resultados  = {}
 
-    print(f"\n  {'Modelo':<28} {'Acc':>8} {'F1':>6} {'Rc-p90':>8} {'Rc-ACP':>9} {'FPR':>7} {'CSI':>7}")
+    print(f"\n  {'Model':<28} {'Acc':>8} {'F1':>6} {'Rc-p90':>8} {'Rc-ACP':>9} {'FPR':>7} {'CSI':>7}")
     print("  " + "-"*82)
 
     ACP_te_np = ds.ACP_te.numpy() if hasattr(ds.ACP_te, 'numpy') else ds.ACP_te
@@ -195,11 +263,17 @@ def analisis_extremos(ds, res_base: dict, res_qml: dict,
                                '_umbral': float(umbral_opt), '_fpr_objetivo': float(fpr_objetivo)}
         print("  " + "-"*82)
         print(f"  {nm_adj:<28} {met_adj['acc']*100:>7.2f}%  {met_adj['f1']:>5.3f}  {rc_ext_adj:>7.3f}  {rc_ACP_adj:>8.3f}  {fpr_adj:>5.3f}  {csi_adj:>5.3f}")
-        print(f"  [!] Umbral del LSTM ajustado de 0.5 a {umbral_opt:.3f} "
-              f"(FPR objetivo={fpr_objetivo:.3f}, FPR real alcanzado={fpr_adj:.3f}) "
-              f"para igualar el punto operativo del LbL-QNN.")
+        print(f"  [!] LSTM threshold adjusted from 0.5 to {umbral_opt:.3f} "
+              f"(target FPR={fpr_objetivo:.3f}, achieved FPR={fpr_adj:.3f}) "
+              f"to match the LbL-QNN operational operating point.")
     elif 'LSTM pura' in probs_todos:
-        print("  [!] Threshold-matching omitido: 'LbL-QNN' no está en resultados "
-              "(pasa res_lbl=... a analisis_extremos).")
+        print("  [!] Threshold-matching skipped: 'LbL-QNN' not found in results "
+              "(pass res_lbl=... to analisis_extremos).")
 
     return resultados
+
+
+# English alias for public API
+extreme_analysis = analisis_extremos
+extract_probs = _extraer_probs
+

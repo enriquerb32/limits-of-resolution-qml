@@ -1,87 +1,123 @@
 """
-experimento_ruido.py — Evaluación en hardware ruidoso (NISQ)
-============================================================
-Inyecta ruido despolarizante (decoherencia y errores de puerta)
-para evaluar la resiliencia de la PI-QNN termodinámica frente
-a modelos cuánticos no restringidos por física.
+experimento_ruido.py — Noisy Quantum Hardware Evaluation (NISQ)
+===============================================================
+Injects depolarizing noise (decoherence and gate errors) to assess
+the resilience of the thermodynamic PI-QNN compared to unconstrained
+quantum models.
 
-Métricas reportadas:
-  - Acc, F1, AUC     : discriminación global
-  - Rc-p90           : recall sobre eventos de precipitación extrema
-  - Rc-ACP          : recall específico sobre eventos ACP (n pequeño)
-  - FPR              : tasa de falsa alarma (fp / (fp + tn))
-  
-Ahora ejecuta un bucle de Monte Carlo con `n_seeds` para calcular la 
-media y desviación estándar, validando rigurosamente el impacto del ruido.
+Reported metrics:
+  - Acc, F1, AUC     : Global discrimination
+  - Rc-p90           : Recall on extreme precipitation events
+  - Rc-ACP           : Specific recall on ACP events (small sample)
+  - FPR              : False positive rate (fp / (fp + tn))
+
+Executes a Monte Carlo loop over `n_seeds` to compute mean and standard
+deviation, guaranteeing statistical reproducibility via deterministic seed isolation.
 """
 
+from dataclasses import dataclass
+import logging
+from typing import Any, Dict, Optional, Tuple
 import math
 import torch
 import numpy as np
 import pennylane as qml
 from sklearn.metrics import recall_score, confusion_matrix
+
 from modelos import LstmQNN, _evaluar_pytorch
+from modelos_utils import deterministic_seed, MetricAccumulator
+
+logger = logging.getLogger(__name__)
 
 
-def _metricas_completas(y_t, y_t_x, ACP_t, prob):
+@dataclass(frozen=True)
+class NoiseConfig:
+    """Immutable, typed configuration for NISQ noise simulation."""
+    p_error: float = 0.01
+    n_seeds: int = 15
+    shots: int = 1024
+    wires: int = 4
+    single_qubit_gates: Tuple[str, ...] = ('ry', 'rz', 'rx', 'u1', 'u2', 'u3')
+    two_qubit_gates: Tuple[str, ...] = ('cx', 'cz')
+
+
+def _metricas_completas(
+    y_true: np.ndarray,
+    y_extreme: np.ndarray,
+    acp_mask: np.ndarray,
+    prob: np.ndarray
+) -> Tuple[float, float, float]:
     """
-    Calcula Rc-p90, Rc-ACP y FPR a partir de las probabilidades predichas.
+    Computes Rc-p90, Rc-ACP, and FPR from predicted probabilities.
     """
     pred = (prob >= 0.5).astype(float)
+    rc_p90 = float(recall_score(y_extreme, pred, zero_division=0))
 
-    rc_p90 = recall_score(y_t_x, pred, zero_division=0)
-
-    if ACP_t.sum() > 0:
-        rc_ACP = recall_score(y_t[ACP_t == 1], pred[ACP_t == 1], zero_division=0)
+    if acp_mask.sum() > 0:
+        rc_acp = float(recall_score(y_true[acp_mask == 1], pred[acp_mask == 1], zero_division=0))
     else:
-        rc_ACP = float('nan')
+        rc_acp = float('nan')
 
-    tn, fp, fn, tp = confusion_matrix(y_t, pred, labels=[0, 1]).ravel()
-    fpr = fp / (fp + tn) if (fp + tn) > 0 else float('nan')
+    tn, fp, fn, tp = confusion_matrix(y_true, pred, labels=[0, 1]).ravel()
+    fpr = float(fp / (fp + tn)) if (fp + tn) > 0 else float('nan')
 
-    return rc_p90, rc_ACP, fpr
+    return rc_p90, rc_acp, fpr
 
 
-def ejecutar_evaluacion_ruido(ds, modelo_qnn_limpio, modelo_lbl_limpio, p_error=0.01, n_seeds=15):
-    print("\n" + "═" * 65)
-    print(f"PASO EXTRA · Evaluación NISQ bajo ruido despolarizante (p={p_error})")
-    print("═" * 65)
+def ejecutar_evaluacion_ruido(
+    ds: Any,
+    modelo_qnn_limpio: LstmQNN,
+    modelo_lbl_limpio: LstmQNN,
+    p_error: float = 0.01,
+    n_seeds: int = 15,
+    config: Optional[NoiseConfig] = None
+) -> Dict[str, Dict[str, float]]:
+    """
+    Runs NISQ evaluation under depolarizing noise with Monte Carlo statistical aggregation.
+    Guarantees strict return type contract across all execution or failure paths.
+    """
+    cfg = config or NoiseConfig(p_error=p_error, n_seeds=n_seeds)
+
+    print("\n" + "=" * 65)
+    print(f"EXTRA STEP · NISQ Evaluation under Depolarizing Noise (p={cfg.p_error})")
+    print("=" * 65)
 
     try:
         from qiskit_aer.noise import NoiseModel, depolarizing_error
     except ImportError:
-        print("  [!] Librerías de ruido no encontradas. Saltando experimento.")
-        print("      Para ejecutarlo: pip install qiskit-aer pennylane-qiskit")
-        return {}, {}
+        print("  [!] Noise simulation libraries not found. Skipping experiment.")
+        print("      To execute: pip install qiskit-aer pennylane-qiskit")
+        return {'LSTM+QNN': {}, 'LbL-QNN': {}}
 
-    # 1. Configurar Qiskit Aer con el modelo de ruido
+    # 1. Configure Qiskit Aer with noise model
     noise_model = NoiseModel()
-    error_1q = depolarizing_error(p_error, 1)
-    error_2q = depolarizing_error(p_error, 2)
+    error_1q = depolarizing_error(cfg.p_error, 1)
+    error_2q = depolarizing_error(cfg.p_error, 2)
 
-    noise_model.add_all_qubit_quantum_error(error_1q, ['ry', 'rz', 'rx', 'u1', 'u2', 'u3'])
-    noise_model.add_all_qubit_quantum_error(error_2q, ['cx', 'cz'])
+    noise_model.add_all_qubit_quantum_error(error_1q, list(cfg.single_qubit_gates))
+    noise_model.add_all_qubit_quantum_error(error_2q, list(cfg.two_qubit_gates))
 
-    # Añadimos shots=1024 para obligar al device a emular el ruido estocástico del hardware
     try:
-        dev_noisy = qml.device('qiskit.aer', wires=4, noise_model=noise_model, shots=1024)
+        dev_noisy = qml.device('qiskit.aer', wires=cfg.wires, noise_model=noise_model, shots=cfg.shots)
     except qml.DeviceError:
-        print("  [!] Plugin pennylane-qiskit no instalado correctamente. Saltando experimento.")
-        return {}, {}
+        print("  [!] Plugin pennylane-qiskit not installed properly. Skipping experiment.")
+        return {'LSTM+QNN': {}, 'LbL-QNN': {}}
 
-    def inyectar_ruido(modelo_entrenado, n_l):
-        modelo_ruidoso = LstmQNN(ds.in_dim, n_q=4, n_l=n_l, physics=modelo_entrenado.physics).double()
+    def inyectar_ruido(modelo_entrenado: LstmQNN, n_l: int) -> LstmQNN:
+        modelo_ruidoso = LstmQNN(ds.in_dim, n_q=cfg.wires, n_l=n_l, physics=modelo_entrenado.physics).double()
         modelo_ruidoso.load_state_dict(modelo_entrenado.state_dict())
         modelo_ruidoso.eval()
 
         @qml.qnode(dev_noisy, interface='torch')
         def circ_ruidoso(W, x):
+            is_batched = (x.ndim == 2)
             for l in range(n_l):
-                for i in range(4):
-                    qml.RY(x[i % x.shape[0]], wires=i)
-                    qml.RZ(x[i % x.shape[0]], wires=i)
-                qml.StronglyEntanglingLayers(W[l:l + 1], wires=range(4))
-            return [qml.expval(qml.PauliZ(i)) for i in range(4)]
+                for i in range(cfg.wires):
+                    val = x[:, i % x.shape[1]] if is_batched else x[i % x.shape[0]]
+                    qml.RY(val, wires=i)
+                    qml.RZ(val, wires=i)
+                qml.StronglyEntanglingLayers(W[l:l + 1], wires=range(cfg.wires))
+            return [qml.expval(qml.PauliZ(i)) for i in range(cfg.wires)]
 
         modelo_ruidoso.circ = circ_ruidoso
         return modelo_ruidoso
@@ -90,50 +126,42 @@ def ejecutar_evaluacion_ruido(ds, modelo_qnn_limpio, modelo_lbl_limpio, p_error=
     y_te_x = ds.y_te_ext.numpy()
     ACP_te = ds.ACP_te.numpy() if hasattr(ds.ACP_te, 'numpy') else np.asarray(ds.ACP_te)
 
-    # 2. Inicializar modelos
+    # 2. Initialize noisy models
     qnn_ruidoso = inyectar_ruido(modelo_qnn_limpio, n_l=2)
     lbl_ruidoso = inyectar_ruido(modelo_lbl_limpio, n_l=3)
 
-    print(f"  [NISQ Sim] Ejecutando simulación Monte Carlo con {n_seeds} semillas...")
-    
-    res_qnn = {'acc': [], 'f1': [], 'auc': [], 'rc_p90': [], 'rc_ACP': [], 'fpr': []}
-    res_lbl = {'acc': [], 'f1': [], 'auc': [], 'rc_p90': [], 'rc_ACP': [], 'fpr': []}
+    print(f"  [NISQ Sim] Running Monte Carlo simulation with {cfg.n_seeds} deterministic seeds...")
 
-    # 3. Bucle de semillas para significancia estadística
-    for i in range(n_seeds):
-        # Evaluación QNN
-        met_qnn, prob_qnn = _evaluar_pytorch(qnn_ruidoso, ds.X_te.double(), y_te)
-        rc_p90_qnn, rc_ACP_qnn, fpr_qnn = _metricas_completas(y_te, y_te_x, ACP_te, prob_qnn)
-        
-        res_qnn['acc'].append(met_qnn['acc'])
-        res_qnn['f1'].append(met_qnn['f1'])
-        res_qnn['auc'].append(met_qnn['auc'])
-        res_qnn['rc_p90'].append(rc_p90_qnn)
-        res_qnn['rc_ACP'].append(rc_ACP_qnn)
-        res_qnn['fpr'].append(fpr_qnn)
-        
-        # Evaluación LbL
-        met_lbl, prob_lbl = _evaluar_pytorch(lbl_ruidoso, ds.X_te.double(), y_te)
-        rc_p90_lbl, rc_ACP_lbl, fpr_lbl = _metricas_completas(y_te, y_te_x, ACP_te, prob_lbl)
-        
-        res_lbl['acc'].append(met_lbl['acc'])
-        res_lbl['f1'].append(met_lbl['f1'])
-        res_lbl['auc'].append(met_lbl['auc'])
-        res_lbl['rc_p90'].append(rc_p90_lbl)
-        res_lbl['rc_ACP'].append(rc_ACP_lbl)
-        res_lbl['fpr'].append(fpr_lbl)
-        
-        if (i + 1) % 5 == 0:
-            print(f"    Evaluación {i+1}/{n_seeds} completada.")
+    acc_qnn = MetricAccumulator()
+    acc_lbl = MetricAccumulator()
 
-    # 4. Agregación Estadística
-    def _aggregate(res_dict):
-        return {k: {'mean': float(np.mean(v)), 'std': float(np.std(v))} for k, v in res_dict.items()}
+    # 3. Monte Carlo loop with isolated deterministic seeds
+    for seed_idx in range(cfg.n_seeds):
+        with deterministic_seed(seed_idx):
+            # QNN evaluation
+            met_qnn, prob_qnn = _evaluar_pytorch(qnn_ruidoso, ds.X_te.double(), y_te)
+            rc_p90_qnn, rc_acp_qnn, fpr_qnn = _metricas_completas(y_te, y_te_x, ACP_te, prob_qnn)
+            acc_qnn.record(
+                acc=met_qnn['acc'], f1=met_qnn['f1'], auc=met_qnn['auc'],
+                rc_p90=rc_p90_qnn, rc_ACP=rc_acp_qnn, fpr=fpr_qnn
+            )
 
-    agg_qnn = _aggregate(res_qnn)
-    agg_lbl = _aggregate(res_lbl)
+            # LbL evaluation
+            met_lbl, prob_lbl = _evaluar_pytorch(lbl_ruidoso, ds.X_te.double(), y_te)
+            rc_p90_lbl, rc_acp_lbl, fpr_lbl = _metricas_completas(y_te, y_te_x, ACP_te, prob_lbl)
+            acc_lbl.record(
+                acc=met_lbl['acc'], f1=met_lbl['f1'], auc=met_lbl['auc'],
+                rc_p90=rc_p90_lbl, rc_ACP=rc_acp_lbl, fpr=fpr_lbl
+            )
 
-    print(f"\n  [Resultados NISQ Robustos - Media ± Desviación Estándar ({n_seeds} runs)]:")
+        if (seed_idx + 1) % 5 == 0:
+            print(f"    Evaluation {seed_idx + 1}/{cfg.n_seeds} completed.")
+
+    # 4. Aggregation and reporting
+    agg_qnn = acc_qnn.summary()
+    agg_lbl = acc_lbl.summary()
+
+    print(f"\n  [Robust NISQ Results - Mean ± Standard Deviation ({cfg.n_seeds} runs)]:")
     print(f"  -> LSTM+QNN   | Acc: {agg_qnn['acc']['mean']*100:.2f}% | F1: {agg_qnn['f1']['mean']:.3f} ± {agg_qnn['f1']['std']:.3f} "
           f"| AUC: {agg_qnn['auc']['mean']:.3f} ± {agg_qnn['auc']['std']:.3f}")
     print(f"                | Rc-ACP: {agg_qnn['rc_ACP']['mean']:.3f} ± {agg_qnn['rc_ACP']['std']:.3f} "
@@ -144,18 +172,11 @@ def ejecutar_evaluacion_ruido(ds, modelo_qnn_limpio, modelo_lbl_limpio, p_error=
     print(f"                | Rc-ACP: {agg_lbl['rc_ACP']['mean']:.3f} ± {agg_lbl['rc_ACP']['std']:.3f} "
           f"| FPR: {agg_lbl['fpr']['mean']:.3f} ± {agg_lbl['fpr']['std']:.3f}")
 
-    # 5. Formatear para compatibilidad hacia atrás con el JSON original en main.py
-    resultado_qnn_flat, resultado_lbl_flat = {}, {}
-    
-    for k, v in agg_qnn.items():
-        resultado_qnn_flat[k] = v['mean']
-        resultado_qnn_flat[f"{k}_std"] = v['std']
-        
-    for k, v in agg_lbl.items():
-        resultado_lbl_flat[k] = v['mean']
-        resultado_lbl_flat[f"{k}_std"] = v['std']
-
+    # 5. Format for strict backward compatibility with main.py
     return {
-        'LSTM+QNN': resultado_qnn_flat,
-        'LbL-QNN': resultado_lbl_flat
+        'LSTM+QNN': acc_qnn.to_flat_dict(),
+        'LbL-QNN': acc_lbl.to_flat_dict()
     }
+
+# English alias for modern pipeline invocations
+run_noise_evaluation = ejecutar_evaluacion_ruido

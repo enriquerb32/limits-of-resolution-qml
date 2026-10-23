@@ -68,7 +68,7 @@ Identical-content duplicates (MD5): `panel_checkpoint.csv` ×3 (data/, results/,
 | `…/exp5_pca4_controls.py` | Classical PCA-4 controls vs QKSVM | 01, 04 json | `results/local_exp5_pca4_controls.json` | supp Tab `bottleneck_control`(?) |
 | `…/exp6_tost_rope_equivalence.py` | TOST/ROPE on 15-seed AUCs | 09, 10 json | `results/local_exp6_tost_rope.json` | supp |
 | `…/run_all_local_experiments.py` | Runs exp1–6 | — | — | — |
-| **`colab_qml_core_trainonly.py`** | 15-seed core QML experiment | — | `results_qml_core_trainonly{.json,_probs.npz}` | main Tab `case`, `qnn_paired`, `label_sens_qnn`; supp Tab `core_spec` — **NOT IN REPO** |
+| **`qml_core_trainonly.py`** | 15-seed core QML experiment | — | `results_qml_core_trainonly{.json,_probs.npz}` | main Tab `case`, `qnn_paired`, `label_sens_qnn`; supp Tab `core_spec` |
 | `make_figs.py` | Fig noise budget, Fig positive control | **hard-coded numbers** (no file read) | `paper/figs/fig_noise_budget.pdf`, `fig_positive_control.pdf` | supp Fig `positive_control`; `fig_noise_budget.pdf` is **not included** by either .tex |
 | (none) | — | — | `paper/figs/fig_paired_ci.pdf`, `fig_sim.pdf` | main Fig `paired_ci`, `sim` — **no generator in repo** |
 | `scripts/make_tables.py` | LaTeX tables from results_master.csv | `results/results_master.csv` | `tables/*.tex` | none (`tables/` is not `\input` by either .tex) |

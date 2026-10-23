@@ -53,7 +53,7 @@ claims = [
     ("TR-019", "Table station_coverage (main.tex:111)", "Valencia Train/Val/Test", "689 / 118 / 50 (Total 857, Test pos 56.0%, 28/50)", "results/json/results_exp12_coverage.json & 01_data.json", "689, 118, 50 (pos 28/50 = 56.0%)", "VERIFIED"),
     ("TR-020", "main.tex:136", "PureLSTM parameter count", "10,103", "results/json/results_wp3_accounting.json:PureLSTM", "10,103", "VERIFIED"),
     ("TR-021", "main.tex:136", "LSTM+QNN parameters", "2,613 total, 24 quantum", "results/json/results_wp3_accounting.json:LSTM_QNN", "2,613 (24 quantum)", "VERIFIED"),
-    ("TR-022", "main.tex:136", "Linear-4D classical control parameters", "20 parameters", "code/local_experiments/colab_qml_core_trainonly.py:LinearControl4D", "nn.Linear(4,4) = 20", "VERIFIED"),
+    ("TR-022", "main.tex:136", "Linear-4D classical control parameters", "20 parameters", "code/local_experiments/qml_core_trainonly.py:LinearControl4D", "nn.Linear(4,4) = 20", "VERIFIED"),
     ("TR-023", "main.tex:136", "LeakyReLU / GELU control params", "28 and 180 parameters", "results/json/results_wp3_accounting.json", "Leaky=28, GELU=180", "VERIFIED"),
     ("TR-024", "main.tex:138", "RF canonical 2,273 rows vs 2,787 rows AUC", "0.6802 +- 0.0035 vs 0.6851 +- 0.0026", "results/local_exp7_noise_budget.json & results/results_master.csv", "0.6802 +- 0.0035 vs 0.6851 +- 0.0026", "VERIFIED"),
     ("TR-025", "main.tex:138", "RF train-only 2,273 rows AUC", "0.6846 +- 0.0036", "results/json/results_qml_core_trainonly.json:models.RF_2273", "mean=0.6846, sd=0.0036", "VERIFIED"),

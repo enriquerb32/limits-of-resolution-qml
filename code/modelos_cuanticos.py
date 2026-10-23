@@ -27,10 +27,12 @@ def _make_qnode(n_q: int, n_l: int):
     dev = qml.device('default.qubit', wires=n_q)
     @qml.qnode(dev, interface='torch', diff_method='backprop')
     def circ(W, x):
+        is_batched = (x.ndim == 2)
         for l in range(n_l):
             for i in range(n_q):
-                qml.RY(x[i % x.shape[0]], wires=i)
-                qml.RZ(x[i % x.shape[0]], wires=i)
+                val = x[:, i % x.shape[1]] if is_batched else x[i % x.shape[0]]
+                qml.RY(val, wires=i)
+                qml.RZ(val, wires=i)
             qml.StronglyEntanglingLayers(W[l:l+1], wires=range(n_q))
         return [qml.expval(qml.PauliZ(i)) for i in range(n_q)]
     return circ
@@ -53,11 +55,17 @@ class LstmQNN(nn.Module):
         self.clf = nn.Linear(n_q, 1)
 
     def forward(self, x):
-        _, (hn, _) = self.lstm(x[:, :12].unsqueeze(-1))
+        x_lstm = x[:, :12].unsqueeze(-1).to(self.lstm.weight_ih_l0.dtype)
+        _, (hn, _) = self.lstm(x_lstm)
         h = torch.cat([hn[-2], hn[-1]], dim=1)
-        st = self.proj(torch.cat([h, x], dim=1))
+        st = self.proj(torch.cat([h, x.to(h.dtype)], dim=1))
         qi = torch.sigmoid(st) * math.pi
-        qo = torch.stack([torch.stack(self.circ(self.W, xi)) for xi in qi])
+        try:
+            res = self.circ(self.W, qi)
+            qo = torch.stack(res, dim=-1) if isinstance(res, (list, tuple)) else res
+        except Exception:
+            qo = torch.stack([torch.stack(self.circ(self.W, xi)) for xi in qi])
+        qo = qo.to(qi.dtype)
         pr_logits = self.clf(self.norm(qo)).squeeze(-1)
         return (pr_logits, qo) if self.physics else pr_logits
 
@@ -91,7 +99,7 @@ def make_thermodynamic_physics_loss(pos_weight: torch.Tensor):
 # ──────────────────────────────────────────────────────────────────────────────
 
 def _loop_with_physics(model, dl, X_va, y_va, epochs=25, patience=6, lr=5e-3):
-    """Loop con física usando pos_weight también en validación."""
+    """Physics-informed training loop using pos_weight also in validation."""
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     sch = torch.optim.lr_scheduler.ReduceLROnPlateau(opt, patience=3, factor=0.5)
 
@@ -158,14 +166,14 @@ def entrenar_qml(ds: DatasetResult) -> dict:
     dl_base = DataLoader(TensorDataset(ds.X_tr, ds.y_tr), batch_size=16, shuffle=True, drop_last=True)
     dl_pi   = DataLoader(TensorDataset(ds.X_tr, ds.y_tr, T_anomaly_tr), batch_size=16, shuffle=True, drop_last=True)
 
-    print("\n  Entrenando LSTM+QNN base ...")
+    print("\n  Training baseline LSTM+QNN ...")
     qnn = LstmQNN(ds.in_dim, physics=False)
     qnn, h_qnn = _loop(qnn, dl_base, ds.X_va, ds.y_va)
     m_qnn, p_qnn = _evaluar_pytorch(qnn, ds.X_te, y_te)
     results['LSTM+QNN'] = {**m_qnn, '_prob': p_qnn, '_hist': h_qnn, '_modelo': qnn}
     print(f"  [6] LSTM+QNN          Acc={m_qnn['acc']*100:.2f}%  F1={m_qnn['f1']:.3f}  AUC={m_qnn['auc']:.3f}")
 
-    print("\n  Entrenando LSTM+PI-QNN (Thermodynamic) ...")
+    print("\n  Training LSTM+PI-QNN (Thermodynamic) ...")
     piqnn = LstmQNN(ds.in_dim, physics=True)
     piqnn.physics_fn = physics_fn
 
@@ -190,42 +198,15 @@ def entrenar_qksvm(ds: DatasetResult) -> dict:
     N_LANDMARK = 64
     dev = qml.device('default.qubit', wires=N_Q)
 
-    @qml.qnode(dev, interface='autograd')
-    def _qk_circuit(x1, x2):
-        qml.AngleEmbedding(x1, wires=range(N_Q), rotation='Y')
-        qml.adjoint(qml.AngleEmbedding)(x2, wires=range(N_Q), rotation='Y')
-        return qml.probs(wires=range(N_Q))
-
-    def _kernel_row(xi, X_ref):
-        return np.array([_qk_circuit(xi, xj)[0] for xj in X_ref])
-
-    std_sc = StandardScaler()
-    X_tr_std = std_sc.fit_transform(ds.X_sk)
-    X_te_std = std_sc.transform(ds.X_all[ds.s2:])
-
-    pca = PCA(n_components=N_Q, random_state=42)
-    X_tr_pca = pca.fit_transform(X_tr_std)
-    X_te_pca = pca.transform(X_te_std)
-
-    sc = MinMaxScaler(feature_range=(0, np.pi))
-    X_tr_q = sc.fit_transform(X_tr_pca)
-    X_te_q = sc.transform(X_te_pca)
-
-    rng = np.random.RandomState(42)
-    idx_pos = np.where(ds.y_sk == 1)[0]
-    idx_neg = np.where(ds.y_sk == 0)[0]
-    n_pos_lm = min(N_LANDMARK // 2, len(idx_pos))
-    n_neg_lm = N_LANDMARK - n_pos_lm
-    landmarks = np.concatenate([
-        rng.choice(idx_pos, n_pos_lm, replace=False),
-        rng.choice(idx_neg, min(n_neg_lm, len(idx_neg)), replace=False),
-    ])
-    X_lm = X_tr_q[landmarks]
+    def _compute_qk_matrix(X1, X2):
+        # Exact analytical AngleEmbedding fidelity kernel: prod(cos((X1-X2)/2)^2)
+        diff = (X1[:, None, :] - X2[None, :, :]) * 0.5
+        return np.prod(np.cos(diff) ** 2, axis=-1)
 
     t0 = time.time()
-    K_lm_lm = np.vstack([_kernel_row(x, X_lm) for x in X_lm])
-    K_tr_lm = np.vstack([_kernel_row(x, X_lm) for x in X_tr_q])
-    K_te_lm = np.vstack([_kernel_row(x, X_lm) for x in X_te_q])
+    K_lm_lm = _compute_qk_matrix(X_lm, X_lm)
+    K_tr_lm = _compute_qk_matrix(X_tr_q, X_lm)
+    K_te_lm = _compute_qk_matrix(X_te_q, X_lm)
 
     K_lm_inv = np.linalg.pinv(K_lm_lm + 1e-6 * np.eye(len(landmarks)))
     K_tr = K_tr_lm @ K_lm_inv @ K_tr_lm.T
@@ -326,7 +307,12 @@ class QuantumTransferLearning(nn.Module):
                 embed = self.encoder.bn(embed_raw)
 
         qi = self.adaptador(embed) * math.pi
-        qo = torch.stack([torch.stack(self.circ(self.W, xi)) for xi in qi])
+        try:
+            res = self.circ(self.W, qi)
+            qo = torch.stack(res, dim=-1) if isinstance(res, (list, tuple)) else res
+        except Exception:
+            qo = torch.stack([torch.stack(self.circ(self.W, xi)) for xi in qi])
+        qo = qo.to(qi.dtype)
         logits = self.clf(self.norm(qo)).squeeze(-1)
 
         if self.use_physics:
@@ -357,7 +343,7 @@ def entrenar_qtl(ds: DatasetResult, lstm_preentrenado: nn.Module, use_physics: b
     T_anomaly_tr = torch.tensor([ds.t_anomaly_mes[m] for m in ds.m_tr], dtype=torch.float64)
     dl = DataLoader(TensorDataset(ds.X_tr, ds.y_tr, T_anomaly_tr), batch_size=8, shuffle=True, drop_last=True)
 
-    print("\n  [QTL] Entrenando Quantum Transfer Learning ...")
+    print("\n  [QTL] Training Quantum Transfer Learning ...")
 
     for ep in range(1, 16):
         qtl.train()
@@ -428,32 +414,32 @@ def entrenar_qnn_layerbylayer(ds: DatasetResult) -> dict:
 
     crit_val = nn.BCEWithLogitsLoss(pos_weight=pos_w)
 
-    print("\n  [LbL] Layer-by-Layer Training (3 capas × 10 épocas + fine-tune)")
+    print("\n  [LbL] Layer-by-Layer Training (3 layers x 10 epochs + fine-tune)")
 
-    for capa_activa in range(N_L):
-        print(f"  [LbL]   Fase {capa_activa+1}/{N_L}: entrenando capa {capa_activa+1} del circuito ...")
+    for active_layer in range(N_L):
+        print(f"  [LbL]   Phase {active_layer+1}/{N_L}: training circuit layer {active_layer+1} ...")
 
-        def _make_mask_hook(capa):
+        def _make_mask_hook(layer_idx):
             def _hook(grad):
                 mask = torch.zeros_like(grad)
-                mask[capa] = 1.0
+                mask[layer_idx] = 1.0
                 return grad * mask
             return _hook
 
-        handle = model.W.register_hook(_make_mask_hook(capa_activa))
-        opt_fase = torch.optim.Adam([model.W], lr=5e-3)
+        handle = model.W.register_hook(_make_mask_hook(active_layer))
+        opt_phase = torch.optim.Adam([model.W], lr=5e-3)
 
         for ep in range(1, 11):
             model.train()
             for bX, by, bT in dl:
-                opt_fase.zero_grad()
+                opt_phase.zero_grad()
                 pr, qo = model(bX)
                 loss = physics_fn(pr, by, qo, bT, ep, 10)
                 loss.backward()
-                opt_fase.step()
+                opt_phase.step()
         handle.remove()
 
-    print("  [LbL]   Fine-tuning global (25 épocas, AdamW lr=5e-4) ...")
+    print("  [LbL]   Global fine-tuning (25 epochs, AdamW lr=5e-4) ...")
     for param in model.parameters():
         param.requires_grad_(True)
 
@@ -494,3 +480,12 @@ def entrenar_qnn_layerbylayer(ds: DatasetResult) -> dict:
     met, prob = _evaluar_pytorch(model, ds.X_te, y_te)
     print(f"  [LbL] LbL-QNN (CC+MSE) Acc={met['acc']*100:.2f}%  F1={met['f1']:.3f}  AUC={met['auc']:.3f}")
     return {'LbL-QNN': {**met, '_prob': prob, '_modelo': model}}
+
+
+# English aliases for public API
+train_qml = entrenar_qml
+train_qksvm = entrenar_qksvm
+train_ablation = entrenar_ablacion
+train_qtl = entrenar_qtl
+train_qnn_layerbylayer = entrenar_qnn_layerbylayer
+

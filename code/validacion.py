@@ -1,15 +1,15 @@
 """
-validacion.py  —  Módulo de validación estadística rigurosa (MULTI-ESTACIÓN)
-============================================================================
-Responde directamente a las críticas del revisor:
+validacion.py  —  Rigorous Statistical Validation Module (MULTI-STATION)
+========================================================================
+Addresses reviewer critique with formal statistical testing:
 
-  1. Test de DeLong (1988): prueba de significancia para diferencias AUC.
-  2. Bootstrapping con IC al 95%: intervalos de confianza (n=2000).
-  3. Experimento de sensibilidad Nyström M={32,64,128} con PCA real.
-  4. Justificación matemática de las Restricciones Termodinámicas Suaves.
+  1. DeLong Test (1988): statistical significance test for AUC differences.
+  2. 95% Confidence Intervals via non-parametric bootstrapping (n=2000).
+  3. Nystrom sensitivity experiment M={32,64,128} with real PCA.
+  4. Mathematical justification of Soft Thermodynamic Constraints.
 
-Función pública:
-  ejecutar_validacion(ds, res_base, res_qml, res_qksvm, skip_nystrom) → dict
+Public function:
+  ejecutar_validacion(ds, res_base, res_qml, res_qksvm, skip_nystrom) / run_validation(...) -> dict
 """
 
 import time
@@ -26,7 +26,7 @@ from features import DatasetResult
 
 
 # ══════════════════════════════════════════════════════════════════
-# 1. TEST DE DELONG — Significancia estadística de diferencias AUC
+# 1. DELONG TEST — Statistical significance of AUC differences
 # ══════════════════════════════════════════════════════════════════
 
 def _delong_roc_variance(ground_truth, predictions):
@@ -79,16 +79,16 @@ def test_delong(y_true, prob_a, prob_b, nombre_a="A", nombre_b="B") -> dict:
         'p_valor': round(p, 4),
         'significativo_95': significativo,
         'conclusion': (
-            f"La diferencia AUC({nombre_a})={auc_a:.3f} vs "
-            f"AUC({nombre_b})={auc_b:.3f} es "
-            f"{'ESTADÍSTICAMENTE SIGNIFICATIVA' if significativo else 'NO significativa'} "
+            f"Difference AUC({nombre_a})={auc_a:.3f} vs "
+            f"AUC({nombre_b})={auc_b:.3f} is "
+            f"{'STATISTICALLY SIGNIFICANT' if significativo else 'NOT significant'} "
             f"(Z={z:.3f}, p={p:.4f})"
         )
     }
 
 
 # ══════════════════════════════════════════════════════════════════
-# 2. BOOTSTRAPPING — Intervalos de confianza al 95%
+# 2. BOOTSTRAPPING — 95% Confidence Intervals
 # ══════════════════════════════════════════════════════════════════
 
 def bootstrap_ci(y_true, y_prob, n_bootstrap=2000, ci=0.95, threshold=0.5, seed=42) -> dict:
@@ -128,7 +128,7 @@ def bootstrap_ci(y_true, y_prob, n_bootstrap=2000, ci=0.95, threshold=0.5, seed=
 
 
 # ══════════════════════════════════════════════════════════════════
-# 3. SENSIBILIDAD NYSTRÖM — Justifica M=64 (CON PCA REAL)
+# 3. NYSTRÖM SENSITIVITY — Justification of Landmark Count M
 # ══════════════════════════════════════════════════════════════════
 
 def experimento_sensibilidad_nystrom(ds: DatasetResult, M_valores=(32, 64, 128), n_semillas=3) -> dict:
@@ -216,9 +216,9 @@ def experimento_sensibilidad_nystrom(ds: DatasetResult, M_valores=(32, 64, 128),
             'tiempo_medio': float(np.mean(tiempos_m)),
             'error_fro': float(np.mean(errores_m)) if errores_m else float('nan'),
         }
-        print(f"  [Nyström M={M:3d}] AUC={resultados[M]['auc_media']:.3f}±{resultados[M]['auc_std']:.3f}  "
-              f"F1={resultados[M]['f1_media']:.3f}±{resultados[M]['f1_std']:.3f}  "
-              f"ε_Fro={resultados[M]['error_fro']:.3f}  t={resultados[M]['tiempo_medio']:.0f}s")
+        print(f"  [Nystrom M={M:3d}] AUC={resultados[M]['auc_media']:.3f}+-{resultados[M]['auc_std']:.3f}  "
+              f"F1={resultados[M]['f1_media']:.3f}+-{resultados[M]['f1_std']:.3f}  "
+              f"eps_Fro={resultados[M]['error_fro']:.3f}  t={resultados[M]['tiempo_medio']:.0f}s")
 
     aucs_por_M = [(M, resultados[M]['auc_media']) for M in M_valores]
     mejora_32_64 = aucs_por_M[1][1] - aucs_por_M[0][1] if len(M_valores) >= 2 else 0
@@ -227,66 +227,59 @@ def experimento_sensibilidad_nystrom(ds: DatasetResult, M_valores=(32, 64, 128),
 
     resultados['_conclusion'] = {
         'knee_point_M': knee_point,
-        'texto': f"Knee-point identificado en M={knee_point}. Rendimiento marginal M=32→64: {mejora_32_64:+.4f}, M=64→128: {mejora_64_128:+.4f}."
+        'texto': f"Knee-point identified at M={knee_point}. Marginal gain M=32->64: {mejora_32_64:+.4f}, M=64->128: {mejora_64_128:+.4f}."
     }
     return resultados
 
 
 # ══════════════════════════════════════════════════════════════════
-# 4. JUSTIFICACIÓN FÍSICA
+# 4. PHYSICAL JUSTIFICATION
 # ══════════════════════════════════════════════════════════════════
 
 JUSTIFICACION_FISICA_TERMODINAMICA = """
-Justificación matemática: Restricciones termodinámicas suaves vs reglas booleanas
-==================================================================================
-Crítica potencial: Si la física dicta que no puede haber lluvia extrema sin 
-carga térmica (Clausius-Clapeyron), ¿por qué no usar un filtro post-proceso 
-if/then en lugar de una penalización en la función de pérdida?
+Mathematical Justification: Soft Thermodynamic Constraints vs Boolean Rules
+=============================================================================
+Potential critique: If physical laws dictate that extreme precipitation cannot 
+occur without sufficient thermal energy (Clausius-Clapeyron), why not apply an 
+if/then post-processing filter instead of penalizing the loss function?
 
-Respuesta matemática y física:
-1. REGLA BOOLEANA (post-proceso): Introduce una discontinuidad en la superficie 
-   de decisión. El gradiente ∂L/∂θ es exactamente cero en la región de baja 
-   energía térmica. El circuito no aprende a representar el régimen de baja 
-   energía; simplemente lo censura.
-2. RESTRICCIÓN DIFERENCIABLE (Clausius-Clapeyron Loss):
+Mathematical and Physical Response:
+1. BOOLEAN RULE (Post-processing): Introduces a discontinuity on the decision 
+   surface. The gradient dL/dTheta is strictly zero across the low-energy region. 
+   The parameterized circuit receives zero feedback and fails to learn the 
+   low-energy regime; it simply suppresses outputs post-hoc.
+2. DIFFERENTIABLE CONSTRAINT (Clausius-Clapeyron Loss):
    L_cc = E[ ReLU(P_pred - 0.6) * ReLU(1.0 - CC_Capacity(T_anomaly)) ]
-   El gradiente existe en TODA la región termodinámica. Cuando el modelo 
-   predice lluvia extrema sin suficiente calor latente, recibe una señal 
-   de gradiente suave pero constante. El circuito aprende a representar 
-   ACTIVAMENTE la física de la estabilidad atmosférica.
-3. CONSERVACIÓN DE ENERGÍA (Moist Static Energy):
+   The gradient is continuous and well-defined across the thermodynamic parameter 
+   manifold. When the ansatz assigns high probability to extreme rainfall without 
+   adequate latent heat support, it receives an informative gradient penalty.
+   The circuit actively sculpts its Hilbert space representation to reflect atmospheric 
+   stability bounds.
+3. ENERGY CONSERVATION (Moist Static Energy):
    L_mse = E[ ReLU(E_thermal + E_moisture - E_kinetic - 0.5)^2 ]
-   Forzamos la conservación de la energía. Si los qubits Q0 y Q1 están 
-   altamente excitados, el qubit Q3 DEBE excitarse.
-Conclusión: Las restricciones termodinámicas diferenciables (CC + MSE) son 
-infinitamente más informativas para el optimizador cuántico, especialmente 
-en el régimen NISQ donde cada señal de gradiente es crucial.
+   Enforces conservation of energy across entangled registers. If qubits Q0 and Q1 
+   exhibit high expectation values, qubit Q3 must co-activate accordingly.
+Conclusion: Differentiable thermodynamic constraints (CC + MSE) are vastly superior 
+for guiding NISQ optimization trajectories, where meaningful gradient signals 
+are essential to avoid barren plateaus and train effective representations.
 """
 
 
 # ══════════════════════════════════════════════════════════════════
-# 5. BOOTSTRAP PAREADO OPERATIVO — Resuelve la "paradoja" a umbral fijo
+# 5. PAIRED OPERATIONAL BOOTSTRAP — Fixed-Threshold Evaluation
 # ══════════════════════════════════════════════════════════════════
 
 def bootstrap_pareado_operativo(y_true, y_ext, ACP, prob_a, prob_b,
                                  umbral_a, umbral_b,
-                                 nombre_a="Modelo A", nombre_b="Modelo B",
+                                 nombre_a="Model A", nombre_b="Model B",
                                  n_iterations=2000, seed=42) -> dict:
     """
-    IC 95% (bootstrap PAREADO) de la diferencia (B - A) en Rc-p90, Rc-ACP y
-    FPR, evaluando cada modelo en un umbral FIJO precalculado una sola vez
-    fuera de esta función (p.ej. el umbral que analisis_extremos ya imprimió
-    en el Paso 8).
+    95% CI (PAIRED bootstrap) for the performance delta (B - A) in Rc-p90, Rc-ACP,
+    and FPR, evaluating each model at a FIXED pre-computed threshold.
 
-    A propósito NO se recalcula el umbral óptimo dentro de cada iteración:
-    hacerlo respondería a "si cada modelo pudiera reajustar su umbral en cada
-    muestra, ¿cuál sería mejor en promedio?", que reintroduce el mismo
-    problema que el threshold-matching quería eliminar (dejar que el modelo
-    elija su punto de operación más favorable). Aquí los umbrales son los
-    que de verdad se despliegan, y solo se remuestrean los resultados.
-
-    Es "pareado" porque cada iteración usa los MISMOS índices remuestreados
-    para ambos modelos, preservando la correlación entre ellos.
+    We deliberately avoid recalibrating the optimal threshold within each iteration:
+    doing so would answer "if each model recalibrated on each resample, which is best?",
+    which reintroduces optimistic bias. Here, thresholds represent operational deployment.
     """
     rng = np.random.RandomState(seed)
     n = len(y_true)
@@ -296,7 +289,7 @@ def bootstrap_pareado_operativo(y_true, y_ext, ACP, prob_a, prob_b,
 
     diffs = {'rc_p90': [], 'rc_ACP': [], 'fpr': []}
 
-    print(f"  [>] Bootstrap pareado (n={n_iterations}), umbrales fijos: "
+    print(f"  [>] Paired bootstrap (n={n_iterations}), fixed thresholds: "
           f"{nombre_a}={umbral_a:.3f}, {nombre_b}={umbral_b:.3f}...")
 
     for _ in range(n_iterations):
@@ -340,7 +333,7 @@ def bootstrap_pareado_operativo(y_true, y_ext, ACP, prob_a, prob_b,
 
 
 # ══════════════════════════════════════════════════════════════════
-# 6. FUNCIÓN PÚBLICA PRINCIPAL
+# 6. MAIN PUBLIC VALIDATION FUNCTION
 # ══════════════════════════════════════════════════════════════════
 
 def ejecutar_validacion(ds: DatasetResult,
@@ -359,13 +352,13 @@ def ejecutar_validacion(ds: DatasetResult,
     if res_qksvm and 'QKSVM' in res_qksvm and '_prob' in res_qksvm['QKSVM']:
         probs_todos['QKSVM'] = res_qksvm['QKSVM']['_prob']
 
-    print("\n" + "═" * 65)
-    print("VALIDACIÓN ESTADÍSTICA RIGUROSA (MULTI-ESTACIÓN)")
-    print("═" * 65)
+    print("\n" + "=" * 65)
+    print("RIGOROUS STATISTICAL VALIDATION (MULTI-STATION)")
+    print("=" * 65)
 
-    # 1. ICs Bootstrap
-    print(f"\n  [1] Intervalos de confianza al 95% (bootstrap n=2000, muestras={len(y_te)})")
-    print(f"  {'Modelo':<22} {'AUC':>7}  {'IC 95%':>18}  {'F1':>6}  {'IC 95%':>16}")
+    # 1. Bootstrap CIs
+    print(f"\n  [1] 95% Confidence Intervals (bootstrap n=2000, samples={len(y_te)})")
+    print(f"  {'Model':<22} {'AUC':>7}  {'95% CI':>18}  {'F1':>6}  {'95% CI':>16}")
     print("  " + "-" * 75)
 
     ic_resultados = {}
@@ -379,8 +372,8 @@ def ejecutar_validacion(ds: DatasetResult,
         print(f"  {nm:<22} {ic['auc']['estimado']:>6.3f}  [{auc_lo:.3f}, {auc_hi:.3f}]  "
               f"{ic['f1']['estimado']:>5.3f}  [{f1_lo:.3f}, {f1_hi:.3f}]")
 
-    # 2. Tests de DeLong
-    print("\n  [2] Tests de DeLong (H0: AUC_A = AUC_B)")
+    # 2. DeLong Tests
+    print("\n  [2] DeLong Tests (H0: AUC_A = AUC_B)")
     print("  " + "-" * 65)
 
     tests_delong = {}
@@ -395,7 +388,7 @@ def ejecutar_validacion(ds: DatasetResult,
         ('LSTM+QTL', 'LSTM pura', 'QTL_vs_LSTMpura'),
         ('LSTM+QTL', 'LbL-QNN', 'QTL_vs_LbL'),
         ('LbL-QNN', 'LSTM+QNN', 'LbL_vs_QNN'),
-        ('LbL-QNN', 'Random Forest', 'LbL_vs_RF'),  # 🎯 FIX: faltaba la comparación vs el mejor baseline clásico
+        ('LbL-QNN', 'Random Forest', 'LbL_vs_RF'),
     ]
 
     for nm_a, nm_b, etiq in pares_clave:
@@ -403,35 +396,35 @@ def ejecutar_validacion(ds: DatasetResult,
             continue
         resultado = test_delong(y_te, probs_todos[nm_a], probs_todos[nm_b], nombre_a=nm_a, nombre_b=nm_b)
         tests_delong[etiq] = resultado
-        sig = "✅ p<0.05" if resultado['significativo_95'] else "⚠️  p≥0.05 (no sig.)"
-        print(f"  {nm_a:<18} vs {nm_b:<18}  ΔAUC={resultado['delta_auc']:+.4f}  p={resultado['p_valor']:.4f}  {sig}")
+        sig = "sig. (p<0.05)" if resultado['significativo_95'] else "not sig. (p>=0.05)"
+        print(f"  {nm_a:<18} vs {nm_b:<18}  Delta-AUC={resultado['delta_auc']:+.4f}  p={resultado['p_valor']:.4f}  [{sig}]")
 
-    # 3. Sensibilidad Nyström
+    # 3. Nystrom Sensitivity
     res_nystrom = None
     if not skip_nystrom and 'QKSVM' in probs_todos:
-        print("\n  [3] Experimento de sensibilidad Nyström M={32,64,128}")
+        print("\n  [3] Nystrom Sensitivity Experiment M={32,64,128}")
         print("  " + "-" * 65)
         try:
             res_nystrom = experimento_sensibilidad_nystrom(ds)
-            print(f"\n  Conclusión: {res_nystrom['_conclusion']['texto']}")
+            print(f"\n  Conclusion: {res_nystrom['_conclusion']['texto']}")
         except Exception as e:
-            print(f"  [!] Nyström no ejecutable: {e}")
+            print(f"  [!] Nystrom execution failed: {e}")
             res_nystrom = {'error': str(e)}
 
-    # 4. Verificación de solapamiento de ICs
-    print("\n  [4] Verificación: ¿se solapan los ICs de AUC entre modelos clave?")
+    # 4. AUC CI Overlap Check
+    print("\n  [4] Verification: do AUC 95% CIs overlap between key models?")
     print("  " + "-" * 65)
     modelos_a_mostrar = [m for m in ['Random Forest', 'XGBoost', 'LSTM pura', 'LSTM+QNN',
                                      'LSTM+PI-QNN', 'LSTM+QTL', 'LbL-QNN', 'QKSVM']
                          if m in ic_resultados]
     for nm in modelos_a_mostrar:
         lo, hi = ic_resultados[nm]['auc']['ic']
-        print(f"  {nm:<22} AUC IC=[{lo:.3f}, {hi:.3f}]")
+        print(f"  {nm:<22} AUC CI=[{lo:.3f}, {hi:.3f}]")
 
-    # 5. Bootstrap pareado operativo (resuelve la "paradoja" del threshold-matching)
+    # 5. Paired operational bootstrap
     res_bootstrap_pareado = {}
     if 'LbL-QNN' in probs_todos and 'LSTM pura' in probs_todos:
-        print("\n  [5] Bootstrap pareado (umbral fijo): LbL-QNN vs LSTM pura (FPR-Matched)")
+        print("\n  [5] Paired Bootstrap (fixed threshold): LbL-QNN vs Pure LSTM (FPR-Matched)")
         print("  " + "-" * 65)
 
         prob_lbl = probs_todos['LbL-QNN']
@@ -439,10 +432,6 @@ def ejecutar_validacion(ds: DatasetResult,
         ACP_te = ds.ACP_te.numpy() if hasattr(ds.ACP_te, 'numpy') else ds.ACP_te
         y_te_ext = ds.y_te_ext.numpy()
 
-        # 🎯 FIX: el umbral objetivo se calcula aquí, no se hardcodea. Es el
-        # mismo FPR que ya reporta 'LbL-QNN' en res_qml (umbral real 0.5,
-        # tal como se despliega) — no un valor de una corrida anterior que
-        # quedaría obsoleto en cuanto cambien los resultados.
         umbral_qml = 0.5
         pred_lbl_05 = (prob_lbl >= umbral_qml).astype(float)
         tn, fp, fn, tp = confusion_matrix(y_te, pred_lbl_05, labels=[0, 1]).ravel()
@@ -452,24 +441,24 @@ def ejecutar_validacion(ds: DatasetResult,
         idx = np.argmin(np.abs(fprs - fpr_objetivo))
         umbral_lstm = thresholds[idx]
 
-        print(f"  FPR objetivo (LbL-QNN @ 0.5) = {fpr_objetivo:.3f}  →  "
-              f"umbral LSTM ajustado = {umbral_lstm:.3f}")
+        print(f"  Target FPR (LbL-QNN @ 0.5) = {fpr_objetivo:.3f} -> "
+              f"adjusted LSTM threshold = {umbral_lstm:.3f}")
 
         res_bootstrap_pareado = bootstrap_pareado_operativo(
             y_te, y_te_ext, ACP_te, prob_lstm, prob_lbl,
             umbral_lstm, umbral_qml,
-            nombre_a="LSTM pura (FPR Matched)", nombre_b="LbL-QNN",
+            nombre_a="Pure LSTM (FPR Matched)", nombre_b="LbL-QNN",
         )
         res_bootstrap_pareado['_fpr_objetivo'] = float(fpr_objetivo)
         res_bootstrap_pareado['_umbral_lstm'] = float(umbral_lstm)
 
-        for k, etiqueta in (('rc_p90', 'ΔRc-p90 '), ('rc_ACP', 'ΔRc-ACP'), ('fpr', 'ΔFPR    ')):
+        for k, etiqueta in (('rc_p90', 'Delta-Rc-p90 '), ('rc_ACP', 'Delta-Rc-ACP'), ('fpr', 'Delta-FPR    ')):
             r = res_bootstrap_pareado[k]
-            sig = "✅ significativo (IC no cruza 0)" if r['significativo'] else "⚠️  NO significativo (IC cruza 0)"
-            print(f"  {etiqueta} (LbL − LSTM) = {r['delta_medio']:+.4f}  "
-                  f"IC95%=[{r['ic_lo']:+.4f}, {r['ic_hi']:+.4f}]  {sig}")
+            sig = "significant (CI excludes 0)" if r['significativo'] else "NOT significant (CI spans 0)"
+            print(f"  {etiqueta} (LbL - LSTM) = {r['delta_medio']:+.4f}  "
+                  f"95% CI=[{r['ic_lo']:+.4f}, {r['ic_hi']:+.4f}]  [{sig}]")
     else:
-        print("\n  [5] Bootstrap pareado omitido: falta 'LbL-QNN' o 'LSTM pura' en probs_todos.")
+        print("\n  [5] Paired bootstrap skipped: 'LbL-QNN' or 'LSTM pura' missing in probs_todos.")
 
     return {
         'ic_bootstrap': ic_resultados,
@@ -480,3 +469,7 @@ def ejecutar_validacion(ds: DatasetResult,
         'n_test': int(len(y_te)),
         'n_positivos_test': int(y_te.sum()),
     }
+
+
+# English alias for public API
+run_validation = ejecutar_validacion

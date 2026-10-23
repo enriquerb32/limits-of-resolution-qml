@@ -17,8 +17,8 @@ significance threshold: report the CI first.
 
 INPUT
   --probs   npz with keys '<prefix>_<MODEL>_probs' (S x N)  [e.g. results_rerun_train_only_canonical_probs.npz]
-            optional: --hybrid json from colab_hybrids_perseed_probs.py (models[k]['probs'], any number of seeds)
-            optional: --extra  npz with keys '<NAME>_probs' (S x N) and 'y_te'  [e.g. output of colab_qml_core_trainonly.py]
+            optional: --hybrid json from hybrid models run (models[k]['probs'], any number of seeds)
+            optional: --extra  npz with keys '<NAME>_probs' (S x N) and 'y_te'  [e.g. output of qml_core_trainonly.py]
   --panel   panel_checkpoint.csv  (to rebuild the calendar year of every test row), or --years years_te.npy
   --pairs   e.g. RF-XGB RF-LSTM XGB-LSTM RF-LSTM+QNN
 USAGE
@@ -94,8 +94,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--probs'); ap.add_argument('--prefix', default='train_only')
     ap.add_argument('--hybrid'); ap.add_argument('--extra')
-    ap.add_argument('--panel'); ap.add_argument('--years')
-    ap.add_argument('--pairs', nargs='+', required=True)
+    ap.add_argument('--panel')
+    ap.add_argument('--years')
+    ap.add_argument('--pairs', nargs='*', default=None)
     ap.add_argument('--B', type=int, default=2000); ap.add_argument('--seed', type=int, default=0)
     ap.add_argument('--out', default='results_exp10_paired_ci.json')
     a = ap.parse_args()
@@ -118,10 +119,29 @@ def main():
         for k in z.files:
             if k.endswith('_probs'): models[k[:-6]] = z[k]
     assert y is not None and models, 'no models loaded'
+    
+    # Auto-detect years / panel if not provided
+    if not a.years and not a.panel:
+        for cand in ['code/local_experiments/years_te.npy', 'years_te.npy', '../years_te.npy']:
+            import os
+            if os.path.exists(cand):
+                a.years = cand; break
+        if not a.years:
+            for cand in ['results/panel_checkpoint.csv', 'panel_checkpoint.csv', '../results/panel_checkpoint.csv']:
+                import os
+                if os.path.exists(cand):
+                    a.panel = cand; break
+
     if a.years: years = np.load(a.years)
     elif a.panel: years = test_years_from_panel(a.panel, len(y))
     else: sys.exit('need --panel or --years')
     assert len(years) == len(y)
+
+    if not a.pairs:
+        if a.extra:
+            a.pairs = ['RF-XGB', 'RF-LSTM', 'XGB-LSTM', 'RF_2273-LSTM_QNN', 'CTRL_LINEAR4D-LSTM_QNN', 'PureLSTM-LSTM_QNN']
+        else:
+            a.pairs = ['RF-XGB', 'RF-LSTM', 'XGB-LSTM']
     print('models:', {k: v.shape for k, v in models.items()}, '| test years', years.min(), '-', years.max(), '| clusters', len(np.unique(years)))
     M = {k: Model(v, y) for k, v in models.items()}
     res = {}

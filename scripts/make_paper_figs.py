@@ -192,9 +192,24 @@ def plot_positive_control():
     plt.close(fig)
     print("generated fig_positive_control.pdf")
 
-if __name__ == "__main__":
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Generate paper figures from saved results.")
+    parser.add_argument("--results", default=os.path.join(ROOT, "results"), help="Results directory")
+    parser.add_argument("--out", default=os.path.join(ROOT, "paper", "figs"), help="Output directory for figures")
+    args = parser.parse_args()
+    
+    global OUT_FIGS, RES_JSON, RES_LOCAL
+    OUT_FIGS = os.path.abspath(args.out)
+    RES_LOCAL = os.path.abspath(args.results)
+    RES_JSON = os.path.join(RES_LOCAL, "json") if os.path.exists(os.path.join(RES_LOCAL, "json")) else RES_LOCAL
+    os.makedirs(OUT_FIGS, exist_ok=True)
+    
     plot_paired_ci()
     plot_sim()
     plot_noise_budget()
     plot_positive_control()
-    print("all figures successfully generated from results/")
+    print(f"all figures successfully generated in {OUT_FIGS} from {RES_LOCAL}")
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,44 @@
+# Version control
+.git
+.github
+
+# Virtual environments
+.venv
+venv/
+
+# Python bytecode and caches
+**/__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Model checkpoints and weights (excluded from image; mount with -v if needed)
+*.pt
+*.ckpt
+checkpoints/
+
+# Raw datasets and temporary output directories
+datos/
+data/raw/
+out/
+audit/
+resultados/
+backup_*/
+archive/
+scratch/
+
+# LaTeX compilation artifacts
+*.aux
+*.log
+*.out
+*.pdf
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# IDE and local configuration
+.idea/
+.vscode/
+.gemini/
+.system_generated/

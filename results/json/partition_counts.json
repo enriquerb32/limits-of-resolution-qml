@@ -1,0 +1,42 @@
+{
+  "Alicante": {
+    "train": 671,
+    "val": 132,
+    "test": 221,
+    "total": 1024,
+    "test_pos": 65,
+    "test_rate": 0.2941
+  },
+  "Barcelona": {
+    "train": 378,
+    "val": 132,
+    "test": 221,
+    "total": 731,
+    "test_pos": 111,
+    "test_rate": 0.5023
+  },
+  "San Javier": {
+    "train": 535,
+    "val": 132,
+    "test": 36,
+    "total": 703,
+    "test_pos": 13,
+    "test_rate": 0.3611
+  },
+  "Valencia": {
+    "train": 689,
+    "val": 118,
+    "test": 50,
+    "total": 857,
+    "test_pos": 28,
+    "test_rate": 0.56
+  },
+  "Total": {
+    "train": 2273,
+    "val": 514,
+    "test": 528,
+    "total": 3315,
+    "test_pos": 217,
+    "test_rate": 0.411
+  }
+}

@@ -1,8 +1,7 @@
 """
 experimentos_control.py — Control & supplementary experiments
 ==============================================================
-Contains experiments extracted from the Colab notebook that serve as
-controls and supplementary analyses for the paper:
+Contains control experiments and supplementary analyses for the paper:
 
   1. LstmAmplitudeQNN     — Amplitude Embedding circuit variant
   2. LstmReuploadingQNN   — Data Re-uploading circuit variant
@@ -30,7 +29,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from scipy.stats import wilcoxon
 import pennylane as qml
 
-from modelos_utils import _metricas, _evaluar_pytorch, _loop
+from modelos_utils import _metricas, _evaluar_pytorch, _loop, deterministic_seed
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -63,7 +62,12 @@ class LstmAmplitudeQNN(nn.Module):
         h = torch.cat([hn[-2], hn[-1]], dim=1)
         st = self.proj(torch.cat([h, x], dim=1))
         amp = torch.softmax(st, dim=-1)
-        qo = torch.stack([torch.stack(self.circ(self.W, xi)) for xi in amp])
+        try:
+            res = self.circ(self.W, amp)
+            qo = torch.stack(res, dim=-1) if isinstance(res, (list, tuple)) else res
+        except Exception:
+            qo = torch.stack([torch.stack(self.circ(self.W, xi)) for xi in amp])
+        qo = qo.to(amp.dtype)
         return self.clf(self.norm(qo)).squeeze(-1)
 
 
@@ -73,12 +77,11 @@ def run_amplitude_experiment(ds, seeds=range(15)):
     print("\n  Running 15-seed Amplitude Embedding experiment...")
 
     for seed in seeds:
-        torch.manual_seed(seed)
-        np.random.seed(seed)
-        model = LstmAmplitudeQNN(ds.in_dim)
-        dl = DataLoader(TensorDataset(ds.X_tr, ds.y_tr), batch_size=16, shuffle=True, drop_last=True)
-        model, _ = _loop(model, dl, ds.X_va, ds.y_va, epochs=25, patience=6, lr=5e-3)
-        met, _ = _evaluar_pytorch(model, ds.X_te, ds.y_te.numpy())
+        with deterministic_seed(seed):
+            model = LstmAmplitudeQNN(ds.in_dim)
+            dl = DataLoader(TensorDataset(ds.X_tr, ds.y_tr), batch_size=16, shuffle=True, drop_last=True)
+            model, _ = _loop(model, dl, ds.X_va, ds.y_va, epochs=25, patience=6, lr=5e-3)
+            met, _ = _evaluar_pytorch(model, ds.X_te, ds.y_te.numpy())
         aucs.append(met['auc'])
         print(f"    Seed {seed}: AUC = {met['auc']:.4f}")
 
@@ -106,9 +109,11 @@ class LstmReuploadingQNN(nn.Module):
 
         @qml.qnode(dev, interface='torch', diff_method='backprop')
         def reuploading_circuit(W, x, n_q, n_l):
+            is_batched = (x.ndim == 2)
             for l in range(n_l):
                 for i in range(n_q):
-                    qml.RX(x[i % x.shape[0]], wires=i)
+                    val = x[:, i % x.shape[1]] if is_batched else x[i % x.shape[0]]
+                    qml.RX(val, wires=i)
                     qml.RY(W[l, i, 0], wires=i)
                     qml.RX(W[l, i, 1], wires=i)
                 for i in range(n_q - 1):
@@ -126,7 +131,12 @@ class LstmReuploadingQNN(nn.Module):
         h = torch.cat([hn[-2], hn[-1]], dim=1)
         st = self.proj(torch.cat([h, x], dim=1))
         qi = torch.sigmoid(st) * math.pi
-        qo = torch.stack([torch.stack(self.circ(self.W, xi, self.n_q, self.n_l)) for xi in qi])
+        try:
+            res = self.circ(self.W, qi, self.n_q, self.n_l)
+            qo = torch.stack(res, dim=-1) if isinstance(res, (list, tuple)) else res
+        except Exception:
+            qo = torch.stack([torch.stack(self.circ(self.W, xi, self.n_q, self.n_l)) for xi in qi])
+        qo = qo.to(qi.dtype)
         return self.clf(self.norm(qo)).squeeze(-1)
 
 
@@ -136,12 +146,11 @@ def run_reuploading_experiment(ds, seeds=range(15)):
     print("\n  Running 15-seed Data Re-uploading experiment...")
 
     for seed in seeds:
-        torch.manual_seed(seed)
-        np.random.seed(seed)
-        model = LstmReuploadingQNN(ds.in_dim)
-        dl = DataLoader(TensorDataset(ds.X_tr, ds.y_tr), batch_size=16, shuffle=True, drop_last=True)
-        model, _ = _loop(model, dl, ds.X_va, ds.y_va, epochs=25, patience=6, lr=5e-3)
-        met, _ = _evaluar_pytorch(model, ds.X_te, ds.y_te.numpy())
+        with deterministic_seed(seed):
+            model = LstmReuploadingQNN(ds.in_dim)
+            dl = DataLoader(TensorDataset(ds.X_tr, ds.y_tr), batch_size=16, shuffle=True, drop_last=True)
+            model, _ = _loop(model, dl, ds.X_va, ds.y_va, epochs=25, patience=6, lr=5e-3)
+            met, _ = _evaluar_pytorch(model, ds.X_te, ds.y_te.numpy())
         aucs.append(met['auc'])
         print(f"    Seed {seed}: AUC = {met['auc']:.4f}")
 
@@ -224,12 +233,11 @@ def run_parity_experiment(ds, qnn_auc_array, model_class, model_name, seeds=rang
     print(f"\n  Starting 15-seed evaluation for {model_name}...")
 
     for seed in seeds:
-        torch.manual_seed(seed)
-        np.random.seed(seed)
-        model = model_class(ds.in_dim)
-        dl = DataLoader(TensorDataset(ds.X_tr, ds.y_tr), batch_size=16, shuffle=True, drop_last=True)
-        model, _ = _loop(model, dl, ds.X_va, ds.y_va, epochs=25, patience=6, lr=5e-3)
-        met, _ = _evaluar_pytorch(model, ds.X_te, ds.y_te.numpy())
+        with deterministic_seed(seed):
+            model = model_class(ds.in_dim)
+            dl = DataLoader(TensorDataset(ds.X_tr, ds.y_tr), batch_size=16, shuffle=True, drop_last=True)
+            model, _ = _loop(model, dl, ds.X_va, ds.y_va, epochs=25, patience=6, lr=5e-3)
+            met, _ = _evaluar_pytorch(model, ds.X_te, ds.y_te.numpy())
         aucs.append(met['auc'])
         print(f"    Seed {seed} -> AUC: {met['auc']:.4f}")
 
@@ -294,7 +302,7 @@ def run_lambda_sensitivity(ds, lambda_grid=None, n_seeds=3):
             return bce + alpha * (lambda_cc * L_cc + lambda_mse * L_mse)
         return loss_fn
 
-    def entrenar_lbl_con_lambda(ds, lambda_cc, seed):
+    def train_lbl_with_lambda(ds, lambda_cc, seed):
         torch.manual_seed(seed)
         np.random.seed(seed)
         N_Q, N_L = 4, 3
@@ -302,23 +310,23 @@ def run_lambda_sensitivity(ds, lambda_grid=None, n_seeds=3):
         model = LstmQNN(ds.in_dim, n_q=N_Q, n_l=N_L, physics=True).double()
         model.physics_fn = make_physics_loss_lambda(POS_W, lambda_cc)
 
-        for capa_activa in range(N_L):
-            def _make_mask_hook(capa):
+        for active_layer in range(N_L):
+            def _make_mask_hook(layer_idx):
                 def _hook(grad):
-                    mask = torch.zeros_like(grad); mask[capa] = 1.0
+                    mask = torch.zeros_like(grad); mask[layer_idx] = 1.0
                     return grad * mask
                 return _hook
 
-            handle = model.W.register_hook(_make_mask_hook(capa_activa))
-            opt_fase = torch.optim.Adam([model.W], lr=5e-3)
+            handle = model.W.register_hook(_make_mask_hook(active_layer))
+            opt_phase = torch.optim.Adam([model.W], lr=5e-3)
             for ep in range(1, 11):
                 model.train()
                 for bX, by, bT in dl:
-                    opt_fase.zero_grad()
+                    opt_phase.zero_grad()
                     pr, qo = model(bX)
                     loss = model.physics_fn(pr, by, qo, bT, ep, 10)
                     loss.backward()
-                    opt_fase.step()
+                    opt_phase.step()
             handle.remove()
 
         for p in model.parameters():
@@ -343,16 +351,16 @@ def run_lambda_sensitivity(ds, lambda_grid=None, n_seeds=3):
     start_time = time.time()
 
     for lam in lambda_grid:
-        print(f"  -> Training for λ_cc={lam}...")
+        print(f"  -> Training for lambda_cc={lam}...")
         aucs = []
         for seed in range(n_seeds):
             seed_start = time.time()
-            auc_val = entrenar_lbl_con_lambda(ds, lam, seed)
+            auc_val = train_lbl_with_lambda(ds, lam, seed)
             aucs.append(auc_val)
             print(f"     [v] Seed {seed} done in {(time.time()-seed_start)/60:.2f} min. AUC={auc_val:.4f}")
 
         resultados[lam] = {'mean': float(np.mean(aucs)), 'std': float(np.std(aucs, ddof=1)), 'valores': aucs}
-        print(f"  [v] λ_cc={lam}: AUC={resultados[lam]['mean']:.4f} ± {resultados[lam]['std']:.4f}\n")
+        print(f"  [v] lambda_cc={lam}: AUC={resultados[lam]['mean']:.4f} +- {resultados[lam]['std']:.4f}\n")
 
     print(f"[v] Total time: {(time.time()-start_time)/3600:.2f} hours")
     return resultados

@@ -1,6 +1,6 @@
 """
-features.py  —  Módulo de ingeniería de características (Q1-READY)
-VERSIÓN MULTI-ESTACIÓN: Evita Data Leakage espacial y aplica split cronológico estricto.
+features.py  —  Feature Engineering Module (Q1-READY)
+MULTI-STATION VERSION: Prevents spatial data leakage and enforces strict chronological splitting.
 """
 
 import math
@@ -63,22 +63,22 @@ class DatasetResult:
 
 
 def preparar_dataset(agg: pd.DataFrame) -> DatasetResult:
-    # --- 1. One-Hot Encoding de ciudades ---
+    # --- 1. One-Hot Encoding of station/city ---
     if 'ciudad' in agg.columns:
         agg = pd.get_dummies(agg, columns=['ciudad'], dtype=float)
 
     city_cols = [c for c in agg.columns if c.startswith('ciudad_')]
     if not city_cols:
-        raise ValueError("No se encontraron columnas de ciudad (city_cols).")
+        raise ValueError("No city indicator columns found (city_cols).")
 
-    # --- 2. Umbrales calculados SOLO sobre datos de entrenamiento (evita leakage) ---
+    # --- 2. Thresholds computed EXCLUSIVELY on training set (prevents leakage) ---
     train_mask = (agg.index.year <= 1996)
     precip_train = agg.loc[train_mask, 'precip'].values
 
     umbral   = np.percentile(precip_train, PERCENTIL_LLUVIA)
     umbral_x = np.percentile(precip_train, PERCENTIL_EXTREMO)
 
-    # --- 3. Scalers ajustados exclusivamente con datos de Train ---
+    # --- 3. Scalers fitted strictly on training data ---
     scalers = {}
     df_sc = agg.copy()
 
@@ -88,7 +88,7 @@ def preparar_dataset(agg: pd.DataFrame) -> DatasetResult:
         df_sc[col] = sc.transform(agg[col].values.reshape(-1, 1)).flatten()
         scalers[col] = sc
 
-    # --- 4. Construcción de secuencias por ciudad ---
+    # --- 4. Sequence construction per station/city ---
     X_all, y_all, y_all_x, meses_all, ACP_all, t_anomaly_all, fechas_all = [], [], [], [], [], [], []
 
     for city_col in city_cols:
@@ -129,7 +129,7 @@ def preparar_dataset(agg: pd.DataFrame) -> DatasetResult:
     t_anomaly_all = np.array(t_anomaly_all)
     fechas_all    = np.array(fechas_all)
 
-    # --- 5. Orden cronológico global ---
+    # --- 5. Global chronological ordering ---
     sort_idx = np.argsort(fechas_all)
     X_all         = X_all[sort_idx]
     y_all         = y_all[sort_idx]
@@ -139,7 +139,7 @@ def preparar_dataset(agg: pd.DataFrame) -> DatasetResult:
     t_anomaly_all = t_anomaly_all[sort_idx]
     fechas_all    = fechas_all[sort_idx]
 
-    # --- 6. Split temporal estricto ---
+    # --- 6. Strict temporal train/validation/test split ---
     años = np.array([dt.year for dt in fechas_all])
     s1 = (años <= 1996).sum()
     s2 = s1 + ((años >= 1997) & (años <= 2007)).sum()
@@ -164,8 +164,8 @@ def preparar_dataset(agg: pd.DataFrame) -> DatasetResult:
         city_cols
     )
 
-    print(f"  [Features] {len(X_all)} muestras (Multi-Estación) · dim={in_dim} · "
-          f"umbral p60={umbral:.1f}mm · p90={umbral_x:.1f}mm · "
+    print(f"  [Features] {len(X_all)} samples (Multi-Station) | dim={in_dim} | "
+          f"threshold p60={umbral:.1f}mm | p90={umbral_x:.1f}mm | "
           f"balance={y_all.mean()*100:.1f}%")
 
     return DatasetResult(
@@ -180,7 +180,7 @@ def preparar_dataset(agg: pd.DataFrame) -> DatasetResult:
         y_te_ext=torch.tensor(y_all_x[s2:], dtype=torch.float64),
         s1=s1, s2=s2,
 
-        # Solo datos de Train para modelos clásicos (evita leakage en XGBoost)
+        # Training-only data for classical models (prevents leakage in XGBoost/RF)
         X_sk=X_all[:s1],
         y_sk=y_all[:s1],
 
@@ -192,3 +192,7 @@ def preparar_dataset(agg: pd.DataFrame) -> DatasetResult:
         feature_names=feature_names,
         t_anomaly_mes=t_anomaly_mes
     )
+
+
+# English alias for public API
+prepare_dataset = preparar_dataset

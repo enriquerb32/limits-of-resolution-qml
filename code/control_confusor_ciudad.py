@@ -1,15 +1,14 @@
 """
-control_confusor_ciudad.py — Diagnóstico de confusión ciudad vs física
-=======================================================================
-Pregunta a responder: la alta importancia de ciudad_Barcelona en el modelo
-completo, ¿está "robándole" importancia a las variables termodinámicas
-(choque_clausius, et0_sum) porque estas correlacionan con la identidad de
-estación, o son predictores genuinamente independientes de qué ciudad es?
+control_confusor_ciudad.py — Station Confounder vs Physics Diagnostic
+======================================================================
+Research question: Does the high feature importance of city indicators (e.g. ciudad_Barcelona)
+in the full model confound the thermodynamic variables (choque_clausius, et0_sum), or are
+the physical indicators genuinely independent of station identity?
 
-Método: reentrena XGBoost excluyendo las columnas one-hot de ciudad y
-compara el ranking/gain de las variables termodinámicas antes y después.
+Method: Retrains XGBoost excluding one-hot station indicators and compares the
+ranking/gain of physical features before and after.
 
-Uso (en Colab, tras cargar ds desde el checkpoint 01_data.pt):
+Usage (after loading ds from checkpoint 01_data.pt):
     from control_confusor_ciudad import comparar_importancias_con_sin_ciudad
     rank_full, rank_sin = comparar_importancias_con_sin_ciudad(ds)
 """
@@ -21,7 +20,7 @@ from sklearn.metrics import roc_auc_score
 
 def _entrenar_xgboost_confusor(ds):
     """Train XGBoost and return (auc, predictions, importances, model).
-    Self-contained to avoid depending on a non-existent modelos API."""
+    Self-contained to avoid depending on external model APIs."""
     from xgboost import XGBClassifier
 
     feature_names = (list(ds.feature_names) if hasattr(ds, 'feature_names')
@@ -51,10 +50,9 @@ def _entrenar_xgboost_confusor(ds):
 
 def _filtrar_columnas_ciudad(ds):
     """
-    Construye una copia superficial de los atributos de ds necesarios para
-    XGBoost, con las columnas 'ciudad_*' eliminadas de X_sk/X_all.
-    No modifica el objeto ds original (que puede reutilizarse en el resto
-    del pipeline).
+    Constructs a shallow copy of ds attributes needed for XGBoost,
+    with 'ciudad_*' columns removed from X_sk/X_all.
+    Does not mutate the original ds instance.
     """
     feature_names = (list(ds.feature_names) if hasattr(ds, 'feature_names')
                       else [f'f{i}' for i in range(ds.X_sk.shape[1])])
@@ -63,10 +61,10 @@ def _filtrar_columnas_ciudad(ds):
     ciudad_cols = [nm for nm in feature_names if nm.startswith('ciudad_')]
 
     if not ciudad_cols:
-        print("  [!] No se encontraron columnas 'ciudad_*' en feature_names. "
-              "Verifica que ds.feature_names está poblado y usa ese prefijo exacto.")
+        print("  [!] No 'ciudad_*' columns found in feature_names. "
+              "Verify that ds.feature_names is populated with that exact prefix.")
 
-    print(f"  [Control] Excluyendo {len(ciudad_cols)} columnas de ciudad: {ciudad_cols}")
+    print(f"  [Control] Excluding {len(ciudad_cols)} station columns: {ciudad_cols}")
 
     class _DatasetFiltrado:
         pass
@@ -85,7 +83,7 @@ def _filtrar_columnas_ciudad(ds):
 
 
 def entrenar_xgboost_sin_ciudad(ds):
-    """Reentrena XGBoost sin las dummies de ciudad y devuelve su feature importance."""
+    """Retrains XGBoost without station dummy features and returns feature importances."""
     ds_f = _filtrar_columnas_ciudad(ds)
     _, _, importancias, _ = _entrenar_xgboost_confusor(ds_f)
     return importancias
@@ -93,11 +91,10 @@ def entrenar_xgboost_sin_ciudad(ds):
 
 def comparar_importancias_con_sin_ciudad(ds, variables_interes=None):
     """
-    Corre XGBoost completo (con ciudad) y filtrado (sin ciudad), e imprime
-    una tabla comparativa del rango/gain de las variables termodinámicas
-    clave en ambos escenarios.
+    Runs full XGBoost (with station indicators) and filtered XGBoost (without station indicators),
+    displaying a comparative gain/rank table of key physical variables.
 
-    Devuelve (rank_full, rank_sin), dos dicts {nombre: (rank, gain)}.
+    Returns (rank_full, rank_sin), two dicts {feature_name: (rank, gain)}.
     """
     if variables_interes is None:
         variables_interes = [
@@ -106,13 +103,13 @@ def comparar_importancias_con_sin_ciudad(ds, variables_interes=None):
         ]
 
     print("\n" + "=" * 70)
-    print("CONTROL: Feature importance XGBoost — CON vs SIN identidad de ciudad")
+    print("CONTROL: XGBoost Feature Importance — WITH vs WITHOUT Station Indicators")
     print("=" * 70)
 
-    print("\n  [1/2] Entrenando XGBoost completo (con ciudad_*)...")
+    print("\n  [1/2] Training full XGBoost (with ciudad_*)...")
     _, _, importancias_full, _ = _entrenar_xgboost_confusor(ds)
 
-    print("\n  [2/2] Entrenando XGBoost sin columnas de ciudad...")
+    print("\n  [2/2] Training XGBoost without station columns...")
     importancias_sin_ciudad = entrenar_xgboost_sin_ciudad(ds)
 
     def _rank(importancias):
@@ -122,35 +119,40 @@ def comparar_importancias_con_sin_ciudad(ds, variables_interes=None):
     rank_full = _rank(importancias_full)
     rank_sin  = _rank(importancias_sin_ciudad)
 
-    print(f"\n  {'Variable':<22} {'Rank CON':>9} {'Gain CON':>10}   {'Rank SIN':>9} {'Gain SIN':>10}   {'Δ Gain':>8}")
-    print("  " + "-" * 78)
+    print(f"\n  {'Feature':<22} {'Rank WITH':>10} {'Gain WITH':>11}   {'Rank W/O':>10} {'Gain W/O':>11}   {'Delta Gain':>10}")
+    print("  " + "-" * 82)
     for v in variables_interes:
         r_f, g_f = rank_full.get(v, ('N/A', 0.0))
         r_s, g_s = rank_sin.get(v, ('N/A', 0.0))
         delta = (g_s - g_f) if isinstance(r_f, int) and isinstance(r_s, int) else float('nan')
-        print(f"  {v:<22} {str(r_f):>9} {g_f:>10.4f}   {str(r_s):>9} {g_s:>10.4f}   {delta:>+8.4f}")
+        print(f"  {v:<22} {str(r_f):>10} {g_f:>11.4f}   {str(r_s):>10} {g_s:>11.4f}   {delta:>+10.4f}")
 
-    print("\n  Top-5 predictores CON ciudad:")
+    print("\n  Top-5 predictors WITH station indicators:")
     for nm, val in sorted(importancias_full.items(), key=lambda kv: kv[1], reverse=True)[:5]:
         print(f"    {nm:<22} {val:.4f}")
 
-    print("\n  Top-5 predictores SIN ciudad:")
+    print("\n  Top-5 predictors WITHOUT station indicators:")
     for nm, val in sorted(importancias_sin_ciudad.items(), key=lambda kv: kv[1], reverse=True)[:5]:
         print(f"    {nm:<22} {val:.4f}")
 
-    # Veredicto automático simple: ¿sube choque_clausius al excluir ciudad?
+    # Automated check on whether physical features rise when excluding station identity
     r_cc_full = rank_full.get('choque_clausius', (None, None))[0]
     r_cc_sin  = rank_sin.get('choque_clausius', (None, None))[0]
     if isinstance(r_cc_full, int) and isinstance(r_cc_sin, int):
-        print(f"\n  [Veredicto] choque_clausius: rank #{r_cc_full} (con ciudad) -> #{r_cc_sin} (sin ciudad)")
+        print(f"\n  [Verdict] choque_clausius: rank #{r_cc_full} (with station) -> #{r_cc_sin} (without station)")
         if r_cc_sin < r_cc_full:
-            print("  → Sube al excluir ciudad: consistente con un efecto de confusión parcial "
-                  "(la física estaba parcialmente enmascarada por el efecto de estación).")
+            print("  -> Rank rises without station identity: partial confounding present "
+                  "(physics was partially masked by station-specific effects).")
         elif r_cc_sin > r_cc_full:
-            print("  → Baja o se mantiene al excluir ciudad: la importancia de choque_clausius "
-                  "no dependía de la identidad de estación; el argumento físico se sostiene mejor "
-                  "de lo esperado.")
+            print("  -> Rank holds or decreases: physical feature was not dependent on station identity; "
+                  "the thermodynamic mechanism stands independently.")
         else:
-            print("  → Sin cambio de rango: resultado ambiguo, revisar valores de gain absolutos.")
+            print("  -> Rank unchanged: inspect absolute gain values.")
 
     return rank_full, rank_sin
+
+
+# English aliases for public API
+train_xgboost_without_city = entrenar_xgboost_sin_ciudad
+compare_feature_importances_with_without_city = comparar_importancias_con_sin_ciudad
+

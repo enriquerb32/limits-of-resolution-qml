@@ -1,12 +1,12 @@
 """
-etl.py  —  Módulo ETL
-=====================
-Carga, limpieza y unión de las 5 fuentes AEMET:
-  datos.txt · datos_presion.txt · datos_temperatura.txt
+etl.py  —  ETL Module
+====================
+Ingestion, cleaning, and merging of the 5 AEMET meteorological sources:
+  datos_precipitacion.txt · datos_presion.txt · datos_temperatura.txt
   datos_sol.txt · datos_viento.txt
 
-Función pública:
-  cargar_datos(directorio) → pd.DataFrame diario limpio
+Public function:
+  cargar_datos(dir_base, ciudades) / load_data(dir_base, cities) -> clean daily pd.DataFrame
 """
 
 import numpy as np
@@ -15,14 +15,14 @@ from datetime import datetime
 from pathlib import Path
 
 
-# ── Carga bruta de un fichero AEMET ──────────────────────────────────────────
+# Raw parser for AEMET tabular data files ───────────────────────────────────
 
 def _leer_aemet(ruta: str, col_indices: list[int]) -> dict:
     """
-    Parsea un fichero AEMET tabulado.
-    Filtra filas con fecha DD-MM-YYYY en posición 0.
-    col_indices: qué columnas (1-based) extraer como float.
-    Devuelve dict {datetime: [val1, val2, ...]}.
+    Parses a tab-delimited AEMET data file.
+    Filters rows with DD-MM-YYYY date strings at position 0.
+    col_indices: 1-based column indices to extract as floats.
+    Returns dict {datetime: [val1, val2, ...]}.
     """
     registros = {}
     with open(ruta, encoding='utf-8', errors='ignore') as f:
@@ -46,11 +46,11 @@ def _leer_aemet(ruta: str, col_indices: list[int]) -> dict:
     return registros
 
 
-# ── Función pública ───────────────────────────────────────────────────────────
+# Public functions ────────────────────────────────────────────────────────────
 
 def cargar_datos(dir_base: str = '.', ciudades: list = None) -> pd.DataFrame:
     """
-    Une las 5 fuentes AEMET para múltiples ciudades en un único DataFrame.
+    Merges the 5 AEMET weather sources across multiple stations/cities into a unified DataFrame.
     """
     if ciudades is None:
         ciudades = ['Barcelona', 'Valencia', 'Alicante', 'San_Javier']
@@ -60,9 +60,9 @@ def cargar_datos(dir_base: str = '.', ciudades: list = None) -> pd.DataFrame:
 
     for ciudad in ciudades:
         d = base_path / ciudad
-        print(f"Procesando {ciudad}...")
+        print(f"Processing station: {ciudad}...")
         
-        # Leemos los 5 ficheros de la ciudad actual
+        # Read the 5 files for the current city
         PR = _leer_aemet(d / 'datos_precipitacion.txt',  [1])
         PS = _leer_aemet(d / 'datos_presion.txt',     [1, 2])
         TM = _leer_aemet(d / 'datos_temperatura.txt', [1, 2])
@@ -87,7 +87,7 @@ def cargar_datos(dir_base: str = '.', ciudades: list = None) -> pd.DataFrame:
 
         df_ciudad = pd.DataFrame(rows).set_index('fecha').sort_index()
 
-        # Limites físicos
+        # Physical sanity boundaries
         df_ciudad['tmax'] = df_ciudad['tmax'].clip(lower=-5.0, upper=45.0)
         df_ciudad['tmin'] = df_ciudad['tmin'].clip(lower=-5.0, upper=45.0)
         
@@ -103,17 +103,22 @@ def cargar_datos(dir_base: str = '.', ciudades: list = None) -> pd.DataFrame:
         df_ciudad['veloc_kmh'] = df_ciudad['veloc_kmh'].clip(lower=0.0, upper=200.0)
         df_ciudad['sol'] = df_ciudad['sol'].clip(lower=0.0, upper=24.0)
 
-        # Imputación de nulos y añadir la columna de ciudad
+        # Missing value imputation and station identifier
         df_ciudad = (df_ciudad.interpolate(method='time', limit=7).ffill().bfill())
         df_ciudad['ciudad'] = ciudad
         
-        print(f"  [ETL] {ciudad}: {len(df_ciudad):,} días · NaN: {df_ciudad.isna().sum().sum()}")
+        print(f"  [ETL] {ciudad}: {len(df_ciudad):,} days | NaN count: {df_ciudad.isna().sum().sum()}")
         lista_dfs.append(df_ciudad)
 
-    # Unimos todos los DataFrames en uno solo
+    # Concatenate all station DataFrames
     df_final = pd.concat(lista_dfs)
     
-    # Exportamos el CSV maestro
+    # Export master CSV
     df_final.to_csv('datos_limpios_multiestacion.csv')
 
     return df_final
+
+
+# English aliases for public API
+load_data = cargar_datos
+

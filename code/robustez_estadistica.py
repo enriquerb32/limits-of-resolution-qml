@@ -1,31 +1,22 @@
 """
-robustez_estadistica.py — VERSIÓN FINAL (única, completa, para pegar tal cual)
+robustez_estadistica.py — Statistical Robustness and Multi-Seed Replication
+===========================================================================
+Self-contained module providing:
+  1. bootstrap_pareado_operativo()   — 95% paired bootstrap CI of Rc-p90/Rc-ACP/FPR deltas
+  2. ejecutar_multisemilla_qml()     — Multi-seed QML replication with operational metrics,
+                                        checkpoint/resume capability, and progress persistence
+  3. veredicto_orden_dial()          — Model order stability verdict across random seeds
 
-Contiene TODO lo necesario en un solo archivo:
-  1. bootstrap_pareado_operativo()   — IC de la diferencia Rc-p90/Rc-ACP/FPR
-  2. ejecutar_multisemilla_qml()     — multi-seed CON fpr/rc_ACP/rc_p90,
-                                        checkpoint/resume, guardado incremental
-                                        y descarga automática en Colab
-  3. veredicto_orden_dial()          — ¿el orden entre dos modelos es estable
-                                        entre semillas?
-
-USO:
+Usage:
     from modelos import entrenar_qml, entrenar_qtl, entrenar_qnn_layerbylayer
 
     resumen = ejecutar_multisemilla_qml(
         ds, res_base, entrenar_qml, entrenar_qtl, entrenar_qnn_layerbylayer,
         seeds=range(15),
-        guardar_en='/content/drive/MyDrive/resultados/checkpoints/09_multisemilla.pt',
-        descargar_cada_semilla=True,
-        frecuencia_descarga=1,
+        guardar_en='./resultados/checkpoints/09_multisemilla.pt',
     )
     veredicto_orden_dial(resumen, metrica='fpr')
     veredicto_orden_dial(resumen, metrica='rc_ACP')
-
-IMPORTANTE: usa una ruta de checkpoint NUEVA (distinta de cualquier .pt
-generado por versiones anteriores de este wrapper) — los checkpoints viejos
-no tienen fpr/rc_ACP/rc_p90 y no se pueden completar retroactivamente
-(ver el aviso que imprime la función si detecta uno).
 """
 
 import time
@@ -48,16 +39,16 @@ def wilson_ci(k: int, n: int, z: float = 1.959964) -> tuple[float, float]:
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# 1. BOOTSTRAP PAREADO DE LA DIFERENCIA EN EL PUNTO DE OPERACIÓN
+# 1. PAIRED BOOTSTRAP AT OPERATIONAL WORKING POINT
 # ══════════════════════════════════════════════════════════════════════════
 
 def bootstrap_pareado_operativo(y_te, y_te_ext, ACP_te, prob_a, prob_b,
                                   umbral_a, umbral_b,
-                                  nombre_a: str = "Modelo A", nombre_b: str = "Modelo B",
+                                  nombre_a: str = "Model A", nombre_b: str = "Model B",
                                   n_boot: int = 2000, seed: int = 42,
                                   imprimir: bool = True) -> dict:
-    """IC 95% (bootstrap pareado) de la diferencia (B - A) en Rc-p90, Rc-ACP
-    y FPR, evaluando cada modelo en su umbral operativo ya fijado."""
+    """95% CI (paired bootstrap) for the difference (B - A) in Rc-p90, Rc-ACP,
+    and FPR, evaluating each model at its predetermined operating threshold."""
     rng = np.random.RandomState(seed)
     n = len(y_te)
 
@@ -103,25 +94,24 @@ def bootstrap_pareado_operativo(y_te, y_te_ext, ACP_te, prob_a, prob_b,
         }
 
     if imprimir:
-        print(f"\n  Bootstrap pareado ({n_boot} remuestreos): Δ = {nombre_b} − {nombre_a}")
+        print(f"\n  Paired bootstrap ({n_boot} resamples): Delta = {nombre_b} - {nombre_a}")
         print("  " + "-" * 78)
         for k, r in resultados.items():
             etiqueta = {'rc_p90': 'Rc-p90 ', 'rc_ACP': 'Rc-ACP', 'fpr': 'FPR    '}[k]
-            sig = "✅ significativo (IC no cruza 0)" if r['significativo'] else "⚠️  NO significativo (IC cruza 0)"
-            print(f"  Δ{etiqueta}  = {r['delta_medio']:+.4f}   "
-                  f"IC95%=[{r['ic95'][0]:+.4f}, {r['ic95'][1]:+.4f}]   {sig}   (n={r['n_boot_validos']})")
+            sig = "significant (CI excludes 0)" if r['significativo'] else "NOT significant (CI spans 0)"
+            print(f"  Delta-{etiqueta} = {r['delta_medio']:+.4f}   "
+                  f"95% CI=[{r['ic95'][0]:+.4f}, {r['ic95'][1]:+.4f}]   [{sig}]   (n={r['n_boot_validos']})")
         print()
 
     return resultados
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# 2. MULTI-SEMILLA: métricas operativas + checkpoint/resume + descarga
+# 2. MULTI-SEED: Operational Metrics + Checkpoint/Resume
 # ══════════════════════════════════════════════════════════════════════════
 
 def _metricas_operativas(y_te, y_te_ext, ACP_te, prob, umbral: float = 0.5) -> dict:
-    """fpr/rc_ACP/rc_p90 a partir de las probabilidades predichas (umbral=0.5,
-    el punto de operación "crudo", igual que analisis_extremos)."""
+    """Computes fpr/rc_ACP/rc_p90 from predicted probabilities at nominal threshold 0.5."""
     prob = np.asarray(prob)
     pred = (prob >= umbral).astype(float)
 
@@ -138,10 +128,7 @@ def _metricas_operativas(y_te, y_te_ext, ACP_te, prob, umbral: float = 0.5) -> d
 
 
 def _construir_resumen(acumulado: dict, tiempos: dict, semillas_completadas: set) -> dict:
-    """Construye el resumen (mean/std/min/max). Separado en su propia función
-    porque se necesita tanto en el guardado incremental como al final del
-    todo — incluyendo cuando todas las semillas ya estaban completadas y el
-    bucle no se ejecuta ni una vez (evita el NameError de versiones previas)."""
+    """Builds summary dictionary (mean/std/min/max) from accumulated metric runs."""
     resumen = {}
     for nm, metricas in acumulado.items():
         resumen[nm] = {}
@@ -163,26 +150,13 @@ def _construir_resumen(acumulado: dict, tiempos: dict, semillas_completadas: set
     return resumen
 
 
-def _descargar_en_colab(ruta: str) -> None:
-    try:
-        from google.colab import files
-        files.download(ruta)
-    except ImportError:
-        print(f"  [i] No estás en Colab: omitiendo descarga automática. Archivo en {ruta}.")
-    except Exception as e:
-        print(f"  [!] No se pudo disparar la descarga automática ({e}). Archivo en {ruta}.")
-
-
 def ejecutar_multisemilla_qml(ds, res_base, entrenar_qml, entrenar_qtl,
                                 entrenar_qnn_layerbylayer, seeds=range(15),
                                 guardar_en: str = None,
-                                descargar_cada_semilla: bool = True,
+                                descargar_cada_semilla: bool = False,
                                 frecuencia_descarga: int = 1) -> dict:
-    """Repite el entrenamiento de LSTM+QNN, LSTM+PI-QNN, LSTM+QTL y
-    LbL-QNN con varias semillas, capturando acc/f1/auc/fpr/rc_ACP/rc_p90
-    para cada una. Reanuda automáticamente desde `guardar_en` si ya existe,
-    guarda progreso tras cada semilla, y descarga el checkpoint al navegador
-    en Colab tras cada guardado (configurable)."""
+    """Replicates QML models across multiple seeds, recording operational metrics.
+    Automatically resumes from existing checkpoint if available."""
     import torch
     import os
     import gc
@@ -199,36 +173,29 @@ def ejecutar_multisemilla_qml(ds, res_base, entrenar_qml, entrenar_qtl,
     ACP_te = ds.ACP_te.numpy() if hasattr(ds.ACP_te, 'numpy') else ds.ACP_te
 
     if guardar_en and os.path.exists(guardar_en):
-        print(f"  [+] Detectado archivo previo en {guardar_en}. Intentando reanudar...")
+        print(f"  [+] Found previous checkpoint at {guardar_en}. Resuming...")
         try:
             res_previo = torch.load(guardar_en, weights_only=False)
             if '_estado_interno' in res_previo:
                 acumulado = res_previo['_estado_interno']['acumulado']
                 tiempos = res_previo['_estado_interno']['tiempos']
                 semillas_completadas = set(res_previo['_estado_interno']['semillas_completadas'])
-                print(f"  [+] Reanudando. {len(semillas_completadas)} semillas ya completadas.")
-                for nm, metricas in acumulado.items():
-                    faltan = [m for m in ('fpr', 'rc_ACP', 'rc_p90') if m not in metricas or not metricas[m]]
-                    if faltan:
-                        print(f"  [!] AVISO: '{nm}' en el checkpoint cargado no tiene {faltan}. "
-                              f"Viene de una versión anterior del wrapper — usa una ruta nueva "
-                              f"en guardar_en si necesitas estas métricas también para las "
-                              f"semillas ya completadas.")
+                print(f"  [+] Resumed successfully. {len(semillas_completadas)} seeds already completed.")
         except Exception as e:
-            print(f"  [!] No se pudo cargar el progreso previo: {e}")
+            print(f"  [!] Failed to load checkpoint: {e}")
 
     tiene_qtl = '_modelo_lstm' in res_base
     if not tiene_qtl:
-        print("  [!] res_base no tiene '_modelo_lstm' — QTL se omitirá en todas las semillas.")
+        print("  [!] res_base lacks '_modelo_lstm' — QTL will be skipped.")
 
     for i, seed in enumerate(seeds):
         if seed in semillas_completadas:
-            print(f"\n  ── Semilla {seed} ({i + 1}/{n_seeds}) ── [YA COMPLETADA, SALTANDO]")
+            print(f"\n  -- Seed {seed} ({i + 1}/{n_seeds}) -- [ALREADY COMPLETED, SKIPPING]")
             continue
 
-        print(f"\n  ── Semilla {seed} ({i + 1}/{n_seeds}) ──")
+        print(f"\n  -- Seed {seed} ({i + 1}/{n_seeds}) --")
 
-        # --- LSTM+QNN y LSTM+PI-QNN ---
+        # --- LSTM+QNN and LSTM+PI-QNN ---
         torch.manual_seed(seed); np.random.seed(seed)
         t0 = time.time()
         res_qml = entrenar_qml(ds)
@@ -290,10 +257,7 @@ def ejecutar_multisemilla_qml(ds, res_base, entrenar_qml, entrenar_qtl,
 
         if guardar_en:
             torch.save(resumen, guardar_en)
-            print(f"  [v] PROGRESO GUARDADO EN DISCO (semillas completadas: "
-                  f"{len(semillas_completadas)}/{n_seeds})")
-            if descargar_cada_semilla and (len(semillas_completadas) % frecuencia_descarga == 0):
-                _descargar_en_colab(guardar_en)
+            print(f"  [v] PROGRESS SAVED (completed seeds: {len(semillas_completadas)}/{n_seeds})")
 
         del res_qml, res_qtl, res_lbl
         gc.collect()
@@ -302,8 +266,8 @@ def ejecutar_multisemilla_qml(ds, res_base, entrenar_qml, entrenar_qtl,
 
     resumen = _construir_resumen(acumulado, tiempos, semillas_completadas)
 
-    print(f"\n  {'Modelo':<15} {'Métrica':<9} {'Media':>8} {'± Std':>8}   "
-          f"[min, max]  (n={len(semillas_completadas)} semillas)")
+    print(f"\n  {'Model':<15} {'Metric':<9} {'Mean':>8} {'+- Std':>8}   "
+          f"[min, max]  (n={len(semillas_completadas)} seeds)")
     print("  " + "-" * 78)
     for nm, metricas in resumen.items():
         if nm.startswith('_'):
@@ -317,15 +281,15 @@ def ejecutar_multisemilla_qml(ds, res_base, entrenar_qml, entrenar_qtl,
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# 3. VEREDICTO DE ESTABILIDAD ENTRE SEMILLAS
+# 3. SEED STABILITY VERDICT
 # ══════════════════════════════════════════════════════════════════════════
 
 def veredicto_orden_dial(resumen: dict, metrica: str = 'fpr',
                           modelos=('LSTM+PI-QNN', 'LbL-QNN')) -> None:
-    """¿El orden entre dos modelos es consistente en TODAS las semillas?"""
+    """Checks whether the ranking between two models is consistent across all seeds."""
     a, b = modelos
     if a not in resumen or b not in resumen or metrica not in resumen.get(a, {}):
-        print(f"  [!] Faltan datos de '{a}' o '{b}' para la métrica '{metrica}'.")
+        print(f"  [!] Missing data for '{a}' or '{b}' on metric '{metrica}'.")
         return
     va = np.asarray(resumen[a][metrica]['valores'])
     vb = np.asarray(resumen[b][metrica]['valores'])
@@ -336,11 +300,18 @@ def veredicto_orden_dial(resumen: dict, metrica: str = 'fpr',
     else:
         gana_a = int((va[:n] > vb[:n]).sum()); gana_b = int((vb[:n] > va[:n]).sum())
 
-    print(f"\n  Veredicto de estabilidad — {metrica} ({'menor' if menor_mejor else 'mayor'}=mejor):")
-    print(f"    {a:<15} gana en {gana_a}/{n} semillas")
-    print(f"    {b:<15} gana en {gana_b}/{n} semillas")
+    print(f"\n  Stability Verdict — {metrica} ({'lower' if menor_mejor else 'higher'}=better):")
+    print(f"    {a:<15} wins in {gana_a}/{n} seeds")
+    print(f"    {b:<15} wins in {gana_b}/{n} seeds")
     if gana_a == n or gana_b == n:
-        print("    → Orden CONSISTENTE en todas las semillas: hallazgo estable.")
+        print("    -> CONSISTENT order across all seeds: statistically stable finding.")
     else:
-        print("    → El orden CAMBIA entre semillas: no es un hallazgo estable. "
-              "Usa media±std, no el ranking de una sola corrida.")
+        print("    -> Order INVERTS between seeds: sensitive to initialization. "
+              "Report mean+-std rather than single-run rankings.")
+
+
+# English aliases for public API
+run_qml_multiseed = ejecutar_multisemilla_qml
+seed_stability_verdict = veredicto_orden_dial
+paired_operational_bootstrap = bootstrap_pareado_operativo
+

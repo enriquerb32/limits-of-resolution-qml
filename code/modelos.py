@@ -20,14 +20,20 @@ from modelos_utils import (                                  # noqa: F401
     _loop,
     _extraer_probs,
     analisis_extremos,
+    extreme_analysis,
+    deterministic_seed,
+    MetricAccumulator,
 )
 
 # Classical baselines
 from modelos_clasicos import (                               # noqa: F401
     PureLSTM,
     entrenar_baselines,
+    train_classical_baselines,
     entrenar_baselines_multisemilla,
+    train_classical_baselines_multiseed,
     entrenar_lstm_standalone_semilla,
+    train_lstm_standalone_seed,
 )
 
 # Quantum models
@@ -37,9 +43,14 @@ from modelos_cuanticos import (                              # noqa: F401
     make_thermodynamic_physics_loss,
     _loop_with_physics,
     entrenar_qml,
+    train_qml,
     entrenar_qksvm,
+    train_qksvm,
     entrenar_ablacion,
+    train_ablation,
     QuantumTransferLearning,
     entrenar_qtl,
+    train_qtl,
     entrenar_qnn_layerbylayer,
+    train_qnn_layerbylayer,
 )

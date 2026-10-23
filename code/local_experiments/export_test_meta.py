@@ -2,7 +2,7 @@
 """
 export_test_meta.py - writes test_meta.csv (ciudad, fecha_target) for the 528 test windows, in the SAME order as
 X_te / y_te of the train-only dataset.  Run it where datos_limpios_multiestacion.csv lives (same code path as the
-Colab / local reruns).  Output feeds exp13_label_sensitivity.py.
+experimental reruns).  Output feeds exp13_label_sensitivity.py.
 
   python export_test_meta.py --csv datos_limpios_multiestacion.csv --out test_meta.csv
 """
