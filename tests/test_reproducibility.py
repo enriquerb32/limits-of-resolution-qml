@@ -9,7 +9,6 @@ Minimal pytest verification of core reproducibility invariants:
 import os
 import subprocess
 import sys
-import pytest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -33,8 +32,9 @@ def test_partition_counts():
 
 
 def test_traceability_matrix():
-    """Verify that all 82 claims in the audit matrix are verified."""
+    """Verify that all 82 claims in the audit matrix pass without mismatches."""
     script = os.path.join(ROOT, "scripts", "build_traceability.py")
     res = subprocess.run([sys.executable, script], capture_output=True, text=True, cwd=ROOT)
-    assert res.returncode == 0, f"build_traceability failed:\n{res.stderr}"
-    assert "82 verified claims" in res.stdout
+    assert res.returncode == 0, f"build_traceability failed:\n{res.stderr}\n{res.stdout}"
+    assert "0 mismatches" in res.stdout
+    assert "82 claims" in res.stdout

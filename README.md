@@ -97,19 +97,21 @@ Commands run from the repository root. Table numbers refer to the compiled `pape
 | Paper item | What it is | Command | Output |
 |---|---|---|---|
 | **Table 1** | Windows by station and partition | `python scripts/make_partition_table.py` | `results/json/partition_counts.json` |
-| **Table 3, Table S1** | Noise budget, seed variance, MDEs | `python code/local_experiments/exp7_noise_budget.py` | `results/json/results_exp7_noise_budget.json` |
+| **Table 3, Table S1** | Noise budget, seed variance, MDEs | `python code/local_experiments/exp7_noise_budget.py` | `results/local_exp7_noise_budget.json` |
 | **Table 4, Figure 1** | Paired DeLong and two-way bootstrap CIs, classical models | `python code/local_experiments/exp10_paired_ci.py --probs results/json/results_rerun_train_only_canonical_probs.npz --prefix train_only` | `results/json/results_exp10_paired_ci.json` |
 | **Table 5, Figure 2, Table S4** | Known-truth simulation, scenarios B–E | `python code/local_experiments/exp11_simulation_known_truth.py --reps 500 --B 300` | `results/json/sim*.json` |
 | **Section 4 (panel-matched check)** | Simulation with the real year sizes | `python code/local_experiments/exp15_panel_matched_simulation.py --probs results/json/results_rerun_train_only_canonical_probs.npz --meta results/test_meta.csv` | `results/json/results_exp15_panel_sim.json` |
 | **Table 6** | Monthly coverage audit | `python code/local_experiments/exp12_monthly_coverage_audit.py --csv code/local_experiments/datos_limpios_multiestacion.csv --out results/json/results_exp12_coverage.json` | `results/json/results_exp12_coverage.json` |
 | **Tables 7–9** | Fixed predictors under label scenarios S0–S7 | `python code/local_experiments/exp13_label_sensitivity.py --probs results/json/results_rerun_train_only_canonical_probs.npz --prefix train_only --extra results/json/results_qml_core_trainonly_probs.npz` | `results/json/results_exp13_label_sensitivity.json` |
 | **(inner-join audit)** | Effect of the five-file inner join on the test partition | `python code/local_experiments/exp14_innerjoin_audit.py --csv code/local_experiments/datos_limpios_multiestacion.csv --precip_raw code/local_experiments/precip_raw.csv --rows code/local_experiments/month_rows.csv --out results/json/results_exp14_innerjoin.json` | `results/json/results_exp14_innerjoin.json` |
-| **Table 10** | Brier score, climatology, reliability | `python code/local_experiments/exp3_brier_and_reliability.py` | `results/json/results_exp3_brier_reliability.json` |
+| **Table 10** | Brier score, climatology, reliability | `python code/local_experiments/exp3_brier_and_reliability.py` | `results/local_exp3_brier_reliability.json` |
 | **Table 11** | Matched 15-seed QML core experiment (long-running) | `python code/local_experiments/qml_core_trainonly.py` | `results/json/results_qml_core_trainonly.json`, `..._probs.npz` |
 | **Table 12** | Paired comparisons with the hybrid | `python code/local_experiments/exp10_paired_ci.py --probs results/json/results_rerun_train_only_canonical_probs.npz --prefix train_only --extra results/json/results_qml_core_trainonly_probs.npz` | `results/json/results_exp10_paired_ci.json` |
-| **Table S2, Figure S1** | Positive control (imposed AUC reduction) | `python code/local_experiments/exp8_positive_control.py` | `results/json/results_exp8_positive_control.json` |
+| **Table S2, Figure S1** | Positive control (imposed AUC reduction) | `python code/local_experiments/exp8_positive_control.py` | `results/local_exp8_positive_control.json` |
 | **Table S18** | Parameter accounting (2,613 vs 2,609) | `python scripts/verify_parameter_counts.py` | `results/json/results_wp3_accounting.json` |
 
+> [!NOTE]
+> **Data Provenance & Derived Files:** The derived spatiotemporal partitions (`results/test_meta.csv`, `results/years_te.npy`, and `results/panel_checkpoint.csv`) are tracked in the repository. Full end-to-end re-execution of `exp12` and `exp14` from scratch requires the unredistributed raw daily AEMET meteorological station records (`datos_limpios_multiestacion.csv`, `precip_raw.csv`), which cannot be redistributed under AEMET licensing; all downstream statistical comparisons run from the archived outputs in `results/`.
 `results/test_meta.csv` (columns `ciudad`, `fecha`, `y_te`, one row per test window) is produced by `python code/local_experiments/export_test_meta.py --csv code/local_experiments/datos_limpios_multiestacion.csv --out results/test_meta.csv`. Table 2 of the paper is a map of experiments (pipeline, fitting rows, seeds and stored probabilities behind each result) and is the best starting point for a reviewer.
 
 ---
@@ -133,7 +135,6 @@ Commands run from the repository root. Table numbers refer to the compiled `pape
 ├── results/                archived machine-readable results (JSON, CSV, NPZ), including the monthly panel
 ├── checkpoints/            model weights and the preprocessed dataset (checksums in CHECKSUMS.sha256)
 ├── scripts/                figure generation, traceability audit, parameter-count check
-├── tables/                 LaTeX table fragments included by the paper
 ├── Dockerfile, requirements.txt, environment.yml, pyproject.toml
 └── LICENSE, LICENSE-DATA, CITATION.cff
 ```

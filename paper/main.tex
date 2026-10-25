@@ -43,9 +43,9 @@
 \newcommand{\@todonoarg}{\ifshowtodo{\textcolor{red}{\textbf{[TODO]}}}\fi}
 \makeatother
 
-% Figures that may be absent at compile time are replaced by a labelled box.
+% Fail compilation if a figure is missing (prevent silent placeholder boxes)
 \graphicspath{{figs/}{./}}
-\newcommand{\safefig}[2]{\IfFileExists{#1}{\includegraphics[width=#2]{#1}}{\IfFileExists{figs/#1}{\includegraphics[width=#2]{figs/#1}}{\fbox{\parbox{0.8\textwidth}{\centering\small [figure file \detokenize{#1} not found]}}}}}
+\newcommand{\safefig}[2]{\IfFileExists{#1}{\includegraphics[width=#2]{#1}}{\IfFileExists{figs/#1}{\includegraphics[width=#2]{figs/#1}}{\PackageError{safefig}{figure file \detokenize{#1} not found. Run scripts/make_paper_figs.py first.}{}}}}
 
 % Page Geometry
 \geometry{top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}

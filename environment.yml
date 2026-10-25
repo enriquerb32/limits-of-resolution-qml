@@ -1,12 +1,12 @@
 # ──────────────────────────────────────────────────────────────────────────────
-# QML_Antigravity — Conda environment for reproducibility
+# limits-of-resolution-qml — Conda environment for reproducibility
 # ──────────────────────────────────────────────────────────────────────────────
 # Usage:
 #   conda env create -f environment.yml
-#   conda activate qml_antigravity
+#   conda activate qml-resolution
 #   python code/local_experiments/exp7_noise_budget.py
 # ──────────────────────────────────────────────────────────────────────────────
-name: qml_antigravity
+name: qml-resolution
 
 channels:
   - conda-forge

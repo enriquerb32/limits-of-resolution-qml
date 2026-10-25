@@ -25,7 +25,8 @@ USAGE
   python exp10_paired_ci.py --probs results_rerun_train_only_canonical_probs.npz --prefix train_only \
       --panel panel_checkpoint.csv --pairs RF-XGB RF-LSTM XGB-LSTM --B 2000 --out results_exp10_paired_ci.json
 """
-import argparse, json, sys
+import argparse
+import json
 import numpy as np
 from scipy.stats import rankdata, norm
 
@@ -41,23 +42,6 @@ def delong_components(y, p):
     auc = tz[pos].sum() / (m * n) - (m + 1) / (2 * n)
     return auc, v10, v01
 
-def test_years_from_panel(panel_csv, n_expected, window=12, test_start=2008):
-    import pandas as pd
-    df = pd.read_csv(panel_csv)
-    dcol = 'fecha' if 'fecha' in df.columns else df.columns[0]
-    df[dcol] = pd.to_datetime(df[dcol])
-    city_cols = [c for c in df.columns if c.startswith('ciudad_')]
-    if not city_cols:
-        raise SystemExit("panel has no ciudad_* one-hot columns; pass --years instead")
-    yrs = []
-    for c in city_cols:
-        d = df.loc[df[c] == 1, dcol].sort_values().reset_index(drop=True)
-        yrs.extend(d.iloc[window:].dt.year.tolist())      # window targets = month i+window
-    yrs = np.sort(np.array(yrs))
-    yrs = yrs[yrs >= test_start]
-    if len(yrs) != n_expected:
-        raise SystemExit(f"rebuilt {len(yrs)} test years, expected {n_expected}: pass --years years_te.npy instead")
-    return yrs
 
 class Model:
     def __init__(self, probs, y):
@@ -120,22 +104,21 @@ def main():
             if k.endswith('_probs'): models[k[:-6]] = z[k]
     assert y is not None and models, 'no models loaded'
     
-    # Auto-detect years / panel if not provided
-    if not a.years and not a.panel:
-        for cand in ['code/local_experiments/years_te.npy', 'years_te.npy', '../years_te.npy']:
+    # Auto-detect years / partition
+    if a.years:
+        years = np.load(a.years)
+    else:
+        for cand in ['results/years_te.npy', 'code/local_experiments/years_te.npy', 'data/years_te.npy', 'years_te.npy', '../years_te.npy']:
             import os
             if os.path.exists(cand):
-                a.years = cand; break
-        if not a.years:
-            for cand in ['results/panel_checkpoint.csv', 'panel_checkpoint.csv', '../results/panel_checkpoint.csv']:
-                import os
-                if os.path.exists(cand):
-                    a.panel = cand; break
-
-    if a.years: years = np.load(a.years)
-    elif a.panel: years = test_years_from_panel(a.panel, len(y))
-    else: sys.exit('need --panel or --years')
-    assert len(years) == len(y)
+                years = np.load(cand)
+                break
+        else:
+            import os, sys
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            from noise_utils import load_test_partition
+            *_, years, _ = load_test_partition()
+    assert len(years) == len(y), f"years length ({len(years)}) != test labels length ({len(y)})"
 
     if not a.pairs:
         if a.extra:

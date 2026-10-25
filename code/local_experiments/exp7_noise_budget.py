@@ -77,15 +77,15 @@ def main():
         aucs, cov = delong_cov(y, stack)
         boot = year_block_bootstrap_aucs(y, stack, years, B=B, seed=42)
 
-        def se_diff_iid(i, j):
-            return float(np.sqrt(max(cov[i, i] + cov[j, j] - 2 * cov[i, j], 1e-300)))
+        def se_diff_iid(i, j, c=cov):
+            return float(np.sqrt(max(c[i, i] + c[j, j] - 2 * c[i, j], 1e-300)))
 
-        def p_iid(i, j):
-            dd = aucs[i] - aucs[j]
-            return float(2 * norm.sf(abs(dd) / se_diff_iid(i, j)))
+        def p_iid(i, j, a=aucs, c=cov):
+            dd = a[i] - a[j]
+            return float(2 * norm.sf(abs(dd) / se_diff_iid(i, j, c)))
 
-        def block_diff(i, j):
-            diffs = boot[:, i] - boot[:, j]
+        def block_diff(i, j, b=boot):
+            diffs = b[:, i] - b[:, j]
             lo, hi = np.percentile(diffs, [2.5, 97.5])
             return float(np.std(diffs, ddof=1)), bool(lo > 0 or hi < 0)
 

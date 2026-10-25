@@ -8,9 +8,9 @@ matplotlib>=3.8
 seaborn>=0.13
 
 # Quantum computing
-pennylane>=0.40
-pennylane-qiskit>=0.40
-qiskit-aer>=0.14
+pennylane>=0.45
+pennylane-qiskit>=0.45
+qiskit-aer>=0.17
 
 # Boosting
 xgboost>=2.0

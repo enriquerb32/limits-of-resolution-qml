@@ -34,6 +34,8 @@ import torch
 warnings.filterwarnings('ignore')
 torch.set_default_dtype(torch.float64)
 
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -43,6 +45,9 @@ def parse_args():
                         help='Directory containing raw AEMET data per city')
     parser.add_argument('--salida', '--output', type=str, default='./resultados',
                         help='Output directory for results, checkpoints, figures')
+    parser.add_argument('--checkpoints', type=str,
+                        default=os.path.join(ROOT, 'checkpoints'),
+                        help='Directory containing model checkpoints (default: ./checkpoints)')
     parser.add_argument('--ciudades', '--cities', nargs='+',
                         default=['Barcelona', 'Valencia', 'Alicante', 'San_Javier'],
                         help='List of city names to process')
@@ -76,7 +81,7 @@ def main():
                          entrenar_baselines_multisemilla, LstmQNN)
 
     os.makedirs(args.salida, exist_ok=True)
-    ckpt_dir = os.path.join(args.salida, 'checkpoints')
+    ckpt_dir = args.checkpoints
     os.makedirs(ckpt_dir, exist_ok=True)
 
     # Checkpoint paths

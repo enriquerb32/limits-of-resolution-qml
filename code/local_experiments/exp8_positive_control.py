@@ -69,7 +69,7 @@ def main():
                'by_delta': {}}
 
     for delta in DELTAS:
-        deg, sig_noise, realised = [], [], []
+        deg, sig_noise = [], []
         for j in range(N_SEEDS):
             for r in range(R if delta > 0 else 1):
                 pd_, s = degrade(y, rf[j], delta, rng)
@@ -79,11 +79,11 @@ def main():
         aucs, cov = delong_cov(y, stack)
         boot = year_block_bootstrap_aucs(y, stack, years, B=B, seed=7)
 
-        def test(i, k):
-            dd = aucs[i] - aucs[k]                       # original minus degraded (true sign > 0)
-            se = np.sqrt(max(cov[i, i] + cov[k, k] - 2 * cov[i, k], 1e-300))
+        def test(i, k, a=aucs, c=cov, b=boot):
+            dd = a[i] - a[k]                             # original minus degraded (true sign > 0)
+            se = np.sqrt(max(c[i, i] + c[k, k] - 2 * c[i, k], 1e-300))
             p = 2 * norm.sf(abs(dd) / se)
-            diffs = boot[:, i] - boot[:, k]
+            diffs = b[:, i] - b[:, k]
             lo, hi = np.percentile(diffs, [2.5, 97.5])
             return dd, se, (p < 0.05 and dd > 0), (p < 0.05 and dd < 0), (lo > 0), (hi < 0)
 
@@ -94,7 +94,7 @@ def main():
                 k = N_SEEDS + kk
                 partners = [j] if design == 'paired' else [i for i in range(N_SEEDS) if i != j]
                 for i in partners:
-                    rows.append(test(i, k))
+                    rows.append(test(i, k, aucs, cov, boot))
             rows = np.array(rows, dtype=float)
             out[design] = {
                 'n_tests': int(len(rows)),

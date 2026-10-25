@@ -61,6 +61,8 @@ test_probe.txt
 test_meta.csv
 years_te.npy
 **/years_te.npy
+!results/test_meta.csv
+!results/years_te.npy
 
 # Local duplicates inside code/local_experiments/
 code/local_experiments/*.json

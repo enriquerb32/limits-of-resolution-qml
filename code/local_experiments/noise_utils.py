@@ -7,27 +7,41 @@ Shared helpers for the noise-budget analysis (exp7) and the positive control (ex
 - Year inference for the 528-row test partition (same rule as exp4) with a sanity check.
 """
 
+from pathlib import Path
 import json
 import numpy as np
 from scipy.stats import rankdata, norm
+
+ROOT = Path(__file__).resolve().parents[2]
 
 Z975 = norm.ppf(0.975)
 Z80 = norm.ppf(0.80)
 
 
 def load_test_partition():
-    with open('results/json/01_data.json', 'r') as f:
+    json_path = ROOT / 'results' / 'json' / '01_data.json'
+    with open(json_path, 'r', encoding='utf-8') as f:
         ds = json.load(f)[1]
     y_te = np.array(ds['y_te']).astype(int)
     m_te = np.array(ds['m_te']).astype(int)
     X_te = np.array(ds['X_te'])
-    # Year inference (identical to exp4): new year whenever the month index decreases.
-    year, years = 0, []
-    for i in range(len(m_te)):
-        if i > 0 and m_te[i] < m_te[i - 1]:
-            year += 1
-        years.append(year)
-    years = np.array(years)
+
+    # Prefer actual calendar year array if present
+    years_npy = ROOT / 'results' / 'years_te.npy'
+    if not years_npy.exists():
+        years_npy = ROOT / 'data' / 'years_te.npy'
+
+    if years_npy.exists():
+        years = np.load(years_npy)
+    else:
+        # Year inference (identical to exp4): new year whenever the month index decreases.
+        year, years = 2008, []
+        for i in range(len(m_te)):
+            if i > 0 and m_te[i] < m_te[i - 1]:
+                year += 1
+            years.append(year)
+        years = np.array(years)
+
     # Sanity check: with 4 stations, a calendar year can hold at most 4 rows per month.
     max_rows_per_month = max(
         int(np.max(np.bincount(m_te[years == yr], minlength=13))) for yr in np.unique(years)

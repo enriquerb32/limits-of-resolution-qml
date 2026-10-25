@@ -58,14 +58,33 @@ def split_pair(pr, M):
 
 
 def main():
+    import os
     ap = argparse.ArgumentParser()
     ap.add_argument('--probs'); ap.add_argument('--prefix', default='train_only'); ap.add_argument('--extra')
-    ap.add_argument('--meta', required=True); ap.add_argument('--rows', required=True)
-    ap.add_argument('--pairs', nargs='+', required=True); ap.add_argument('--B', type=int, default=2000)
+    ap.add_argument('--meta', default='results/test_meta.csv')
+    ap.add_argument('--rows', default='month_rows.csv')
+    ap.add_argument('--pairs', nargs='*', default=None); ap.add_argument('--B', type=int, default=2000)
     ap.add_argument('--seed', type=int, default=0); ap.add_argument('--out', default='results_exp13_label_sensitivity.json')
     a = ap.parse_args(); rng = np.random.default_rng(a.seed)
+
+    if not a.pairs:
+        if a.extra:
+            a.pairs = ['RF-XGB', 'RF-LSTM', 'XGB-LSTM', 'RF_2273-LSTM_QNN', 'CTRL_LINEAR4D-LSTM_QNN', 'PureLSTM-LSTM_QNN']
+        else:
+            a.pairs = ['RF-XGB', 'RF-LSTM', 'XGB-LSTM']
+
     models, y0 = load_models(a)
-    meta = pd.read_csv(a.meta); rows = pd.read_csv(a.rows)
+
+    meta_path = a.meta
+    if not os.path.exists(meta_path) and os.path.exists(os.path.join('results', 'test_meta.csv')):
+        meta_path = os.path.join('results', 'test_meta.csv')
+    if not os.path.exists(meta_path):
+        raise SystemExit(f"test_meta file '{meta_path}' not found; generate it or pass --meta results/test_meta.csv")
+
+    if not os.path.exists(a.rows):
+        raise SystemExit(f"month rows file '{a.rows}' not found. Note: month_rows.csv is produced from raw daily AEMET records (exp12), which are not redistributed due to AEMET licensing.")
+
+    meta = pd.read_csv(meta_path); rows = pd.read_csv(a.rows)
     assert len(meta) == len(y0), (len(meta), len(y0))
     if 'y_te' in meta: assert (meta['y_te'].values == y0).all(), 'meta y_te differs from probs y_te: row order or dataset differs'
     j = link(meta, rows); years = pd.to_datetime(j['fecha']).dt.year.values

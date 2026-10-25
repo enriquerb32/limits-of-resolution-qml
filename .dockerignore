@@ -21,7 +21,6 @@ checkpoints/
 datos/
 data/raw/
 out/
-audit/
 resultados/
 backup_*/
 archive/

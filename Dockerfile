@@ -20,12 +20,10 @@
 
 ARG PYTHON_VERSION=3.12
 ARG UV_VERSION=0.5.0
-ARG TORCH_VERSION=2.4.1
 # For bit-for-bit rebuilds also pin the base image by digest: python:3.12-slim@sha256:<digest>
 
 # ── STAGE 1: dependencies ─────────────────────────────────────────────────────
 FROM python:${PYTHON_VERSION}-slim AS builder
-ARG TORCH_VERSION
 ENV PYTHONDONTWRITEBYTECODE=1 UV_LINK_MODE=copy
 WORKDIR /build
 
@@ -38,14 +36,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends gcc g++ \
 RUN uv venv /opt/venv
 ENV VIRTUAL_ENV=/opt/venv PATH="/opt/venv/bin:$PATH"
 
-# CPU-only torch, pinned and quoted (an unquoted >= is a shell redirect)
+# Install exact universal dependencies from cryptographically verified lockfile
+COPY requirements.lock .
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install "torch==${TORCH_VERSION}" --index-url https://download.pytorch.org/whl/cpu
-
-# Everything else, from PyPI. Filter out torch so it never re-resolves the 2.5 GB CUDA wheels.
-COPY requirements.txt .
-RUN --mount=type=cache,target=/root/.cache/uv \
-    grep -v -i '^torch\b' requirements.txt > /tmp/req.txt && uv pip install -r /tmp/req.txt
+    uv pip install --require-hashes -r requirements.lock
 
 # Fail the build, not the run, if the environment is broken (smoke test)
 RUN python -c "import torch, pennylane, numpy, scipy, sklearn; print('torch', torch.__version__, 'pennylane', pennylane.__version__)"
@@ -67,12 +61,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONHASHSEED=0 \
 WORKDIR /app
 COPY --from=builder /opt/venv /opt/venv
 
-RUN useradd -u 1000 -m -s /bin/bash appuser && mkdir -p /app/out && chown appuser:appuser /app/out
+RUN useradd -u 1000 -m -s /bin/bash appuser && \
+    mkdir -p /app/out /app/audit /app/paper/figs && \
+    chown -R appuser:appuser /app
 
 COPY --chown=appuser:appuser code/ ./code/
 COPY --chown=appuser:appuser scripts/ ./scripts/
 COPY --chown=appuser:appuser results/ ./results/
-COPY --chown=appuser:appuser README.md LICENSE* CITATION.cff* ./
+COPY --chown=appuser:appuser paper/ ./paper/
+COPY --chown=appuser:appuser tests/ ./tests/
+COPY --chown=appuser:appuser Makefile pyproject.toml README.md LICENSE* CITATION.cff* ./
 
 USER appuser
 VOLUME ["/app/out"]

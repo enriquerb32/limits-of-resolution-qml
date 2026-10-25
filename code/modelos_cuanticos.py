@@ -196,7 +196,23 @@ def entrenar_qksvm(ds: DatasetResult) -> dict:
 
     N_Q        = 4
     N_LANDMARK = 64
-    dev = qml.device('default.qubit', wires=N_Q)
+
+    std_sc = StandardScaler()
+    X_tr_std = std_sc.fit_transform(ds.X_sk)
+    X_te_std = std_sc.transform(ds.X_all[ds.s2:])
+    pca = PCA(n_components=N_Q, random_state=42)
+    X_tr_pca, X_te_pca = pca.fit_transform(X_tr_std), pca.transform(X_te_std)
+    sc = MinMaxScaler(feature_range=(0, np.pi))
+    X_tr_q, X_te_q = sc.fit_transform(X_tr_pca), sc.transform(X_te_pca)
+
+    rng = np.random.RandomState(42)
+    idx_pos, idx_neg = np.where(ds.y_sk == 1)[0], np.where(ds.y_sk == 0)[0]
+    n_pos_lm = min(N_LANDMARK // 2, len(idx_pos))
+    landmarks = np.concatenate([
+        rng.choice(idx_pos, n_pos_lm, replace=False),
+        rng.choice(idx_neg, min(N_LANDMARK - n_pos_lm, len(idx_neg)), replace=False),
+    ])
+    X_lm = X_tr_q[landmarks]
 
     def _compute_qk_matrix(X1, X2):
         # Exact analytical AngleEmbedding fidelity kernel: prod(cos((X1-X2)/2)^2)

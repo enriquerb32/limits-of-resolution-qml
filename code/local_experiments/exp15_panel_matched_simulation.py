@@ -34,9 +34,13 @@ def normal_scores(y, p):
 
 
 def estimate(a):
+    import os
     Z = np.load(a.probs); y = Z['y_te'].astype(int)
     pa = Z[f'{a.prefix}_{a.scorer_a}_probs'].mean(0); pb = Z[f'{a.prefix}_{a.scorer_b}_probs'].mean(0)
-    meta = pd.read_csv(a.meta); assert len(meta) == len(y), (len(meta), len(y))
+    meta_path = a.meta
+    if not os.path.exists(meta_path) and os.path.exists('test_meta.csv'):
+        meta_path = 'test_meta.csv'
+    meta = pd.read_csv(meta_path); assert len(meta) == len(y), (len(meta), len(y))
     yr = pd.to_datetime(meta['fecha']).dt.year.values; years = np.unique(yr)
     sizes = np.array([(yr == u).sum() for u in years]); prev_u = np.array([y[yr == u].mean() for u in years])
     auc_a, auc_b = auc(y, pa), auc(y, pb); za, zb = normal_scores(y, pa), normal_scores(y, pb)
@@ -109,7 +113,7 @@ def run_config(rng, a, est, sizes, mult, delta, abs_tau=None):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('--probs', required=True); ap.add_argument('--prefix', default='train_only'); ap.add_argument('--meta', required=True)
+    ap.add_argument('--probs', required=True); ap.add_argument('--prefix', default='train_only'); ap.add_argument('--meta', default='results/test_meta.csv')
     ap.add_argument('--scorer_a', default='RF'); ap.add_argument('--scorer_b', default='LSTM')
     ap.add_argument('--tau_mult', type=float, nargs='+', default=[0.5, 1.0, 1.5])
     ap.add_argument('--tau_abs', type=float, nargs='*', default=[0.0, 0.1, 0.2, 0.3], help='absolute year-effect scales (used because moment estimates can be 0)')

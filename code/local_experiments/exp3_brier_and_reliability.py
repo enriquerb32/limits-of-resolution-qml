@@ -4,15 +4,18 @@ Local Experiment 3: Brier Score, Brier Skill Score, and Calibration/Reliability 
 Evaluates the 10 single-run models on the test partition (N=528).
 """
 
+from pathlib import Path
 import json
 import os
 import numpy as np
 from sklearn.metrics import brier_score_loss, roc_auc_score
 from sklearn.linear_model import LogisticRegression
 
+ROOT = Path(__file__).resolve().parents[2]
+
+
 def compute_calibration_metrics(y_true, y_prob, n_bins=10):
     bin_edges = np.linspace(0, 1, n_bins + 1)
-    bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
     
     bin_counts = []
     bin_accs = []
@@ -70,15 +73,15 @@ def compute_calibration_metrics(y_true, y_prob, n_bins=10):
     }
 
 def main():
-    os.makedirs('results', exist_ok=True)
+    os.makedirs(ROOT / 'results', exist_ok=True)
     
-    with open('results/json/01_data.json', 'r') as f:
+    with open(ROOT / 'results' / 'json' / '01_data.json', 'r', encoding='utf-8') as f:
         ds = json.load(f)[1]
-    with open('results/json/02_baselines.json', 'r') as f:
+    with open(ROOT / 'results' / 'json' / '02_baselines.json', 'r', encoding='utf-8') as f:
         b = json.load(f)
-    with open('results/json/03_qml.json', 'r') as f:
+    with open(ROOT / 'results' / 'json' / '03_qml.json', 'r', encoding='utf-8') as f:
         q = json.load(f)
-    with open('results/json/04_qksvm.json', 'r') as f:
+    with open(ROOT / 'results' / 'json' / '04_qksvm.json', 'r', encoding='utf-8') as f:
         qksvm = json.load(f)
 
     y_tr = np.array(ds['y_tr'])
@@ -152,7 +155,7 @@ def main():
             m_name, auc, bs, bss_uncond, bss_clim, cal_dict['ece_10'], slope_str
         ))
 
-    out_path = 'results/local_exp3_brier_reliability.json'
+    out_path = ROOT / 'results' / 'local_exp3_brier_reliability.json'
     with open(out_path, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2)
     print(f"Exp 3 completed successfully. Output saved to {out_path}.")
