@@ -180,6 +180,27 @@ def main():
                                   ci95_t18=[d - 2.101 * se_jk, d + 2.101 * se_jk])
     out['C4_year_jackknife'] = jk
 
+    # ---- C1/C4 for the remaining hybrids, once exp17_hybrids_multiseed.py has produced the merged archive
+    merged = os.path.join(ROOT, 'results', 'json', 'results_core_plus_hybrids_probs.npz')
+    if os.path.exists(merged):
+        z = np.load(merged)
+        assert np.array_equal(z['y_te'].astype(int), y)
+        new = [k[:-6] for k in z.files if k.endswith('_probs') and k[:-6] not in qml]
+        if new:
+            print('C1/C4 extra hybrids:', new)
+            fam = {k: z[f'{k}_probs'].astype(float) for k in list(qml) + new}
+            out['C1_seed_share']['qml_core_plus_hybrids'] = family_stats('qml_core_plus_hybrids', fam, y, years)
+            jk2 = {}
+            pairs = [(a, b) for b in new if b != 'QTL_EXTRACTOR' for a in ('RF_2273', 'CTRL_LINEAR4D', 'PureLSTM', 'LSTM_QNN')]
+            if 'QTL_EXTRACTOR' in new and 'LSTM_QTL' in new:
+                pairs.append(('QTL_EXTRACTOR', 'LSTM_QTL'))
+            for a, b in pairs:
+                se_jk = jackknife_seed_mean(fam[a], fam[b], y, years)
+                d = float(np.mean(auc_matrix(y, fam[a])) - np.mean(auc_matrix(y, fam[b])))
+                jk2[f'{a}-{b}'] = dict(delta=d, se_jackknife=se_jk, mde_jackknife=2.80 * se_jk,
+                                       ci95_t18=[d - 2.101 * se_jk, d + 2.101 * se_jk])
+            out['C4_year_jackknife_extra_hybrids'] = jk2
+
     # ---- C2
     print('C2 baselines ...')
     X_tr, y_tr, m_tr = np.array(ds['X_tr']), np.array(ds['y_tr']).astype(int), np.array(ds['m_tr']).astype(int)
