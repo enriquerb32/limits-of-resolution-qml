@@ -48,6 +48,9 @@ def parse_args():
     parser.add_argument('--checkpoints', type=str,
                         default=os.path.join(ROOT, 'checkpoints'),
                         help='Directory containing model checkpoints (default: ./checkpoints)')
+    parser.add_argument('--sobrescribir-checkpoints', '--overwrite-checkpoints',
+                        dest='sobrescribir_checkpoints', action='store_true',
+                        help='Allow overwriting the archived checkpoints/ directory')
     parser.add_argument('--ciudades', '--cities', nargs='+',
                         default=['Barcelona', 'Valencia', 'Alicante', 'San_Javier'],
                         help='List of city names to process')
@@ -82,6 +85,12 @@ def main():
 
     os.makedirs(args.salida, exist_ok=True)
     ckpt_dir = args.checkpoints
+    archived = os.path.realpath(ckpt_dir) == os.path.realpath(os.path.join(ROOT, 'checkpoints'))
+    retraining = args.forzar_reentreno or args.forzar_reentreno_qml or not args.usar_checkpoints
+    if archived and retraining and not args.sobrescribir_checkpoints:
+        raise SystemExit(
+            "Refusing to overwrite the archived checkpoints/ (see CHECKSUMS.sha256). "
+            "Pass --checkpoints <new_dir> to retrain, or --overwrite-checkpoints to force.")
     os.makedirs(ckpt_dir, exist_ok=True)
 
     # Checkpoint paths

@@ -8,7 +8,7 @@ import json, sys, math, os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 D = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "results", "json")
-OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, "tables")
+OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, "out", "tables")
 os.makedirs(OUT, exist_ok=True)
 
 sc = [

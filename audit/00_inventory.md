@@ -37,10 +37,9 @@ results/json/  01_data.json … 10_multisemilla_clasico.json ablacion_ia_racha_r
                results_capacity_matched_lstm.json results_circuit_depths.json results_hybrid_perseed_probs.json
                results_rerun_train_only_canonical{.json,_probs.npz} results_wp3_accounting.json
                results_exp10..14*.json (U) results_qml_core_trainonly{.json,_probs.npz} (U)
-scripts/       build_results_master.py make_tables.py multiseed_stats.py recompute_metrics.py
+scripts/       build_results_master.py multiseed_stats.py recompute_metrics.py
                verify_parameter_counts.py export_colab_wp3.py colab_appendix_d_lambda_sweep.py
                colab_appendix_e_circuit_depths.py execute_wp6_restructuring.py validate_todo_code.py
-tables/        table1/4/6/7/8/12_*.tex
 ```
 
 Identical-content duplicates (MD5): `panel_checkpoint.csv` ×3 (data/, results/, code/local_experiments/); `datos_limpios_multiestacion.csv` ×2; `years_te.npy` ×2; `month_rows.csv` ×2; `precip_raw.csv` ×2; all `results_exp10..14*.json` and both `.npz` ×2. **Differs**: `results_rerun_train_only_canonical.json` (results/json vs code/local_experiments). **Only copy outside results/**: `results_exp15_panel_sim.json` (in `code/local_experiments/` only).
@@ -71,7 +70,6 @@ Identical-content duplicates (MD5): `panel_checkpoint.csv` ×3 (data/, results/,
 | **`qml_core_trainonly.py`** | 15-seed core QML experiment | — | `results_qml_core_trainonly{.json,_probs.npz}` | main Tab `case`, `qnn_paired`, `label_sens_qnn`; supp Tab `core_spec` |
 | `make_figs.py` | Fig noise budget, Fig positive control | **hard-coded numbers** (no file read) | `paper/figs/fig_noise_budget.pdf`, `fig_positive_control.pdf` | supp Fig `positive_control`; `fig_noise_budget.pdf` is **not included** by either .tex |
 | (none) | — | — | `paper/figs/fig_paired_ci.pdf`, `fig_sim.pdf` | main Fig `paired_ci`, `sim` — **no generator in repo** |
-| `scripts/make_tables.py` | LaTeX tables from results_master.csv | `results/results_master.csv` | `tables/*.tex` | none (`tables/` is not `\input` by either .tex) |
 | `scripts/build_results_master.py` | Aggregates results_master.csv | checkpoints / json | `results/results_master.csv` | exp7 (hybrid proxy rows), supp historical tables |
 | `scripts/multiseed_stats.py` | Friedman/Wilcoxon/Cliff on 15-seed AUC | 09, 10, ablacion json | stdout | supp historical multiseed |
 | `scripts/recompute_metrics.py` | Single-run metrics, Wilson CIs | 01–04, 08 json | stdout | supp Tab `single_run_results`, `recall_wilson_ci` |

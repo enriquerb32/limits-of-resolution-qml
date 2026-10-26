@@ -40,7 +40,7 @@ dependencies = [
     "pennylane>=0.45",
     "pennylane-qiskit>=0.45",
     "qiskit-aer>=0.17",
-    "xgboost>=2.0",
+    "xgboost>=2.0,<2.1",
     "pmdarima>=2.1",
 ]
 
@@ -49,6 +49,9 @@ dev = [
     "pytest>=8.0",
     "pypdf>=4.0",
 ]
+
+[tool.setuptools]
+packages = []
 
 [tool.uv.extra-build-dependencies]
 ibm-platform-services = ["setuptools<70"]

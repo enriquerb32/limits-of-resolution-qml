@@ -7,6 +7,7 @@ Minimal pytest verification of core reproducibility invariants:
   3. Traceability matrix integrity (82 verified claims)
 """
 import os
+import re
 import subprocess
 import sys
 
@@ -36,5 +37,11 @@ def test_traceability_matrix():
     script = os.path.join(ROOT, "scripts", "build_traceability.py")
     res = subprocess.run([sys.executable, script], capture_output=True, text=True, cwd=ROOT)
     assert res.returncode == 0, f"build_traceability failed:\n{res.stderr}\n{res.stdout}"
-    assert "0 mismatches" in res.stdout
-    assert "82 claims" in res.stdout
+
+    m = re.search(r"(\d+) claims: (\d+) verified, (\d+) read-only, (\d+) unverified, (\d+) mismatches",
+                  res.stdout)
+    assert m, f"summary line not found:\n{res.stdout}"
+    total, verified, read_only, unverified, mismatches = map(int, m.groups())
+    assert total == 82
+    assert mismatches == 0 and unverified == 0
+    assert verified + read_only == total

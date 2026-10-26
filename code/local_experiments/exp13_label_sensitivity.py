@@ -22,9 +22,11 @@ USAGE
   python exp13_label_sensitivity.py --probs results_rerun_train_only_canonical_probs.npz --prefix train_only \
       --meta test_meta.csv --rows month_rows.csv --pairs RF-XGB RF-LSTM XGB-LSTM --B 2000 --out results_exp13_label_sensitivity.json
 """
-import argparse, json
+import argparse, json, os
 import numpy as np, pandas as pd
 from exp10_paired_ci import Model, paired_delong, boot
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def load_models(a):
@@ -58,11 +60,10 @@ def split_pair(pr, M):
 
 
 def main():
-    import os
     ap = argparse.ArgumentParser()
     ap.add_argument('--probs'); ap.add_argument('--prefix', default='train_only'); ap.add_argument('--extra')
-    ap.add_argument('--meta', default='results/test_meta.csv')
-    ap.add_argument('--rows', default='month_rows.csv')
+    ap.add_argument('--meta', default=os.path.join(ROOT, 'results', 'test_meta.csv'))
+    ap.add_argument('--rows', default=os.path.join(ROOT, 'code', 'local_experiments', 'month_rows.csv'))
     ap.add_argument('--pairs', nargs='*', default=None); ap.add_argument('--B', type=int, default=2000)
     ap.add_argument('--seed', type=int, default=0); ap.add_argument('--out', default='results_exp13_label_sensitivity.json')
     a = ap.parse_args(); rng = np.random.default_rng(a.seed)
@@ -76,8 +77,6 @@ def main():
     models, y0 = load_models(a)
 
     meta_path = a.meta
-    if not os.path.exists(meta_path) and os.path.exists(os.path.join('results', 'test_meta.csv')):
-        meta_path = os.path.join('results', 'test_meta.csv')
     if not os.path.exists(meta_path):
         raise SystemExit(f"test_meta file '{meta_path}' not found; generate it or pass --meta results/test_meta.csv")
 

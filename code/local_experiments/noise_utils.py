@@ -33,6 +33,7 @@ def load_test_partition():
 
     if years_npy.exists():
         years = np.load(years_npy)
+        assert len(years) == len(y_te), (len(years), len(y_te))
     else:
         # Year inference (identical to exp4): new year whenever the month index decreases.
         year, years = 2008, []

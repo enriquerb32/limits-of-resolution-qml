@@ -19,16 +19,18 @@ INPUT
   --probs   npz with keys '<prefix>_<MODEL>_probs' (S x N)  [e.g. results_rerun_train_only_canonical_probs.npz]
             optional: --hybrid json from hybrid models run (models[k]['probs'], any number of seeds)
             optional: --extra  npz with keys '<NAME>_probs' (S x N) and 'y_te'  [e.g. output of qml_core_trainonly.py]
-  --panel   panel_checkpoint.csv  (to rebuild the calendar year of every test row), or --years years_te.npy
+  --years   years_te.npy (optional; default results/years_te.npy, else inferred by noise_utils)
   --pairs   e.g. RF-XGB RF-LSTM XGB-LSTM RF-LSTM+QNN
 USAGE
   python exp10_paired_ci.py --probs results_rerun_train_only_canonical_probs.npz --prefix train_only \
-      --panel panel_checkpoint.csv --pairs RF-XGB RF-LSTM XGB-LSTM --B 2000 --out results_exp10_paired_ci.json
+      --pairs RF-XGB RF-LSTM XGB-LSTM --B 2000 --out results_exp10_paired_ci.json
 """
-import argparse
-import json
+import argparse, json, os, sys
 import numpy as np
 from scipy.stats import rankdata, norm
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 def auc_fast(y, p):
     r = rankdata(p); m = int(y.sum()); n = len(y) - m
@@ -78,12 +80,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--probs'); ap.add_argument('--prefix', default='train_only')
     ap.add_argument('--hybrid'); ap.add_argument('--extra')
-    ap.add_argument('--panel')
     ap.add_argument('--years')
     ap.add_argument('--pairs', nargs='*', default=None)
     ap.add_argument('--B', type=int, default=2000); ap.add_argument('--seed', type=int, default=0)
-    ap.add_argument('--out', default='results_exp10_paired_ci.json')
+    ap.add_argument('--out', default=os.path.join(ROOT, 'out', 'results_exp10_paired_ci.json'))
     a = ap.parse_args()
+    os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     rng = np.random.default_rng(a.seed)
     models, y = {}, None
     if a.probs:
@@ -107,17 +109,11 @@ def main():
     # Auto-detect years / partition
     if a.years:
         years = np.load(a.years)
+    elif os.path.exists(os.path.join(ROOT, 'results', 'years_te.npy')):
+        years = np.load(os.path.join(ROOT, 'results', 'years_te.npy'))
     else:
-        for cand in ['results/years_te.npy', 'code/local_experiments/years_te.npy', 'data/years_te.npy', 'years_te.npy', '../years_te.npy']:
-            import os
-            if os.path.exists(cand):
-                years = np.load(cand)
-                break
-        else:
-            import os, sys
-            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-            from noise_utils import load_test_partition
-            *_, years, _ = load_test_partition()
+        from noise_utils import load_test_partition
+        *_, years, _ = load_test_partition()
     assert len(years) == len(y), f"years length ({len(years)}) != test labels length ({len(y)})"
 
     if not a.pairs:

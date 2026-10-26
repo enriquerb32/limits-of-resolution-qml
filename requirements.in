@@ -13,7 +13,7 @@ pennylane-qiskit>=0.45
 qiskit-aer>=0.17
 
 # Boosting
-xgboost>=2.0
+xgboost>=2.0,<2.1
 
 # Time series
 pmdarima>=2.1

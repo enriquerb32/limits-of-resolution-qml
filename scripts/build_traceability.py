@@ -478,16 +478,17 @@ def main():
         for row in claims:
             writer.writerow(row)
 
-    n_verified = sum(1 for r in claims if r[6] == "VERIFIED")
-    n_readonly = sum(1 for r in claims if r[6] == "READ_ONLY")
-    n_mismatch = sum(1 for r in claims if r[6] == "MISMATCH")
-    n_unverified = sum(1 for r in claims if r[6] == "UNVERIFIED")
+    n_ver = sum(1 for r in claims if r[6] == "VERIFIED")
+    n_ro = sum(1 for r in claims if r[6] == "READ_ONLY")
+    n_unv = sum(1 for r in claims if r[6] == "UNVERIFIED")
+    n_mis = sum(1 for r in claims if r[6] == "MISMATCH")
 
-    print(f"Successfully generated {out_csv} with {len(claims)} claims: {n_verified} verified, {n_readonly} read-only, {n_unverified} unverified, {n_mismatch} mismatches.")
+    print(f"{len(claims)} claims: {n_ver} verified, {n_ro} read-only, {n_unv} unverified, {n_mis} mismatches")
+    for r in claims:
+        if r[6] == "MISMATCH":
+            print(f"  MISMATCH {r[0]}: paper={r[3]} source={r[5]}", file=sys.stderr)
 
-    if n_mismatch > 0:
-        print(f"[error] {n_mismatch} claim mismatches detected!", file=sys.stderr)
-        sys.exit(1)
+    sys.exit(1 if n_mis or n_unv else 0)
 
 
 if __name__ == "__main__":

@@ -19,10 +19,12 @@ INPUTS   --probs results_rerun_train_only_canonical_probs.npz (--prefix train_on
 USAGE    python exp15_panel_matched_simulation.py --probs results_rerun_train_only_canonical_probs.npz --meta test_meta.csv \
              --scorer_a RF --scorer_b LSTM --tau_mult 0.5 1 1.5 --reps 500 --B 300 --out results_exp15_panel_sim.json
 """
-import argparse, json, time
+import argparse, json, os, time
 import numpy as np, pandas as pd
 from scipy.stats import norm, rankdata
 from exp11_simulation_known_truth import comp, auc
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def normal_scores(y, p):
@@ -34,13 +36,9 @@ def normal_scores(y, p):
 
 
 def estimate(a):
-    import os
     Z = np.load(a.probs); y = Z['y_te'].astype(int)
     pa = Z[f'{a.prefix}_{a.scorer_a}_probs'].mean(0); pb = Z[f'{a.prefix}_{a.scorer_b}_probs'].mean(0)
-    meta_path = a.meta
-    if not os.path.exists(meta_path) and os.path.exists('test_meta.csv'):
-        meta_path = 'test_meta.csv'
-    meta = pd.read_csv(meta_path); assert len(meta) == len(y), (len(meta), len(y))
+    meta = pd.read_csv(a.meta); assert len(meta) == len(y), (len(meta), len(y))
     yr = pd.to_datetime(meta['fecha']).dt.year.values; years = np.unique(yr)
     sizes = np.array([(yr == u).sum() for u in years]); prev_u = np.array([y[yr == u].mean() for u in years])
     auc_a, auc_b = auc(y, pa), auc(y, pb); za, zb = normal_scores(y, pa), normal_scores(y, pb)
@@ -113,7 +111,7 @@ def run_config(rng, a, est, sizes, mult, delta, abs_tau=None):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('--probs', required=True); ap.add_argument('--prefix', default='train_only'); ap.add_argument('--meta', default='results/test_meta.csv')
+    ap.add_argument('--probs', required=True); ap.add_argument('--prefix', default='train_only'); ap.add_argument('--meta', default=os.path.join(ROOT, 'results', 'test_meta.csv'))
     ap.add_argument('--scorer_a', default='RF'); ap.add_argument('--scorer_b', default='LSTM')
     ap.add_argument('--tau_mult', type=float, nargs='+', default=[0.5, 1.0, 1.5])
     ap.add_argument('--tau_abs', type=float, nargs='*', default=[0.0, 0.1, 0.2, 0.3], help='absolute year-effect scales (used because moment estimates can be 0)')
