@@ -24,13 +24,16 @@ Notes
   * entrenar_qtl calls qtl.train(), which also puts the "frozen" extractor in train mode: its BatchNorm running
     statistics are updated and its LSTM dropout is active during QTL training (gradients are off). This is the
     behaviour of the code used in the paper and is reproduced as is.
-  * Environment: the core archive (results_qml_core_trainonly_probs.npz) was produced on Colab. Run locally
-    (scikit-learn 1.9.1, Windows), RF_2273 with the same seeds gives correlated but not identical probabilities
-    (seed 0: AUC 0.6832 vs 0.6849, r = 0.98), so seed-by-seed equality with the core archive is not expected.
-    Pairing new hybrids with the core models is still valid (same test rows), but for a single-environment
-    comparison also rerun the core models here: --models RF_2273 PureLSTM CTRL_LINEAR4D (about 35 min) and,
-    if time allows, LSTM_QNN (about 8 h). Entries already in the core archive are kept in the merged file;
-    the new runs are in results_hybrids_trainonly_probs.npz.
+  * Environment: the core archive (results_qml_core_trainonly_probs.npz) was produced on Colab with
+    scikit-learn 1.6.1. Locally, PyTorch training reproduces Colab exactly (PureLSTM seed 0: 0.6529), and RF_2273
+    reproduces it bit for bit with scikit-learn 1.6.1 (with 1.9.1 it differs: seed 0 AUC 0.6832 vs 0.6849).
+    Install it before running RF: pip install scikit-learn==1.6.1
+  * Dataset: trainonly_dataset.py (used by the archived core) misaligns et0_verano_prev / potencial_convectivo
+    (about 68 % of rows take another station's value on the same date) and recomputes P60 = 28.00 on the training
+    rows. The classical train-only rerun used the correct feature and P60 = 28.1. Together these two differences
+    are the whole difference between the two datasets (3 training/validation labels, 2 features), i.e. the source
+    of PureLSTM 0.6630 (core) vs 0.6682 (rerun). Default: the archived core dataset, so that the new hybrids pair
+    with the archived core. --fix-et0 --p60 28.1: exactly the rerun dataset; then rerun the core models too.
   * --label S5: target from the coverage-corrected monthly sum, threshold recomputed on training rows
     (trainonly_dataset.build_dataset(label_scenario='S5')); predictors unchanged. Outputs get the suffix _S5.
 
@@ -190,14 +193,27 @@ def main():
     ap.add_argument('--seeds', type=int, default=15, help='number of seeds (indices 0..seeds-1)')
     ap.add_argument('--label', choices=['orig', 'S5'], default='orig')
     ap.add_argument('--threads', type=int, default=0, help='torch threads (0 = all cores)')
+    ap.add_argument('--fix-et0', action='store_true',
+                    help='correct the et0_verano_prev misalignment of trainonly_dataset (outputs get _fixet0; '
+                         'then also rerun the core models, the archived core used the misaligned feature)')
+    ap.add_argument('--p60', type=float, default=None,
+                    help='fix the label threshold (28.1 = the classical rerun and the paper); default: training P60 (28.00, as the core)')
     ap.add_argument('--out-dir', default=OUT_DIR, help='output folder (default results/json)')
     ap.add_argument('--dry-run', action='store_true')
     a = ap.parse_args()
     if a.threads:
         torch.set_num_threads(a.threads)
 
-    print('Building TRAIN-ONLY dataset', '(label S5)' if a.label == 'S5' else '(project labels)')
-    _, ds = build_dataset(RAW_CSV, train_only=True, label_scenario=None if a.label == 'orig' else 'S5')
+    import sklearn
+    if 'RF_2273' in a.models and sklearn.__version__ != '1.6.1':
+        print(f'WARNING: scikit-learn {sklearn.__version__}; the core archive used 1.6.1 (Colab). RF_2273 reproduces the '
+              f'archive bit for bit only with 1.6.1 (pip install scikit-learn==1.6.1).')
+    print('Building TRAIN-ONLY dataset', '(label S5)' if a.label == 'S5' else '(project labels)',
+          '| et0_verano_prev corrected' if a.fix_et0 else '| et0_verano_prev as archived (misaligned)')
+    _, ds = build_dataset(RAW_CSV, train_only=True, label_scenario=None if a.label == 'orig' else 'S5',
+                          fix_et0_verano=a.fix_et0, umbral_override=a.p60)
+    if a.p60 is not None and a.label != 'orig':
+        raise SystemExit('--p60 applies to the project labels only')
     y_te = ds.y_te.numpy().astype(int)
     print(f'rows train/val/test = {len(ds.X_tr)}/{len(ds.X_va)}/{len(ds.X_te)} | threshold = {ds.umbral:.2f} '
           f'| test positives = {int(y_te.sum())}')
@@ -209,7 +225,7 @@ def main():
         dry_run(ds)
         return
 
-    suffix = '' if a.label == 'orig' else '_S5'
+    suffix = ('' if a.label == 'orig' else '_S5') + ('_fixet0' if a.fix_et0 else '') + (f'_p60_{a.p60:g}' if a.p60 else '')
     out_json = os.path.join(a.out_dir, f'results_hybrids_trainonly{suffix}.json')
     out_npz = os.path.join(a.out_dir, f'results_hybrids_trainonly{suffix}_probs.npz')
     out_merged = os.path.join(a.out_dir, f'results_core_plus_hybrids{suffix}_probs.npz')
@@ -236,7 +252,7 @@ def main():
                 arr[f'{k}_probs'] = np.asarray(v['probs'])
         np.savez_compressed(out_npz, **arr)
         # merged archive with the 15-seed core models (only complete models, only if the labels match)
-        if a.label == 'orig' and os.path.exists(CORE_NPZ):
+        if a.label == 'orig' and not a.fix_et0 and a.p60 is None and os.path.exists(CORE_NPZ):
             core = np.load(CORE_NPZ)
             if np.array_equal(core['y_te'].astype(int), y_te):
                 merged = {k: core[k] for k in core.files}
@@ -265,7 +281,7 @@ def main():
                   + f'  {dt / 60:.1f} min', flush=True)
 
     # QTL extractor vs the core PureLSTM (same class, same seeds); equal only if run in the same environment as the core
-    if a.label == 'orig' and 'LSTM_QTL' in a.models and os.path.exists(CORE_NPZ):
+    if a.label == 'orig' and not a.fix_et0 and a.p60 is None and 'LSTM_QTL' in a.models and os.path.exists(CORE_NPZ):
         core = np.load(CORE_NPZ)
         ext = np.asarray(state['models']['QTL_EXTRACTOR']['probs'])
         ref = core['PureLSTM_probs'][:len(ext)]

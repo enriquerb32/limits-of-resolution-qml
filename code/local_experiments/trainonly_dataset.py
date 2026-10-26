@@ -197,7 +197,12 @@ def _anomalia_train_only(agg: pd.DataFrame, col: str) -> pd.Series:
     stds = np.array([stats_tr.loc[k, 'std'] if k in stats_tr.index else 1e-4 for k in keys])
     return pd.Series((agg[col].values - means) / stds, index=agg.index)
 
-def _indices_sinopticos(agg: pd.DataFrame, anomalia_fn) -> pd.DataFrame:
+def _indices_sinopticos(agg: pd.DataFrame, anomalia_fn, fix_et0_verano: bool = False) -> pd.DataFrame:
+    """fix_et0_verano=False reproduces the archived core experiment (results_qml_core_trainonly*), in which
+    et0_verano_prev / potencial_convectivo are misaligned: the groupby('ciudad').apply(...) result is assigned back
+    on a date index that repeats across stations, so about 68 % of the rows receive the value of ANOTHER station on
+    the SAME date (no temporal leakage). fix_et0_verano=True interpolates per station by position and matches the
+    canonical 01_data.pt (and the classical train-only rerun)."""
     agg = agg.copy()
     agg['iap'] = anomalia_fn(agg, 'pmed')
     agg['iav'] = anomalia_fn(agg, 'veloc_ms')
@@ -215,7 +220,12 @@ def _indices_sinopticos(agg: pd.DataFrame, anomalia_fn) -> pd.DataFrame:
     et0_jja = agg[jja_mask].groupby(['ciudad', agg[jja_mask].index.year])['et0_sum'].sum().to_dict()
     ref_year = agg.index.year - (agg.index.month < 9).astype(int)
     agg['et0_verano'] = [et0_jja.get((c, y), np.nan) for c, y in zip(agg['ciudad'], ref_year)]
-    agg['et0_verano'] = agg.groupby('ciudad', group_keys=False)['et0_verano'].apply(lambda x: x.interpolate(method='time').ffill().bfill())
+    if fix_et0_verano:
+        col = agg.columns.get_loc('et0_verano')
+        for _, pos in agg.groupby('ciudad').indices.items():
+            agg.iloc[pos, col] = agg['et0_verano'].iloc[pos].interpolate(method='time').ffill().bfill().values
+    else:   # archived (misaligned) behaviour
+        agg['et0_verano'] = agg.groupby('ciudad', group_keys=False)['et0_verano'].apply(lambda x: x.interpolate(method='time').ffill().bfill())
     agg['et0_verano_prev'] = agg['et0_verano']
 
     agg['et0_lag1m'] = agg.groupby('ciudad')['et0_sum'].shift(1).fillna(agg.groupby('ciudad')['et0_sum'].transform('mean'))
@@ -248,9 +258,9 @@ def _flag_ACP(agg: pd.DataFrame) -> pd.DataFrame:
     ).astype(float)
     return agg
 
-def construir_features(df_diario: pd.DataFrame, anomalia_fn=_anomalia_canonical) -> pd.DataFrame:
+def construir_features(df_diario: pd.DataFrame, anomalia_fn=_anomalia_canonical, fix_et0_verano: bool = False) -> pd.DataFrame:
     agg = _agregar_mensual(df_diario)
-    agg = _indices_sinopticos(agg, anomalia_fn)
+    agg = _indices_sinopticos(agg, anomalia_fn, fix_et0_verano=fix_et0_verano)
     agg = _flag_ACP(agg)
     return agg
 
@@ -368,15 +378,17 @@ def preparar_dataset(agg: pd.DataFrame,
     return ret
 
 
-def build_dataset(csv_path, train_only=True, label_scenario=None):
+def build_dataset(csv_path, train_only=True, label_scenario=None, fix_et0_verano=False, umbral_override=None):
     """label_scenario=None: project labels. 'S5': target from the coverage-corrected monthly sum
     (sum / valid days * days in month) with the 60th-percentile threshold recomputed on the training rows;
     predictors are unchanged (labels-only change)."""
     df = pd.read_csv(csv_path, index_col='fecha', parse_dates=['fecha'])
     fn = _anomalia_train_only if train_only else _anomalia_canonical
-    agg = construir_features(df, anomalia_fn=fn)
+    agg = construir_features(df, anomalia_fn=fn, fix_et0_verano=fix_et0_verano)
+    # umbral_override=28.1 (with fix_et0_verano=True) gives exactly the dataset of the classical train-only rerun
+    # (results_rerun_train_only_canonical*); the default recomputes P60 on the training rows (28.00).
     if label_scenario is None:
-        ds = preparar_dataset(agg)
+        ds = preparar_dataset(agg, umbral_override=umbral_override)
     elif label_scenario == 'S5':
         agg = agg.copy(); agg['precip_corr'] = agg['precip'] / agg['dias'] * agg.index.days_in_month
         ds = preparar_dataset(agg, label_col='precip_corr')
