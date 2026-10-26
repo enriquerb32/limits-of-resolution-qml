@@ -25,9 +25,9 @@
 \usepackage[font=small, labelfont=bf, margin=1cm]{caption}
 \usepackage{authblk}
 \usepackage{xurl}
+\usepackage{xr-hyper}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
 \usepackage{cleveref}
-\usepackage{xr}
 \externaldocument[M-]{main}
 \usepackage{tikz}
 \emergencystretch=2em
@@ -36,7 +36,7 @@
 
 % TODO toggle: \showtodotrue shows the notes, \showtodofalse hides them (submission version)
 \newif\ifshowtodo
-\showtodotrue
+\showtodofalse
 \makeatletter
 \newcommand{\todo}{\@ifnextchar\bgroup\@todowitharg\@todonoarg}
 \newcommand{\@todowitharg}[1]{\ifshowtodo{\textcolor{red}{\textbf{[TODO: #1]}}}\fi}
@@ -264,7 +264,7 @@ Bottleneck-free LSTM (hidden 8) & C & 0.6435 & 0.0065 & $-0.036$ \\
 
 \textbf{Equivalence margins.} In the historical fixed-test seed-level analysis, GELU satisfied the $\pm0.010$ margin and the linear controller satisfied $\pm0.015$; LeakyReLU required $\pm0.020$ (for \texttt{LSTM+QNN} versus \texttt{LbL-QNN}: mean difference $-0.0016$, 90\,\% CI $[-0.0095,+0.0062]$, $p_{\text{TOST}}=0.041$ at $\pm0.010$). These tests use seed variance only, the margins were not justified by a scientific or practical criterion, and the paired structure of the seed index is a convention. They do not establish sampling-aware equivalence of predictive performance; a TOST that includes sampling error would require the per-seed test probabilities of the hybrids, which are not available (\Cref{app:multiseed,app:bottleneck}).
 
-\textbf{Bottleneck-matched controls.} The end-to-end hybrids compress a 51-dimensional vector to 4 angles. Three classical controllers on the identical 4-dimensional interface (linear, 20 parameters; LeakyReLU, 28; GELU, 180) obtain AUC $0.6545$, $0.6516$ and $0.6563$ against $0.6589$ for \texttt{LSTM+QNN}, with Wilcoxon $p\in[0.17,0.64]$ (\Cref{app:bottleneck}). The gaps are 0.003--0.007 on the historical seed-level data. A bottleneck-free LSTM with the same hidden size scores lower ($0.6435\pm0.0065$) than the 4-dimensional controls, and full-feature XGBoost (0.662 train-only; 0.6575 in the canonical pipeline of the hybrids, \Cref{tab:multiseed}) is comparable to \texttt{LSTM+QNN} (0.659). We therefore \emph{withdraw} the explanation that the 4-dimensional bottleneck is the cause of the gap between hybrids and tree ensembles: the data do not identify the bottleneck as its cause, and removing the bottleneck did not raise the score of the small recurrent backbone.
+\textbf{Bottleneck-matched controls.} The end-to-end hybrids compress a 51-dimensional vector to 4 angles. Three classical controllers on the identical 4-dimensional interface (linear, 20 parameters; LeakyReLU, 28; GELU, 180) obtain AUC $0.6545$, $0.6516$ and $0.6563$ against $0.6589$ for \texttt{LSTM+QNN}, with Wilcoxon $p\in[0.17,0.64]$ (\Cref{app:bottleneck}). The gaps are 0.003--0.007 on the historical seed-level data. A bottleneck-free LSTM with the same hidden size scores lower ($0.6435\pm0.0065$) than the 4-dimensional controls, and full-feature XGBoost (0.662 train-only; 0.6575 in the canonical pipeline of the hybrids, \Cref{tab:multiseed}) is comparable to \texttt{LSTM+QNN} (0.659). The evidence therefore does not support the hypothesis that the 4-dimensional bottleneck is the cause of the gap between hybrids and tree ensembles: the data do not identify the bottleneck as its cause, and removing the bottleneck did not raise the score of the small recurrent backbone.
 
 \textbf{Encoding bandwidth.} Widening the interface to 16D amplitude embedding or 12D data re-uploading gives AUC $0.6643$ and $0.6688$, i.e.\ 0.005--0.010 above \texttt{LSTM+QNN}. The Friedman test over six quantum models is nominally significant ($p=0.0228$, $W=0.174$), but the advantage of re-uploading over \texttt{LSTM+QNN} does not survive Holm correction ($p_{\text{Holm}}=0.083$), both variants add 600--800 classical projection weights, and the re-uploading circuit is also deeper. Even the best bandwidth variant (re-uploading, 0.6688) stays 0.016 below Random Forest (0.6851), so the data neither show that wider encodings close the gap to the tree ensembles nor that they fail to. The paired sampling uncertainty required for an architecture-level conclusion was not reconstructed for these historical runs; the result is descriptive and exploratory (\Cref{app:bandwidth}).
 
@@ -274,7 +274,7 @@ Bottleneck-free LSTM (hidden 8) & C & 0.6435 & 0.0065 & $-0.036$ \\
 
 
 \subsection{Internal Variable Mapping}
-\paragraph{Internal Variable Mapping (\texttt{dana\_*} $\to$ \texttt{acp\_*}).}
+\paragraph{Proxy Standardization and Legacy Tokens (\texttt{dana\_*} $\to$ \texttt{acp\_*}).}
 To maintain strict meteorological precision while preserving compatibility with legacy repository scripts, variable names have been standardized in the manuscript to reflect their proxy nature. The internal naming convention maps as follows:
 \begin{itemize}
     \item \texttt{dana\_flag} $\longrightarrow$ \texttt{acp\_flag}: Binary indicator for Autumn Convective Precipitation conditions at the target month ($i+12$), defined by autumn calendar month, negative sunshine anomaly, and positive gust anomaly.
@@ -301,7 +301,7 @@ yielding only 36 samples in the test partition (6.8\% of 528). Similarly, Valenc
 (50 test samples, 9.5\%). In contrast, Alicante and Barcelona maintain continuous records extending through
 February 2026 (221 test samples each, 41.9\% each). 
 
-While all four stations are proportionally represented in the training partition (each contributing between 17.6\% and 30.0\% of samples; \Cref{M-tab:station_coverage}), test-partition metrics post-2012 are effectively dominated by Alicante and Barcelona. We emphasize that no station data were fabricated or artificially extended to fill these gaps: monthly aggregation and downstream anomaly indices are computed only over genuinely observed date ranges per station. Re-acquiring or cross-validating post-2010 and post-2012 records for San Javier and Valencia would materially strengthen future replications of this benchmark and is, in our view, the clearest data-availability gap identified in this study.
+While all four stations are represented in the training partition (each contributing between 16.6\% and 30.3\% of samples; \Cref{M-tab:station_coverage}), test-partition metrics post-2012 are effectively dominated by Alicante and Barcelona. We emphasize that no station data were fabricated or artificially extended to fill these gaps: monthly aggregation and downstream anomaly indices are computed only over genuinely observed date ranges per station. Re-acquiring or cross-validating post-2010 and post-2012 records for San Javier and Valencia would materially strengthen future replications of this benchmark and is, in our view, the clearest data-availability gap identified in this study.
 
 \subsection{Daily Aggregation and \texorpdfstring{$P_{60}$}{P60} Target Validation}
 \label{app:p60_validation}
@@ -340,7 +340,7 @@ Evaluating paired differences (train-only minus canonical) across the 15 optimiz
     \item \textbf{XGBoost:} $\Delta\text{AUC} = +0.0041 \pm 0.0067$ (Wilcoxon $p = 0.0125$; Holm-Bonferroni corrected across three models $p_{\text{Holm}} = 0.037$);
     \item \textbf{Standalone LSTM:} $\Delta\text{AUC} = +0.0025 \pm 0.0090$ (Wilcoxon $p = 0.107$).
 \end{itemize}
-These paired $p$-values compare seeds on a single fixed test set and omit the test-set sampling error (standard error of one AUC about 0.024; \Cref{M-sec:budget}); we therefore use them only descriptively. All AUC differences are small (about 0.004 AUC or less) and of mixed sign. Crucially, the nominally significant positive delta for XGBoost ($+0.0041$) goes in the direction \emph{opposite} to leakage inflation: performance slightly improves under train-only standardization rather than degrading upon removing future information. Furthermore, an earlier exploratory check on a rebuilt dataset yielded an XGBoost delta of $-0.0016$ ($p = 0.17$), indicating that the sign and magnitude of this effect are not stable across dataset builds. We therefore do not characterize this outcome as showing ``no significant difference'' in a strict formal sense; rather, the observed preprocessing differences were small and of mixed sign in this benchmark. These results do not establish that full-record preprocessing is free of leakage, and they do not isolate the differences as seed noise.
+These paired $p$-values compare seeds on a single fixed test set and omit the test-set sampling error (standard error of one AUC about 0.024; \Cref{M-sec:budget}); we therefore use them only descriptively. All AUC differences are small (about 0.004 AUC or less) and of mixed sign. The nominally significant positive delta for XGBoost ($+0.0041$, $p_{\text{Holm}} = 0.037$) goes in the direction \emph{opposite} to leakage inflation: performance slightly improves under train-only standardization rather than degrading upon removing future information, whereas Random Forest exhibits a small nominally significant negative delta ($-0.0022$, $p = 0.0353$) in the direction of mild leakage inflation under full-record standardization. Furthermore, an earlier exploratory check on a rebuilt dataset yielded an XGBoost delta of $-0.0016$ ($p = 0.17$), indicating that the sign and magnitude of this effect are not stable across dataset builds. We therefore do not characterize this outcome as showing ``no significant difference'' in a strict formal sense; rather, the observed preprocessing differences were small and of mixed sign in this benchmark. These results do not establish that full-record preprocessing is free of leakage, and they do not isolate the differences as seed noise.
 
 \textbf{Compositional Shift in the Extreme Convective Evaluation Subset:} While model discriminative ability remains stable, recomputing anomalies strictly from pre-1997 data noticeably shifts the threshold-based diagnostic subset \textit{acp\_flag} (identifying 176 panel events vs.\ 159 canonical). In the test partition, the train-only anomaly calculation flags 32 test months (25 with $y=1$), compared to 25 flagged months (20 with $y=1$) under the canonical full-record definition. Comparing the two test subsets reveals substantial churn: 23 months overlap, 2 canonical months leave the flagged set, and 9 newly flagged months enter. (The corresponding export field is \texttt{train\_only\_acp\_test\_n\_positive}$=25$ and counts only the flagged months with $y=1$; the total flagged count is 32). Evaluating Rc-ACP naively by pairing the model outputs across differing masks ($n=25$ vs.\ $n=20$) is methodologically invalid. When evaluated strictly on the canonical test mask ($n=20$), the mean extreme-recall deltas (train-only minus canonical) are: Random Forest $\Delta\text{Rc-ACP} = -0.010$, XGBoost $\Delta\text{Rc-ACP} = -0.070$, and Standalone LSTM $\Delta\text{Rc-ACP} = -0.013$.
 

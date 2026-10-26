@@ -60,11 +60,11 @@ def delong_cov(y, preds):
     ty = np.apply_along_axis(rankdata, 1, neg)
     tz = np.apply_along_axis(rankdata, 1, np.concatenate([pos, neg], axis=1))
     aucs = (tz[:, :m].sum(axis=1) / m - (m + 1) / 2.0) / n
-    v01 = (tz[:, :m] - tx) / n
-    v10 = 1.0 - (tz[:, m:] - ty) / m
-    sx = np.atleast_2d(np.cov(v01))
-    sy = np.atleast_2d(np.cov(v10))
-    return aucs, sx / m + sy / n
+    v10 = (tz[:, :m] - tx) / n
+    v01 = 1.0 - (tz[:, m:] - ty) / m
+    s10 = np.atleast_2d(np.cov(v10))
+    s01 = np.atleast_2d(np.cov(v01))
+    return aucs, s10 / m + s01 / n
 
 
 def delong_se(y, p):
