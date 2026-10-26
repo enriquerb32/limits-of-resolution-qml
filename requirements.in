@@ -17,3 +17,6 @@ xgboost>=2.0,<2.1
 
 # Time series
 pmdarima>=2.1
+
+# IBM Platform Services (wheel with prebuilt binaries to avoid legacy sdist build)
+ibm-platform-services>=0.50

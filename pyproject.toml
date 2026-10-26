@@ -53,6 +53,3 @@ dev = [
 [tool.setuptools]
 packages = []
 
-[tool.uv.extra-build-dependencies]
-ibm-platform-services = ["setuptools<70"]
-

@@ -39,7 +39,7 @@ ENV VIRTUAL_ENV=/opt/venv PATH="/opt/venv/bin:$PATH"
 # Install exact universal dependencies from cryptographically verified lockfile
 COPY requirements.lock .
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --require-hashes -r requirements.lock
+    uv pip install --require-hashes --index-strategy unsafe-best-match -r requirements.lock
 
 # Fail the build, not the run, if the environment is broken (smoke test)
 RUN python -c "import torch, pennylane, numpy, scipy, sklearn; print('torch', torch.__version__, 'pennylane', pennylane.__version__)"
