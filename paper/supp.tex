@@ -14,6 +14,7 @@
 \usepackage{multirow}
 \usepackage{microtype}
 \usepackage{siunitx}
+\usepackage{adjustbox}
 \usepackage[authoryear,round]{natbib}
 \usepackage{parskip}
 \usepackage{setspace}
@@ -86,7 +87,7 @@ The main text compares the means of 15 seeds. For single runs, the paired standa
 \caption{Single-seed pairings: observed 15-seed mean gaps and minimum detectable differences (MDE $=2.80\times$ SE of the gap; $\alpha=0.05$, power 0.80). Standard errors are averages over the $15\times 15$ single-seed pairings; \Cref{M-tab:paired_ci} gives the comparison of the 15-seed means. MDEs are computed from unrounded standard errors, so they can differ in the third decimal from $2.80\times$ the SE shown. Last column: share of $15\times 15$ single-seed pairings declared significant.}
 \label{tab:mde}
 {\small
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Pair} & \textbf{Observed gap} & \textbf{SE of gap, iid / block} & \textbf{MDE, iid / block} & \textbf{Declared significant, iid / block} \\
@@ -178,7 +179,7 @@ Equal capacity or tuning effort across the models should not be assumed. The \em
 \caption{All simulation rows. Population difference (Monte Carlo SE of the reference), rejection rate of $\Delta=0$ (number of rejections in brackets; DeLong, block bootstrap), coverage of the population difference, mean of the estimates, SD of the estimates and mean standard errors (DeLong, block). Scenario B first run: the Monte Carlo standard error of the reference was not recorded. Scenario A values are those of the first script run, rounded.}
 \label{tab:sim_all}
 {\scriptsize
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{lcccccccc}
 \toprule
 $\Delta_{\text{true}}$ & \textbf{Rej. DeLong} & \textbf{Rej. block} & \textbf{Cov. DeLong} & \textbf{Cov. block} & \textbf{Mean $\hat\Delta$} & \textbf{SD$(\hat\Delta)$} & \textbf{SE DeLong} & \textbf{SE block} \\
@@ -228,7 +229,7 @@ $\Delta_{\text{true}}$ & \textbf{Rej. DeLong} & \textbf{Rej. block} & \textbf{Co
 To maintain strict meteorological precision while preserving compatibility with legacy repository scripts, variable names have been standardized in the manuscript to reflect their proxy nature. The internal naming convention maps as follows:
 \begin{itemize}
     \item \texttt{dana\_flag} $\longrightarrow$ \texttt{acp\_flag}: Binary indicator for Autumn Convective Precipitation conditions at the target month ($i+12$), defined by autumn calendar month, negative sunshine anomaly, and positive gust anomaly.
-    \item \texttt{dana\_all} $\longrightarrow$ \texttt{acp\_windowed}: Boolean mask over the 3,315 windowed samples indicating target-month ACP conditions ($n = 156$; the $n=159$ quoted for the full panel in \Cref{app:p60_validation} also counts months that are never prediction targets, because the first 12 months of each station are used only as inputs).
+    \item \texttt{dana\_all} $\longrightarrow$ \texttt{acp\_windowed}: Boolean mask over the 3{,}315 windowed samples indicating target-month ACP conditions ($n = 156$; the $n=159$ quoted for the full panel in \Cref{app:p60_validation} also counts months that are never prediction targets, because the first 12 months of each station are used only as inputs).
     \item \texttt{dana\_te} $\longrightarrow$ \texttt{acp\_test}: Boolean mask over the 528 test-partition samples ($n = 25$ flagged months, of which 20 exceeded $P_{60}$ and 5 did not).
     \item \texttt{Rc-DANA} / \texttt{rc\_dana} $\longrightarrow$ \texttt{Rc-ACP}: Tail recall evaluated strictly over the $n = 20$ flagged test months with confirmed extreme precipitation ($y = 1$).
     \item \texttt{ia\_racha} $\longrightarrow$ Wind-gust anomaly relative to station-month climatology.
@@ -293,7 +294,7 @@ These paired $p$-values compare seeds on a single fixed test set and omit the te
 
 \textbf{Compositional Shift in the Extreme Convective Evaluation Subset:} While model discriminative ability remains stable, recomputing anomalies strictly from pre-1997 data noticeably shifts the threshold-based diagnostic subset \textit{acp\_flag} (identifying 176 panel events vs.\ 159 canonical). In the test partition, the train-only anomaly calculation flags 32 test months (25 with $y=1$), compared to 25 flagged months (20 with $y=1$) under the canonical full-record definition. Comparing the two test subsets reveals substantial churn: 23 months overlap, 2 canonical months leave the flagged set, and 9 newly flagged months enter. (The corresponding export field is \texttt{train\_only\_acp\_test\_n\_positive}$=25$ and counts only the flagged months with $y=1$; the total flagged count is 32). Evaluating Rc-ACP naively by pairing the model outputs across differing masks ($n=25$ vs.\ $n=20$) is methodologically invalid. When evaluated strictly on the canonical test mask ($n=20$), the mean extreme-recall deltas (train-only minus canonical) are: Random Forest $\Delta\text{Rc-ACP} = -0.010$, XGBoost $\Delta\text{Rc-ACP} = -0.070$, and Standalone LSTM $\Delta\text{Rc-ACP} = -0.013$.
 
-\textbf{Declaration of Training Set Sizes and Fitting Protocol:} The two branches did not fit the tree ensembles on the same rows. The canonical branch fitted Random Forest and XGBoost on the 2,787 training and validation rows ($X_{\text{sk}}$ of \texttt{01\_data.pt}, 1938--2007), but the train-only branch fitted them on the 2,273 training rows, because its dataset builder defines $X_{\text{sk}} = X_{\text{all}}[:s_1]$. For Random Forest this is verified bit for bit: the train-only rerun probabilities equal those of the 2,273-row Random Forest of the QML core experiment (\Cref{M-sec:validation_protocol}). The Standalone LSTM was fitted on the 2,273 training rows in both branches, with early stopping on the 514 validation rows. The tree deltas of the leakage assessment are therefore confounded with fitting-set size; the row-matched comparison above shows that the standardization itself moves the AUC of Random Forest by at most 0.003 and that of XGBoost by less than 0.001. When canonical Random Forest is fitted on the 2,273 training rows, its 15-seed performance is $0.6802 \pm 0.0035$ (range $[0.6732, 0.6867]$; scikit-learn 1.9.1), 0.007 below the 2,787-row model in the same environment, a difference small relative to the test-sampling error of this benchmark.
+\textbf{Declaration of Training Set Sizes and Fitting Protocol:} The two branches did not fit the tree ensembles on the same rows. The canonical branch fitted Random Forest and XGBoost on the 2{,}787 training and validation rows ($X_{\text{sk}}$ of \texttt{01\_data.pt}, 1938--2007), but the train-only branch fitted them on the 2{,}273 training rows, because its dataset builder defines $X_{\text{sk}} = X_{\text{all}}[:s_1]$. For Random Forest this is verified bit for bit: the train-only rerun probabilities equal those of the 2{,}273-row Random Forest of the QML core experiment (\Cref{M-sec:validation_protocol}). The Standalone LSTM was fitted on the 2{,}273 training rows in both branches, with early stopping on the 514 validation rows. The tree deltas of the leakage assessment are therefore confounded with fitting-set size; the row-matched comparison above shows that the standardization itself moves the AUC of Random Forest by at most 0.003 and that of XGBoost by less than 0.001. When canonical Random Forest is fitted on the 2{,}273 training rows, its 15-seed performance is $0.6802 \pm 0.0035$ (range $[0.6732, 0.6867]$; scikit-learn 1.9.1), 0.007 below the 2{,}787-row model in the same environment, a difference small relative to the test-sampling error of this benchmark.
 
 \subsection{Engineered Meteorological Features and Glossary}
 \label{sec:glossary}
@@ -345,7 +346,7 @@ The modular pipeline connecting the recurrent feature extractor, the 4-dimension
 
 \begin{figure}[H]
     \centering
-    \resizebox{\textwidth}{!}{%
+    \adjustbox{max width=\textwidth}{%
     \begin{tikzpicture}[
         node distance=1.2cm and 1.8cm,
         box/.style={rectangle, draw=black, thick, minimum width=2.4cm, minimum height=1cm, align=center, fill=blue!5},
@@ -377,7 +378,7 @@ The modular pipeline connecting the recurrent feature extractor, the 4-dimension
 
 \begin{figure}[htbp]
     \centering
-    \resizebox{0.95\textwidth}{!}{%
+    \adjustbox{max width=0.95\textwidth}{%
     \begin{tikzpicture}[
         >=stealth,
         % Global node styles
@@ -463,12 +464,12 @@ We evaluate ten distinct model architectures alongside one threshold-matched ope
     \item \textbf{Statistical and Climatological Reference Baselines:} We evaluate non-parametric reference benchmarks alongside $L_2$-regularized Logistic Regression: (i) \emph{Month $\times$ Station Climatology}, which assigns each test sample the empirical frequency of precipitation exceeding $P_{60}$ observed for that specific station and calendar month in the training partition (AUC = 0.680, Brier score = 0.222, Brier skill score relative to the sample base rate = $+0.082$); and (ii) a binarized calendar-month climatology (training exceedance frequency per calendar month, pooled over stations), evaluated as an unranked binary baseline thresholded at 0.5 ($\text{Acc} = 64.58\%$, $\text{F1} = 0.522$, binary $\text{AUC} = 0.619$), whereas physical lag-1 precipitation persistence achieves $\text{AUC} = 0.589$.
 
     \item \textbf{Classical Ensembles:} Random Forest (300 estimators), Gradient Boosting (200 estimators), and XGBoost (500 estimators, depth=4).
-    \item \textbf{Deep Learning Baselines:} A standalone bidirectional LSTM (\texttt{PureLSTM}) with 2 layers and 16 hidden units per direction (yielding a concatenated 32-dimensional sequence representation), concatenated with the 35 input features (67 dimensions), followed by batch normalization (\texttt{BatchNorm1d(67)}) and a two-layer classification head (\texttt{Linear(67, 16)} + LayerNorm + \texttt{Linear(16, 1)}), totaling 10,103 parameters, optimized using AdamW. Alongside this model, we evaluate \texttt{Matched LSTM}, an operational configuration of \texttt{PureLSTM} with its classification threshold adjusted to match the false positive rate of the hybrid models ($\tau = 0.531$; \Cref{app:operational_analysis}). The standalone LSTM is not capacity-matched to the hybrids (10,103 vs.\ $\sim$2,600 parameters; 16 vs.\ 8 hidden units per direction; batch normalization; and direct access to raw features without a 4-dimensional projection bottleneck).
-    \item \textbf{Hybrid Quantum-Classical Models:} Developed using PennyLane's \texttt{default.qubit} simulator. \texttt{LSTM+QNN}, \texttt{LSTM+PI-QNN} and \texttt{LbL-QNN} use a bidirectional LSTM trained end to end (hidden dimension 8 per direction, 2,368 parameters) concatenated with the 35 input features to produce a 51-dimensional representation, which is compressed via a linear layer (\texttt{Linear(51, 4)}, 208 parameters) into a 4-dimensional projection bottleneck before being encoded into a 4-qubit Variational Quantum Circuit. The circuit uses a Strongly Entangling Layers ansatz with same-vector data re-uploading ($R_y$ and $R_z$ rotations per qubit repeated in each layer; \citealp{perez2020}) followed by parameterized $\mathrm{SU}(2)$ $\mathrm{Rot}$ gates and a circular CNOT entanglement topology ($L = 2$ layers with 24 quantum parameters for baseline models; $L = 3$ layers with 36 quantum parameters for the layer-wise \texttt{LbL-QNN} model; see \Cref{fig:vqc_circuit}). We distinguish this repeated encoding from the \emph{information-widening} re-uploading variant introduced later (\Cref{sec:relaxing_bottleneck}), which injects distinct feature subsets at each block.
+    \item \textbf{Deep Learning Baselines:} A standalone bidirectional LSTM (\texttt{PureLSTM}) with 2 layers and 16 hidden units per direction (yielding a concatenated 32-dimensional sequence representation), concatenated with the 35 input features (67 dimensions), followed by batch normalization (\texttt{BatchNorm1d(67)}) and a two-layer classification head (\texttt{Linear(67, 16)} + LayerNorm + \texttt{Linear(16, 1)}), totaling 10{,}103 parameters, optimized using AdamW. Alongside this model, we evaluate \texttt{Matched LSTM}, an operational configuration of \texttt{PureLSTM} with its classification threshold adjusted to match the false positive rate of the hybrid models ($\tau = 0.531$; \Cref{app:operational_analysis}). The standalone LSTM is not capacity-matched to the hybrids (10{,}103 vs.\ $\sim$2{,}600 parameters; 16 vs.\ 8 hidden units per direction; batch normalization; and direct access to raw features without a 4-dimensional projection bottleneck).
+    \item \textbf{Hybrid Quantum-Classical Models:} Developed using PennyLane's \texttt{default.qubit} simulator. \texttt{LSTM+QNN}, \texttt{LSTM+PI-QNN} and \texttt{LbL-QNN} use a bidirectional LSTM trained end to end (hidden dimension 8 per direction, 2{,}368 parameters) concatenated with the 35 input features to produce a 51-dimensional representation, which is compressed via a linear layer (\texttt{Linear(51, 4)}, 208 parameters) into a 4-dimensional projection bottleneck before being encoded into a 4-qubit Variational Quantum Circuit. The circuit uses a Strongly Entangling Layers ansatz with same-vector data re-uploading ($R_y$ and $R_z$ rotations per qubit repeated in each layer; \citealp{perez2020}) followed by parameterized $\mathrm{SU}(2)$ $\mathrm{Rot}$ gates and a circular CNOT entanglement topology ($L = 2$ layers with 24 quantum parameters for baseline models; $L = 3$ layers with 36 quantum parameters for the layer-wise \texttt{LbL-QNN} model; see \Cref{fig:vqc_circuit}). We distinguish this repeated encoding from the \emph{information-widening} re-uploading variant introduced later (\Cref{sec:relaxing_bottleneck}), which injects distinct feature subsets at each block.
     \begin{itemize}
         \item \texttt{LSTM+QNN}: Standard end-to-end unconstrained variational network (2 layers).
         \item \texttt{LSTM+PI-QNN}: End-to-end network optimized with the heuristic thermodynamic loss $\mathcal{L}_{\text{total}}$ (2 layers; \Cref{app:heuristic_regularization}).
-        \item \texttt{LSTM+QTL}: Quantum Transfer Learning \citep{mari2020}, which differs in architecture from the three models above: the standalone \texttt{PureLSTM} (10,103 parameters, \Cref{tab:parameter_accounting}) is first trained as a classical model with early stopping and then frozen; its 32-dimensional state and the 35 features (67 dimensions) feed a trainable classical adapter ($67\rightarrow8\rightarrow4$), followed by a single angle encoding (RY, no re-uploading) and a 2-layer circuit. It has 617 trainable parameters, of which 24 are quantum.
+        \item \texttt{LSTM+QTL}: Quantum Transfer Learning \citep{mari2020}, which differs in architecture from the three models above: the standalone \texttt{PureLSTM} (10{,}103 parameters, \Cref{tab:parameter_accounting}) is first trained as a classical model with early stopping and then frozen; its 32-dimensional state and the 35 features (67 dimensions) feed a trainable classical adapter ($67\rightarrow8\rightarrow4$), followed by a single angle encoding (RY, no re-uploading) and a 2-layer circuit. It has 617 trainable parameters, of which 24 are quantum.
         \item \texttt{LbL-QNN}\footnote{This architecture combines layer-by-layer training \citep{skolik2021} with the heuristic thermodynamic loss (\Cref{app:heuristic_regularization}). As shown in \Cref{app:depth_justification}, a depth-matched ablation specifically evaluating \texttt{LbL-QNN} against an end-to-end 3-layer architecture (\texttt{LSTM+PI-QNN-3L}) showed lower observed across-seed variability for the combined layer-wise configuration. However, this comparison is confounded by an expanded training budget (55 total epochs: 10 epochs per layer across 3 layers = 30 epochs, followed by 25 global fine-tuning epochs vs.\ 25 single-run epochs) and a staged learning rate schedule ($5\times 10^{-3}$ then $5\times 10^{-4}$ vs.\ fixed $5\times 10^{-3}$). The observed variance stabilization is therefore associated with the combined multi-stage schedule and expanded budget rather than demonstrably caused by the layer-wise inductive bias in isolation, particularly since a penalty-free layer-by-layer control and an epoch-matched (55-epoch) end-to-end control were not evaluated; the observed performance should be attributed to the combined layer-wise/heuristic configuration.}: applies the layer-by-layer training protocol to the \texttt{LSTM+PI-QNN} architecture, using a 3-layer circuit to support a non-degenerate three-stage freezing schedule.
         \item \texttt{QKSVM}: Quantum Kernel Support Vector Machine utilizing a Nystr\"{o}m approximation ($M=64$ landmarks) to handle the panel's size.
     \end{itemize}
@@ -476,7 +477,7 @@ We evaluate ten distinct model architectures alongside one threshold-matched ope
 
 \begin{figure}[htbp]
     \centering
-    \resizebox{\textwidth}{!}{%
+    \adjustbox{max width=\textwidth}{%
     \begin{quantikz}[row sep=0.5cm, column sep=0.45cm]
         \lstick{$\ket{0}_{q_0}$} &
         \gategroup[wires=4, steps=2, style={dashed, rounded corners, fill=blue!5, inner sep=6pt}, background, label style={label position=above, anchor=south, yshift=0.2cm}]{\makebox[0pt]{Data Encoding}} \gate{R_y(x_0)} & \gate{R_z(x_0)} &
@@ -633,7 +634,7 @@ NISQ noise sim & \texttt{qiskit.aer} with depolarizing noise model, \texttt{shot
 \centering
 \caption{Circuit decomposition to native gates for all evaluated quantum architectures.}
 \label{tab:circuit_gates}
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{lcccccc}
 \toprule
 \textbf{Circuit} & \textbf{Qubits} & \textbf{Depth} & \textbf{Total Gates} & \textbf{Single-Qubit} & \textbf{CNOTs} & \textbf{Quantum Params} \\
@@ -667,32 +668,32 @@ applies $4\times \text{RY} + 4\times \text{RZ} = 8$ single-qubit gates (data emb
 \caption{Complete parameter accounting for hybrid quantum-classical models. 
 \texttt{in\_dim} = 35 for 4 stations (12 precipitation lags + 17 physics features + 2 seasonal + 4 station dummies).}
 \label{tab:parameter_accounting}
-\resizebox{\columnwidth}{!}{%
+\adjustbox{max width=\columnwidth}{%
 \begin{tabular}{lrrrr}
 \toprule
 \textbf{Model} & \textbf{Total Params} & \textbf{Trainable Params} & \textbf{Quantum (W)} & \textbf{Classical} \\
 \midrule
-LSTM+QNN (4q, 2L) & 2,613 & 2,613 & 24 & 2,589 \\
-LSTM+PI-QNN (4q, 2L) & 2,613 & 2,613 & 24 & 2,589 \\
-LbL-QNN (4q, 3L) & 2,625 & 2,625 & 36 & 2,589 \\
-QTL (4q, 2L) & 10,720 & \textbf{617} & 24 & 593 (adapter+head) \\
-PureLSTM (baseline) & 10,103 & 10,103 & --- & 10,103 \\
-Amplitude Embedding (4q, 2L) & 3,237 & 3,237 & 24 & 3,213 \\
-Re-uploading-3$\times$4D (4q, 3L) & 3,041 & 3,041 & 36 & 3,005 \\
+LSTM+QNN (4q, 2L) & 2{,}613 & 2{,}613 & 24 & 2{,}589 \\
+LSTM+PI-QNN (4q, 2L) & 2{,}613 & 2{,}613 & 24 & 2{,}589 \\
+LbL-QNN (4q, 3L) & 2{,}625 & 2{,}625 & 36 & 2{,}589 \\
+QTL (4q, 2L) & 10{,}720 & \textbf{617} & 24 & 593 (adapter+head) \\
+PureLSTM (baseline) & 10{,}103 & 10{,}103 & --- & 10{,}103 \\
+Amplitude Embedding (4q, 2L) & 3{,}237 & 3{,}237 & 24 & 3{,}213 \\
+Re-uploading-3$\times$4D (4q, 3L) & 3{,}041 & 3{,}041 & 36 & 3{,}005 \\
 \midrule
 \multicolumn{5}{l}{\textit{Classical bottleneck controls}} \\
-Linear parity control & 2,609 & 2,609 & 0 & 2,609 \\
-LeakyMLP parity control & 2,617 & 2,617 & 0 & 2,617 \\
-GELU MLP control & 2,769 & 2,769 & 0 & 2,769 \\
+Linear parity control & 2{,}609 & 2{,}609 & 0 & 2{,}609 \\
+LeakyMLP parity control & 2{,}617 & 2{,}617 & 0 & 2{,}617 \\
+GELU MLP control & 2{,}769 & 2{,}769 & 0 & 2{,}769 \\
 \bottomrule
 \end{tabular}%
 }
 \end{table}
 
-In LSTM+QNN, only 24/2,613 = \textbf{0.92\% of trainable parameters} 
-are quantum. The circuit adds 48 gates on a 16-dimensional state vector atop a 2,589-parameter 
-classical backbone (2,368-parameter LSTM encoder + 208-parameter projection layer + 13-parameter normalization and head). For QTL, the entire 
-PureLSTM encoder (10,103 params) is frozen; only the adapter network (580 params) + head/norm (13 params) + quantum circuit 
+In LSTM+QNN, only 24/2{,}613 = \textbf{0.92\% of trainable parameters} 
+are quantum. The circuit adds 48 gates on a 16-dimensional state vector atop a 2{,}589-parameter 
+classical backbone (2{,}368-parameter LSTM encoder + 208-parameter projection layer + 13-parameter normalization and head). For QTL, the entire 
+PureLSTM encoder (10{,}103 params) is frozen; only the adapter network (580 params) + head/norm (13 params) + quantum circuit 
 weights (24 params) are trainable = 617 trainable parameters (3.89\% quantum).
 
 \subsection{Dimensionality Reduction Cost}
@@ -703,7 +704,7 @@ The full input dimensionality is 35 (with 4 stations). Hybrid models concatenate
 \centering
 \caption{Dimensionality reduction pipeline and associated classical cost.}
 \label{tab:dim_reduction}
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{llll}
 \toprule
 \textbf{Model} & \textbf{Reduction Method} & \textbf{From $\rightarrow$ To} & \textbf{Params in Reduction} \\
@@ -727,7 +728,7 @@ hidden state (bidirectional LSTM, 2 layers, hidden=8), adding:
 
 Including the full classical preprocessing (LSTM encoder + projection) 
 means that most trainable parameters are classical. The circuit adds 48 gates 
-on a 16-dimensional state vector atop a 2,589-parameter classical backbone; the parameter count alone does not quantify the functional contribution of the circuit.
+on a 16-dimensional state vector atop a 2{,}589-parameter classical backbone; the parameter count alone does not quantify the functional contribution of the circuit.
 
 \subsection{Circuit Evaluations and Computational Cost}
 
@@ -777,7 +778,7 @@ The table counts parameter-shift evaluations for the variational circuit weights
 \centering
 \caption{Gate, parameter and partial execution-count summary for the quantum architectures (excludes runtime, input-angle derivatives and hardware overheads).}
 \label{tab:cost_summary}
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{lccccc}
 \toprule
 \textbf{Metric} & \textbf{LSTM+QNN} & \textbf{PI-QNN} & \textbf{LbL-QNN} & \textbf{QTL} & \textbf{QKSVM} \\
@@ -788,8 +789,8 @@ Single-qubit gates & 40 & 40 & 60 & 28 & 8 \\
 CNOTs & 8 & 8 & 12 & 8 & 0 \\
 Total gates & 48 & 48 & 72 & 36 & 8 \\
 Quantum params & 24 & 24 & 36 & 24 & 0 (fixed map) \\
-Total trainable params & 2,613 & 2,613 & 2,625 & 617 & N/A (SVM) \\
-Classical params & 2,589 & 2,589 & 2,589 & 593 & PCA+SVM \\
+Total trainable params & 2{,}613 & 2{,}613 & 2{,}625 & 617 & N/A (SVM) \\
+Classical params & 2{,}589 & 2{,}589 & 2{,}589 & 593 & PCA+SVM \\
 \textbf{\% quantum params} & \textbf{0.92\%} & \textbf{0.92\%} & \textbf{1.37\%} & \textbf{3.89\%} & \textbf{Fixed map\textsuperscript{*}} \\
 Statevector cost & $O(16 \times \text{depth})$ & $O(16 \times \text{depth})$ & $O(16 \times \text{depth})$ & $O(16 \times \text{depth})$ & $O(16)$ \\
 Shots cost ($N=1024$) & 49$\times$1024/sample & 49$\times$1024/sample & 73$\times$1024/sample & 49$\times$1024/sample & 1$\times$1024/kernel \\
@@ -812,7 +813,7 @@ Dim. reduction & 51$\rightarrow$4 (linear) & 51$\rightarrow$4 (linear) & 51$\rig
 \label{app:historical}
 % ============================================================
 
-All results in this section come from the canonical pipeline (checkpoint \texttt{01\_data.pt}), in which the synoptic anomalies are standardized with the full 1938--2026 record and the scikit-learn tree ensembles are fitted on the 2,787 training and validation rows. These runs preceded the train-only pipeline of the main text. For most of them only per-seed AUCs, or the test probabilities of single runs (seed 42, and seed 0 regenerated for the hybrids), were archived, so no paired seed-mean intervals can be computed, and Random Forest and XGBoost were run with an earlier software environment. They are descriptive and are not used for the inferential claims of the main text. Random Forest, XGBoost, the standalone LSTM, the Linear-4D control and the four variational hybrids were re-run in the train-only pipeline with all test probabilities stored (\Cref{M-tab:case,M-tab:brier}); where a historical value below differs from the train-only one, the train-only value is the reference. The quantum-kernel SVM, logistic regression, gradient boosting, the bottleneck and bandwidth variants, the operational metrics and the noise and ablation analyses exist only in this canonical form.
+All results in this section come from the canonical pipeline (checkpoint \texttt{01\_data.pt}), in which the synoptic anomalies are standardized with the full 1938--2026 record and the scikit-learn tree ensembles are fitted on the 2{,}787 training and validation rows. These runs preceded the train-only pipeline of the main text. For most of them only per-seed AUCs, or the test probabilities of single runs (seed 42, and seed 0 regenerated for the hybrids), were archived, so no paired seed-mean intervals can be computed, and Random Forest and XGBoost were run with an earlier software environment. They are descriptive and are not used for the inferential claims of the main text. Random Forest, XGBoost, the standalone LSTM, the Linear-4D control and the four variational hybrids were re-run in the train-only pipeline with all test probabilities stored (\Cref{M-tab:case,M-tab:brier}); where a historical value below differs from the train-only one, the train-only value is the reference. The quantum-kernel SVM, logistic regression, gradient boosting, the bottleneck and bandwidth variants, the operational metrics and the noise and ablation analyses exist only in this canonical form.
 
 \subsection{Hybrid Architectures and Further Comparisons}
 \label{app:hybrids}
@@ -829,9 +830,9 @@ All results in this section come from the canonical pipeline (checkpoint \texttt
 \toprule
 \textbf{Model} & \textbf{Pipeline} & \textbf{Mean AUC} & \textbf{SD} & \textbf{Gap to clim.} \\
 \midrule
-Random Forest (2,787 rows) & C & 0.6851 & 0.0026 & $+0.006$ \\
-Random Forest (2,273 rows) & TO & 0.6829 & 0.0035 & $+0.003$ \\
-Random Forest (2,273 rows) & C & 0.6802 & 0.0035 & $+0.001$ \\
+Random Forest (2{,}787 rows) & C & 0.6851 & 0.0026 & $+0.006$ \\
+Random Forest (2{,}273 rows) & TO & 0.6829 & 0.0035 & $+0.003$ \\
+Random Forest (2{,}273 rows) & C & 0.6802 & 0.0035 & $+0.001$ \\
 Gradient Boosting & C & 0.6692 & 0.0022 & $-0.010$ \\
 Reuploading-3$\times$4D & C & 0.6688 & 0.0085 & $-0.011$ \\
 Standalone LSTM & TO & 0.6682 & 0.0063 & $-0.011$ \\
@@ -915,7 +916,7 @@ Rc-ACP is evaluated strictly over the $n=20$ positive test months ($y=1$) matchi
 }
 \end{table}
 
-In this single realization, the layer-wise hybrid \texttt{LbL-QNN} achieves the highest quantum AUC (0.672), tracking Random Forest (\Cref{tab:single_run_results}) with no statistically significant difference under an uncorrected DeLong test \citep{delong1988} ($p = 0.2124$; formal equivalence not tested). It nominally outperforms unconstrained \texttt{LSTM+QNN} ($p = 0.0070$) and \texttt{Standalone LSTM} ($p = 0.0263$), though the latter comparison is heavily confounded by the capacity mismatch (10,103 vs.\ $\sim$2,600 parameters; \Cref{M-sec:architectures}).
+In this single realization, the layer-wise hybrid \texttt{LbL-QNN} achieves the highest quantum AUC (0.672), tracking Random Forest (\Cref{tab:single_run_results}) with no statistically significant difference under an uncorrected DeLong test \citep{delong1988} ($p = 0.2124$; formal equivalence not tested). It nominally outperforms unconstrained \texttt{LSTM+QNN} ($p = 0.0070$) and \texttt{Standalone LSTM} ($p = 0.0263$), though the latter comparison is heavily confounded by the capacity mismatch (10{,}103 vs.\ $\sim$2{,}600 parameters; \Cref{M-sec:architectures}).
 
 The single-run ordering does not withstand closer examination. First, formal paired testing against Month $\times$ Station Climatology was conducted on the leading model, Random Forest, yielding no statistically significant advantage under a paired DeLong test (point difference $\Delta \text{AUC} = +0.0079$, $\text{SE} = 0.0138$, $z = 0.578$, $p = 0.5635$) or a year-block bootstrap (mean of the bootstrap differences $+0.0068$, $95\%$ block CI: $[-0.0171, +0.0284]$, $p = 0.5420$). Because all evaluated quantum architectures and neural baselines achieved lower point AUCs and higher Brier scores than Random Forest, neither Random Forest nor any evaluated quantum architecture demonstrates statistically verifiable predictive skill beyond empirical seasonal-geographic climatology when temporal autocorrelation is respected.
 
@@ -1068,7 +1069,7 @@ gradient-optimized models (LSTMs and quantum hybrids) than in stochastic tree en
 
 Extending the 15-seed replication to the classical baselines (\Cref{tab:multiseed}) shows that the \emph{direction} of the classical-over-quantum gap is consistent across seeds, whereas its size is not separated from test-sampling uncertainty by these seed-level data (\Cref{M-sec:budget}). Tree-based ensembles exhibit markedly lower across-seed variance ($\sigma_{\text{AUC}} \le 0.0054$) than the hybrid quantum architectures ($\sigma_{\text{AUC}} \in [0.0089, 0.0172]$ in \Cref{tab:multiseed}; classical neural baselines range from $0.0063$ for standalone LSTM to $0.0069$--$0.0083$ for 4D controllers).
 
-An omnibus Friedman test across the eight canonical-pipeline architectures (Random Forest on 2,787 rows, Gradient Boosting, XGBoost, the standalone LSTM and the four hybrids) nominally reveals a significant overall ranking effect ($\chi^2(7) = 53.47$, $p < 10^{-6}$; Kendall's $W = 0.509$). However, because Friedman's test formally assumes commensurate, exchangeable blocks across all conditions, treating nominal seed indices across disparate software ecosystems (scikit-learn Mersenne Twister vs.\ PyTorch/PennyLane PRNG) as paired blocks should be regarded as a heuristic diagnostic rather than an exact inferential test. As a descriptive summary of optimization outcomes, across all 225 cross-framework seed pairs Random Forest (2,787 rows: $0.6851 \pm 0.0026$; the training-row-matched 2,273-row model scores $0.6802 \pm 0.0035$ in a different scikit-learn version) has a higher AUC than \texttt{LbL-QNN} in 224 of 225 pairs ($\hat{P} = 0.9956$, Cliff's $\delta = 0.9911$, the difference between the probabilities that a draw from one model exceeds a draw from the other and the reverse; \citealp{cliff1993}) and exceeds all other neural and quantum architectures in all pairs (complete matrix in \Cref{app:operational_analysis}). These cross-seed summaries describe optimization outcomes on the fixed historical test set. They are not independent replications of generalization performance and do not replace the paired sampling analyses in the main text. However, this optimization-seed separation on a fixed chronological split must not be mistaken for test-set generalization certainty: on the test partition itself, an uncorrected single-run DeLong test comparing Random Forest to \texttt{LbL-QNN} yields $p = 0.2124$, and the year-block bootstrap test against empirical climatology yields $p = 0.5420$, indicating that test-set sampling uncertainty ($N=528$ correlated station-months) remains substantial.
+An omnibus Friedman test across the eight canonical-pipeline architectures (Random Forest on 2{,}787 rows, Gradient Boosting, XGBoost, the standalone LSTM and the four hybrids) nominally reveals a significant overall ranking effect ($\chi^2(7) = 53.47$, $p < 10^{-6}$; Kendall's $W = 0.509$). However, because Friedman's test formally assumes commensurate, exchangeable blocks across all conditions, treating nominal seed indices across disparate software ecosystems (scikit-learn Mersenne Twister vs.\ PyTorch/PennyLane PRNG) as paired blocks should be regarded as a heuristic diagnostic rather than an exact inferential test. As a descriptive summary of optimization outcomes, across all 225 cross-framework seed pairs Random Forest (2{,}787 rows: $0.6851 \pm 0.0026$; the training-row-matched 2{,}273-row model scores $0.6802 \pm 0.0035$ in a different scikit-learn version) has a higher AUC than \texttt{LbL-QNN} in 224 of 225 pairs ($\hat{P} = 0.9956$, Cliff's $\delta = 0.9911$, the difference between the probabilities that a draw from one model exceeds a draw from the other and the reverse; \citealp{cliff1993}) and exceeds all other neural and quantum architectures in all pairs (complete matrix in \Cref{app:operational_analysis}). These cross-seed summaries describe optimization outcomes on the fixed historical test set. They are not independent replications of generalization performance and do not replace the paired sampling analyses in the main text. However, this optimization-seed separation on a fixed chronological split must not be mistaken for test-set generalization certainty: on the test partition itself, an uncorrected single-run DeLong test comparing Random Forest to \texttt{LbL-QNN} yields $p = 0.2124$, and the year-block bootstrap test against empirical climatology yields $p = 0.5420$, indicating that test-set sampling uncertainty ($N=528$ correlated station-months) remains substantial.
 
 
 
@@ -1090,7 +1091,7 @@ survive multiplicity adjustment ($p_{\text{Holm}}=0.0826$); and Amplitude-16D sh
 \texttt{LbL-QNN} survives ($p_{\text{Holm}}=0.006$), though that comparison confounds
 re-uploading with \texttt{LbL-QNN}'s distinct training protocol and depth.
 
-The widened variants had lower mean test AUC than Random Forest in these historical runs (canonical pipeline, matched 2,273 rows: $0.6802 \pm 0.0035$; 2,787 rows: $0.6851 \pm 0.0026$; \Cref{tab:bottleneck_relaxation}). Because the comparisons differ in architecture, projection size, depth and training conditions, and sampling-aware paired intervals were not reconstructed, these results do not establish whether widening the encoding interface changes the generalization gap. While Re-uploading-3$\times$4D exceeds the Standalone LSTM ($0.6657 \pm 0.0091$) and Amplitude-16D approaches it, the bottleneck-matched classical controls (\Cref{sec:bottleneck_control}) show no detectable circuit effect over classical linear/MLP projections at a fixed interface, and full-feature XGBoost ($0.6575 \pm 0.0051$) performs comparably to baseline \texttt{LSTM+QNN} ($0.6589 \pm 0.0153$). The Re-uploading architecture's improvement is also confounded
+The widened variants had lower mean test AUC than Random Forest in these historical runs (canonical pipeline, matched 2{,}273 rows: $0.6802 \pm 0.0035$; 2{,}787 rows: $0.6851 \pm 0.0026$; \Cref{tab:bottleneck_relaxation}). Because the comparisons differ in architecture, projection size, depth and training conditions, and sampling-aware paired intervals were not reconstructed, these results do not establish whether widening the encoding interface changes the generalization gap. While Re-uploading-3$\times$4D exceeds the Standalone LSTM ($0.6657 \pm 0.0091$) and Amplitude-16D approaches it, the bottleneck-matched classical controls (\Cref{sec:bottleneck_control}) show no detectable circuit effect over classical linear/MLP projections at a fixed interface, and full-feature XGBoost ($0.6575 \pm 0.0051$) performs comparably to baseline \texttt{LSTM+QNN} ($0.6589 \pm 0.0153$). The Re-uploading architecture's improvement is also confounded
 with an increase in circuit depth relative to the 2-layer \texttt{LSTM+QNN} baseline, so it cannot
 be attributed to encoding bandwidth alone (unlike \texttt{LbL-QNN}, where a depth-matched 3-layer control was evaluated, the separate depth-matched control needed to disentangle these factors for re-uploading was not evaluated; see \Cref{M-sec:limitations}). We therefore report this result
 descriptively, as evidence that widening the encoding interface is \emph{associated with} improved
@@ -1113,13 +1114,13 @@ LSTM+PI-QNN & 0.6555 & 0.0172 & 3.733 \\
 LbL-QNN & 0.6605 & 0.0089 & 3.800 \\
 LSTM+QTL & 0.6519 & 0.0128 & 4.600 \\
 \midrule
-\textit{Random Forest (matched, 2,273 rows)}\textsuperscript{*} & \textit{0.6802} & \textit{0.0035} & --- \\
-\textit{Random Forest (train+val, 2,787 rows)} & \textit{0.6851} & \textit{0.0026} & --- \\
+\textit{Random Forest (matched, 2{,}273 rows)}\textsuperscript{*} & \textit{0.6802} & \textit{0.0035} & --- \\
+\textit{Random Forest (train+val, 2{,}787 rows)} & \textit{0.6851} & \textit{0.0026} & --- \\
 \bottomrule
 \end{tabular}
 \vspace{4pt}
 
-{\footnotesize\textsuperscript{*}Sensitivity baseline trained strictly on 2,273 rows.}
+{\footnotesize\textsuperscript{*}Sensitivity baseline trained strictly on 2{,}273 rows.}
 \end{table}
 
 % ============================================================
@@ -1164,8 +1165,8 @@ sorted descending by mean AUC. All values are 15-seed distributions with seed-in
 \toprule
 \textbf{Architecture} & \textbf{Controller params} & \textbf{Mean AUC} & \textbf{Std. Dev.} & \textbf{Max} \\
 \midrule
-Random Forest (train+val, 2,787 rows)\textsuperscript{*} & Ensemble & 0.6851 & 0.0026 & 0.690 \\
-Random Forest (matched, 2,273 rows)\textsuperscript{*} & Ensemble & 0.6802 & 0.0035 & 0.687 \\
+Random Forest (train+val, 2{,}787 rows)\textsuperscript{*} & Ensemble & 0.6851 & 0.0026 & 0.690 \\
+Random Forest (matched, 2{,}273 rows)\textsuperscript{*} & Ensemble & 0.6802 & 0.0035 & 0.687 \\
 LSTM+QNN (quantum, 4-dim. bottleneck) & 24 & 0.6589 & 0.0153 & 0.681 \\
 GELU MLP (classical control, 4-dim. input) & 180 & 0.6563 & 0.0071 & 0.6725 \\
 Linear (classical control, 4-dim. input) & 20 & 0.6545 & 0.0069 & 0.6680 \\
@@ -1175,7 +1176,7 @@ LeakyReLU MLP (classical control, 4-dim. input) & 28 & 0.6516 & 0.0083 & 0.6636 
 }
 \vspace{4pt}
 
-{\footnotesize\textsuperscript{*}Tree ensemble capacity is determined by the number of leaves/nodes rather than differentiable parameters; the 300-tree Random Forest with \texttt{max\_depth=8} and the hybrid belong to different function classes and are not capacity-matched. The 2,273-row model provides the strictly matched training comparison to the neural and hybrid models. Parameter counts reported under Controller params reflect only the 4-dimensional controller/neck replacing the quantum circuit; for total model parameter accounting (including the shared 2,589 classical backbone), see \Cref{tab:parameter_accounting}.}
+{\footnotesize\textsuperscript{*}Tree ensemble capacity is determined by the number of leaves/nodes rather than differentiable parameters; the 300-tree Random Forest with \texttt{max\_depth=8} and the hybrid belong to different function classes and are not capacity-matched. The 2{,}273-row model provides the strictly matched training comparison to the neural and hybrid models. Parameter counts reported under Controller params reflect only the 4-dimensional controller/neck replacing the quantum circuit; for total model parameter accounting (including the shared 2{,}589 classical backbone), see \Cref{tab:parameter_accounting}.}
 \end{table}
 
 A 4-qubit circuit with 24 variational parameters operates on a state space of dimension $2^4 = 16$; its statevector evolution is represented by a $16 \times 16$ unitary matrix, which is classically simulable by statevector methods. Parameterized quantum circuits with angle encoding compute truncated Fourier series of the input coordinates \citep{schuld2021fourier}; classical models with trigonometric activations could therefore be functional analogues, but this was not tested here. 
@@ -1184,11 +1185,11 @@ As a historical fixed-test seed-level diagnostic (canonical pipeline), we conduc
 
 We additionally evaluated classical controls under an unsupervised 4-dimensional compression of the entire 35-dimensional input space, providing an information-matched benchmark for \texttt{QKSVM} (\Cref{M-sec:architectures}). Fitting Principal Component Analysis strictly on the training partition ($\text{PCA}(4)$, capturing 65.70\% of total variance across the 35 features) and evaluating on the test partition, a classical Support Vector Machine with an RBF kernel achieves an AUC of 0.6686 and a Brier score of 0.2219 (with $\text{Acc} = 62.31\%$, $\text{F1} = 0.5158$, and $\text{Rc-ACP} = 0.8500$). This classical 4-dimensional benchmark outperforms the 4-qubit Quantum Kernel SVM (AUC = 0.6390, Brier score = 0.2283; \Cref{tab:single_run_results}) by 0.030 AUC (a descriptive gap; its paired sampling uncertainty was not computed), whereas tree ensembles on PCA-4 achieve lower discriminative performance (Random Forest: $0.6312 \pm 0.0030$; Gradient Boosting: $0.6230 \pm 0.0005$). This indicates that the modest score of \texttt{QKSVM} is not explained by low-dimensional compression alone; whether it reflects the inductive bias of the evaluated quantum feature map is not established by these data.
 
-Random Forest is not a bottleneck-matched comparator for the VQC; it operates on the uncompressed 35-dimensional space with 300 trees, establishing an empirical tabular reference (canonical pipeline: mean AUC $= 0.6802 \pm 0.0035$ on matched 2,273 rows, scikit-learn 1.9.1; archived $0.6851 \pm 0.0026$ on 2,787 rows, scikit-learn 1.6.1). The 4D controls hold the input interface constant, isolating circuit-specific effects from representation compression: at this fixed interface, the historical seed-level means of the controllers lie within about 0.007 AUC of the hybrid. Restricting models to a 4D interface degrades performance relative to Random Forest, but the 4D controls show no detectable circuit effect at that interface. That full-feature XGBoost ($0.6575 \pm 0.0051$) scores close to baseline \texttt{LSTM+QNN} ($0.6589 \pm 0.0153$) shows that access to all features does not by itself guarantee a higher AUC; it does not show whether the bottleneck limits the hybrid. The residual gap to Random Forest may reflect model-family capabilities on tabular data rather than an encoding bottleneck, and was not tested here.
+Random Forest is not a bottleneck-matched comparator for the VQC; it operates on the uncompressed 35-dimensional space with 300 trees, establishing an empirical tabular reference (canonical pipeline: mean AUC $= 0.6802 \pm 0.0035$ on matched 2{,}273 rows, scikit-learn 1.9.1; archived $0.6851 \pm 0.0026$ on 2{,}787 rows, scikit-learn 1.6.1). The 4D controls hold the input interface constant, isolating circuit-specific effects from representation compression: at this fixed interface, the historical seed-level means of the controllers lie within about 0.007 AUC of the hybrid. Restricting models to a 4D interface degrades performance relative to Random Forest, but the 4D controls show no detectable circuit effect at that interface. That full-feature XGBoost ($0.6575 \pm 0.0051$) scores close to baseline \texttt{LSTM+QNN} ($0.6589 \pm 0.0153$) shows that access to all features does not by itself guarantee a higher AUC; it does not show whether the bottleneck limits the hybrid. The residual gap to Random Forest may reflect model-family capabilities on tabular data rather than an encoding bottleneck, and was not tested here.
 
-As exploratory evidence on whether the 4-dimensional compression itself constrains the recurrent backbone, we also evaluated a bottleneck-free classical LSTM with the same hidden dimension 8 (\texttt{bottleneck\_free\_lstm}, arithmetically $\sim$2,522 parameters: 2,368 LSTM + 102 BatchNorm + 52 linear head, though parameter counts were not stored in the checkpoint). Unlike the hybrid, which projects the 51-dimensional representation (16D LSTM hidden + 35D raw features) down to 4 dimensions before classification, this model attaches a direct linear classification head to the 51-dimensional vector. Across 15 seeds, it achieves an AUC of $0.6435 \pm 0.0065$. Because the classifier head differs and no paired seed-by-seed test was logged, this exploratory result does not support a claim that removing the bottleneck formally confirms compression as a performance limit. Descriptively, the bottleneck-free model falls below both the 4D linear control ($0.6545 \pm 0.0069$) and the 4D MLP controls ($0.6563 \pm 0.0071$, $0.6516 \pm 0.0083$), as well as the larger Standalone LSTM ($0.6657 \pm 0.0091$). That the 4D linear control scores 0.011 above the unprojected 51D head (a descriptive gap) at most suggests that low-dimensional linear projection can act as a regularizer for this small recurrent backbone, rather than compression acting solely as an upper bound on performance. We explicitly separate the claim of projection regularization from the claim that quantum circuits provide an inductive advantage at that interface.
+As exploratory evidence on whether the 4-dimensional compression itself constrains the recurrent backbone, we also evaluated a bottleneck-free classical LSTM with the same hidden dimension 8 (\texttt{bottleneck\_free\_lstm}, arithmetically $\sim$2{,}522 parameters: 2{,}368 LSTM + 102 BatchNorm + 52 linear head, though parameter counts were not stored in the checkpoint). Unlike the hybrid, which projects the 51-dimensional representation (16D LSTM hidden + 35D raw features) down to 4 dimensions before classification, this model attaches a direct linear classification head to the 51-dimensional vector. Across 15 seeds, it achieves an AUC of $0.6435 \pm 0.0065$. Because the classifier head differs and no paired seed-by-seed test was logged, this exploratory result does not support a claim that removing the bottleneck formally confirms compression as a performance limit. Descriptively, the bottleneck-free model falls below both the 4D linear control ($0.6545 \pm 0.0069$) and the 4D MLP controls ($0.6563 \pm 0.0071$, $0.6516 \pm 0.0083$), as well as the larger Standalone LSTM ($0.6657 \pm 0.0091$). That the 4D linear control scores 0.011 above the unprojected 51D head (a descriptive gap) at most suggests that low-dimensional linear projection can act as a regularizer for this small recurrent backbone, rather than compression acting solely as an upper bound on performance. We explicitly separate the claim of projection regularization from the claim that quantum circuits provide an inductive advantage at that interface.
 
-The training protocol reveals an important asymmetry between model families: tree ensembles (Random Forest, Gradient Boosting, and XGBoost) were originally fit on the 2,787 rows of the combined training and validation partitions ($X_{\text{sk}} = X_{\text{all}}[:s_2]$), whereas neural and hybrid quantum models were fit on the 2,273 training rows with validation rows reserved for early stopping (\Cref{M-sec:validation_protocol}). Evaluating Random Forest strictly on the 2,273 training rows with canonical hyperparameters yields a 15-seed mean AUC of $0.6802 \pm 0.0035$ (range $[0.6732, 0.6867]$), compared to $0.6875 \pm 0.0044$ on 2,787 rows in the same software environment (scikit-learn 1.9.1; the archived 2,787-row run, scikit-learn 1.6.1, gives $0.6851 \pm 0.0026$). An automated Optuna search (50 trials) on the 2,273 training rows yielded $0.6798 \pm 0.0045$. In the train-only pipeline, which is primary in the main text, Random Forest is fitted on the same 2,273 training rows as the neural models, so the comparisons of the main text are not affected by this asymmetry; the extra validation rows would add 0.003 AUC there (\Cref{M-sec:validation_protocol}).
+The training protocol reveals an important asymmetry between model families: tree ensembles (Random Forest, Gradient Boosting, and XGBoost) were originally fit on the 2{,}787 rows of the combined training and validation partitions ($X_{\text{sk}} = X_{\text{all}}[:s_2]$), whereas neural and hybrid quantum models were fit on the 2{,}273 training rows with validation rows reserved for early stopping (\Cref{M-sec:validation_protocol}). Evaluating Random Forest strictly on the 2{,}273 training rows with canonical hyperparameters yields a 15-seed mean AUC of $0.6802 \pm 0.0035$ (range $[0.6732, 0.6867]$), compared to $0.6875 \pm 0.0044$ on 2{,}787 rows in the same software environment (scikit-learn 1.9.1; the archived 2{,}787-row run, scikit-learn 1.6.1, gives $0.6851 \pm 0.0026$). An automated Optuna search (50 trials) on the 2{,}273 training rows yielded $0.6798 \pm 0.0045$. In the train-only pipeline, which is primary in the main text, Random Forest is fitted on the same 2{,}273 training rows as the neural models, so the comparisons of the main text are not affected by this asymmetry; the extra validation rows would add 0.003 AUC there (\Cref{M-sec:validation_protocol}).
 
 
 % ============================================================

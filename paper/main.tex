@@ -14,6 +14,7 @@
 \usepackage{multirow}
 \usepackage{microtype}
 \usepackage{siunitx}
+\usepackage{adjustbox}
 \usepackage[authoryear,round]{natbib}
 \usepackage{parskip}
 \usepackage{setspace}
@@ -112,13 +113,13 @@ Antecedent observations from months $i,\dots,i+11$ (35 input features: 12 precip
 
 \begin{table}[htbp]
 \centering
-\caption{AEMET stations (climatological identifier, altitude), station-month windows by partition and test-set class prevalence for the regional exceedance threshold ($P_{60}=28.1$\,mm). Daily records span 1938-09 to 2026-05 (Alicante), 1961-01 to 2026-05 (Barcelona), 1951-01 to 2010-12 (San Javier) and 1938-02 to 2012-02 (Valencia).}
+\caption{AEMET stations (climatological identifier, altitude), station-month windows by partition (training 1938--1996, validation 1997--2007, test 2008--2026) and test-set class prevalence for the regional exceedance threshold ($P_{60}=28.1$\,mm). Daily records span 1938-09 to 2026-05 (Alicante), 1961-01 to 2026-05 (Barcelona), 1951-01 to 2010-12 (San Javier) and 1938-02 to 2012-02 (Valencia).}
 \label{tab:station_coverage}
 {\small
 \setlength{\tabcolsep}{4.5pt}
 \begin{tabular}{llccccc}
 \toprule
-\textbf{Station} & \textbf{AEMET id (alt.)} & \textbf{Train (1938--1996)} & \textbf{Val (1997--2007)} & \textbf{Test (2008--2026)} & \textbf{Total} & \textbf{Test positive rate} \\
+\textbf{Station} & \textbf{AEMET id (alt.)} & \textbf{Train} & \textbf{Val} & \textbf{Test} & \textbf{Total} & \textbf{Test positive rate} \\
 \midrule
 Alicante    & 8025 (81\,m) & 671  & 132 & 221 & 1{,}024 & 29.4\% (65 / 221) \\
 Barcelona   & 0076 (1\,m)  & 378  & 132 & 221 & 731   & 50.2\% (111 / 221) \\
@@ -230,7 +231,7 @@ Pairing removes most of the sampling error shared by two models but none of the 
 \caption{Paired comparison of the 15-seed means (train-only pipeline): $\Delta=\overline{\mathrm{AUC}}_A-\overline{\mathrm{AUC}}_B$ with the paired DeLong standard error on seed-averaged components, two-sided $p$-value, 95\,\% intervals from the calendar-year block bootstrap (19 years, $B=2{,}000$) and from a two-way bootstrap that resamples years and seeds, and the MDE ($2.80\times$ SE) under DeLong and the block bootstrap.}
 \label{tab:paired_ci}
 {\small
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{lcccccc}
 \toprule
 \textbf{Pair} & $\Delta$ & \textbf{SE (DeLong)} & $z$ ($p$) & \textbf{Block 95\,\% CI (SE)} & \textbf{Two-way 95\,\% CI} & \textbf{MDE iid / block} \\
@@ -263,7 +264,7 @@ The positive control of the Supplement perturbs observed probabilities, so it ca
 \caption{Simulation with known truth ($N=528$, 19 years, prevalence 0.41, $\rho=0.9$, 500 replications). $\tau_\pi$, $\tau_s$ and $\tau_m$: standard deviations of the year effects on the prevalence logit, on a shift shared by both scorers and on a shift specific to each scorer. Type-I error and coverage are for an exactly null difference (DeLong, block bootstrap); SD$(\hat\Delta)$ is the Monte Carlo standard deviation of the estimate, to be compared with the mean standard error (DeLong / block). Last column: power at the largest simulated difference (population difference in brackets). All rows are in the Supplement.}
 \label{tab:sim}
 {\small
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{lccccccc}
 \toprule
 \textbf{Scenario} & \textbf{Type-I DeLong} & \textbf{Type-I block} & \textbf{Cover. DeLong} & \textbf{Cover. block} & SD$(\hat\Delta)$ & \textbf{Mean SE} & \textbf{Power (DeLong / block)} \\
@@ -331,7 +332,7 @@ For the hybrid case (\Cref{tab:label_sens_qnn}), the RF $-$ \texttt{LSTM+QNN} di
 \centering\small
 \caption{Re-evaluation of the saved test predictions (15-seed means, no retraining) under alternative label definitions: sample, labels and scores of the classical models. S4--S7 are hypothetical scenarios that evaluate predictors trained on the project labels against alternative labels. Pos.: positive test labels. Flips: test labels that differ from the project labels. Differences between models are in \Cref{tab:label_sens_delta,tab:label_sens_qnn}.}
 \label{tab:label_sens}
-\resizebox{\columnwidth}{!}{%
+\adjustbox{max width=\columnwidth}{%
 \begin{tabular}{@{}lrrrrll@{}}
 \toprule
 Scenario & $n$ & Pos. & Prev. & Flips & AUC RF / XGB / LSTM & Brier RF / XGB / LSTM \\
@@ -373,7 +374,7 @@ S7 unjoined sum, new threshold & $+$0.023 [$-$0.001, $+$0.048]; 0.035 & $+$0.005
 \centering\scriptsize
 \caption{The hybrid case (\Cref{sec:applying}) under the same label definitions: AUC of Random Forest (2{,}273 rows), standalone LSTM, Linear-4D control and \texttt{LSTM+QNN}, and paired differences with \texttt{LSTM+QNN} ($\Delta$ [year-block 95\,\% CI]; unadjusted DeLong $p$). Holm first-step threshold for these three pairs: 0.017.}
 \label{tab:label_sens_qnn}
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{@{}llccc@{}}
 \toprule
 Scenario & AUC RF / LSTM / Linear-4D / QNN & RF $-$ QNN & Linear-4D $-$ QNN & LSTM $-$ QNN \\
@@ -400,7 +401,7 @@ A month$\times$station climatology fitted on the training partition reaches AUC 
 \caption{Probabilistic skill against the month$\times$station climatology (train-only pipeline, 15 seeds per model, 528 test rows; archived predictions, no retraining; script \protect\path{exp21_brier_trainonly.py}). Brier score: 15-seed mean (SD). BSS$_{\text{clim}} = 1-\text{BS}/0.2224$: seed mean [minimum, maximum]. $\Delta$BS: mean Brier score minus that of the climatology, with year-block 95\,\% interval ($B=2{,}000$). ECE: 10-bin expected calibration error, seed mean. The canonical single-run version of this table, which also includes logistic regression, gradient boosting and the quantum-kernel SVM, is \Cref{S-tab:brier_single_run}.}
 \label{tab:brier}
 {\small
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{lccccc}
 \toprule
 \textbf{Model} & \textbf{AUC} & \textbf{Brier score} & \textbf{BSS}$_{\text{clim}}$ & $\Delta$\textbf{BS [year-block CI]} & \textbf{ECE} \\
@@ -428,7 +429,7 @@ LSTM+QTL & 0.657 & 0.2400 (0.0069) & $-0.079$ [$-0.128$, $-0.030$] & $+0.018$ [$
 \caption{Pooled and within-station AUC (train-only pipeline, 15-seed means, 528 test rows; archived predictions, no retraining). Within-station AUC: positive--negative pairs of the same station only. SD: across seeds. Per-station AUC in the last four columns (test $n$: 221, 221, 36, 50).}
 \label{tab:within}
 {\small
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{lcccccc}
 \toprule
 \textbf{Model} & \textbf{Pooled AUC} & \textbf{Within-station AUC (SD)} & \textbf{Alicante} & \textbf{Barcelona} & \textbf{San Javier} & \textbf{Valencia} \\
@@ -480,7 +481,7 @@ Linear-4D classical control & 0.6539 & 0.0078 & $-0.009$ \\
 \caption{Paired comparisons of the 15-seed means with \texttt{LSTM+QNN} (train-only pipeline, 528 test rows, 19 test years; same procedures and notation as \Cref{tab:paired_ci}). DeLong $p$-values are unadjusted; the Holm first-step threshold for these three pairs is 0.017. The MDEs are specific to each pair.}
 \label{tab:qnn_paired}
 {\small
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{@{}lcccccc@{}}
 \toprule
 Difference & $\hat\Delta$ & SE (DeLong) & $z$ ($p$) & Year-block 95\,\% CI (SE) & Years$\times$seeds 95\,\% CI & MDE DeLong / block \\
@@ -497,7 +498,7 @@ LSTM $-$ LSTM+QNN & $+0.005$ & 0.0050 & 0.97 (0.334) & $[-0.003,+0.013]$ (0.0042
 \caption{Paired comparisons of the 15-seed means with the three further hybrids (same experiment, procedures and notation as \Cref{tab:qnn_paired}). For \texttt{LSTM+QTL} the comparator is its own frozen extractor, which is the standalone LSTM of the same seed. Secondary analysis: DeLong $p$-values are unadjusted and the intervals pointwise.}
 \label{tab:hyb_paired}
 {\small
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{@{}lcccccc@{}}
 \toprule
 Difference & $\hat\Delta$ & SE (DeLong) & $z$ ($p$) & Year-block 95\,\% CI (SE) & Years$\times$seeds 95\,\% CI & MDE DeLong / block \\
@@ -606,7 +607,7 @@ The consequence for QML benchmarking is practical. Single-seed comparisons, and 
 
 \section*{Data and Code Availability}
 \label{sec:data_availability}
-Code, processed panel data and model checkpoints are available at \url{https://github.com/enriquerb32/limits-of-resolution-qml}\todo{archive the release of this repository with a DOI (for example Zenodo) and cite that identifier}. The canonical pipeline is anchored in checkpoint \texttt{01\_data.pt} (monthly panel $N=3{,}363$, 1938-03 to 2026-05; windowed dataset $N=3{,}315$; train/validation/test 2,273/514/528; 35 input features); thresholds ($P_{60}=28.1$\,mm, $P_{90}=86.32$\,mm) were computed on the training partition only. The daily station records are sourced from AEMET's public data holdings via \textit{datosclima.es} under AEMET's Open Data reuse framework; only the processed, aggregated monthly panel is redistributed (\path{results/panel_checkpoint.csv}), with attribution to AEMET. Scripts for the analyses of this paper are organized under \path{code/local_experiments/} (\path{exp7_noise_budget.py}, \path{exp10_paired_ci.py}, \path{exp11_simulation_known_truth.py}, \path{exp12_monthly_coverage_audit.py}, \path{exp13_label_sensitivity.py}, \path{exp14_innerjoin_audit.py}, \path{exp15_panel_matched_simulation.py}, and \path{exp16_block_c.py} for the seed shares of differences, the year jackknife and the additional climatological references, computed from the archived probabilities without retraining and saved in \path{results/local_exp16_block_c.json}); figures are generated from saved results via \path{scripts/make_paper_figs.py}. The 15-seed QML core experiment (\Cref{tab:case}) is produced by \path{code/local_experiments/exp17_hybrids_multiseed.py} with the options \texttt{-{}-fix-et0 -{}-p60 28.1} and all seven models (outputs \path{results_hybrids_trainonly_fixet0_p60_28.1.json} and \path{results_hybrids_trainonly_fixet0_p60_28.1_probs.npz}); the earlier execution (\path{qml_core_trainonly.py}, \path{results_qml_core_trainonly_probs.npz}) is kept for reference. The paired comparisons of \Cref{tab:qnn_paired,tab:hyb_paired} are produced by \path{exp10_paired_ci.py} with the option \texttt{-{}-extra} pointing to the new archive, the label sensitivity of the hybrid (\Cref{tab:label_sens_qnn}) by \path{exp13_label_sensitivity.py} with the same option, the seed shares and year jackknife by \path{exp16_block_c.py -{}-core} (\path{results/local_exp16_block_c_fixet0.json}), and the Random Forest refits by pipeline and fitting rows by \path{exp20_rf_fitting_rows.py} (\path{results/local_exp20_rf_fitting_rows.json}); test metadata are exported by \path{export_test_meta.py}. The commands, seeds and output files are listed in the repository README. Internal variable names (\texttt{dana\_*}, \texttt{acp\_*}) and the feature glossary are in the Supplement.
+Code, processed panel data and model checkpoints are available at \url{https://github.com/enriquerb32/limits-of-resolution-qml}\todo{archive the release of this repository with a DOI (for example Zenodo) and cite that identifier}. The canonical pipeline is anchored in checkpoint \texttt{01\_data.pt} (monthly panel $N=3{,}363$, 1938-03 to 2026-05; windowed dataset $N=3{,}315$; train/validation/test 2{,}273/514/528; 35 input features); thresholds ($P_{60}=28.1$\,mm, $P_{90}=86.32$\,mm) were computed on the training partition only. The daily station records are sourced from AEMET's public data holdings via \textit{datosclima.es} under AEMET's Open Data reuse framework; only the processed, aggregated monthly panel is redistributed (\path{results/panel_checkpoint.csv}), with attribution to AEMET. Scripts for the analyses of this paper are organized under \path{code/local_experiments/} (\path{exp7_noise_budget.py}, \path{exp10_paired_ci.py}, \path{exp11_simulation_known_truth.py}, \path{exp12_monthly_coverage_audit.py}, \path{exp13_label_sensitivity.py}, \path{exp14_innerjoin_audit.py}, \path{exp15_panel_matched_simulation.py}, and \path{exp16_block_c.py} for the seed shares of differences, the year jackknife and the additional climatological references, computed from the archived probabilities without retraining and saved in \path{results/local_exp16_block_c.json}); figures are generated from saved results via \path{scripts/make_paper_figs.py}. The 15-seed QML core experiment (\Cref{tab:case}) is produced by \path{code/local_experiments/exp17_hybrids_multiseed.py} with the options \texttt{-{}-fix-et0 -{}-p60 28.1} and all seven models (outputs \path{results_hybrids_trainonly_fixet0_p60_28.1.json} and \path{results_hybrids_trainonly_fixet0_p60_28.1_probs.npz}); the earlier execution (\path{qml_core_trainonly.py}, \path{results_qml_core_trainonly_probs.npz}) is kept for reference. The paired comparisons of \Cref{tab:qnn_paired,tab:hyb_paired} are produced by \path{exp10_paired_ci.py} with the option \texttt{-{}-extra} pointing to the new archive, the label sensitivity of the hybrid (\Cref{tab:label_sens_qnn}) by \path{exp13_label_sensitivity.py} with the same option, the seed shares and year jackknife by \path{exp16_block_c.py -{}-core} (\path{results/local_exp16_block_c_fixet0.json}), and the Random Forest refits by pipeline and fitting rows by \path{exp20_rf_fitting_rows.py} (\path{results/local_exp20_rf_fitting_rows.json}); test metadata are exported by \path{export_test_meta.py}. The commands, seeds and output files are listed in the repository README. Internal variable names (\texttt{dana\_*}, \texttt{acp\_*}) and the feature glossary are in the Supplement.
 
 \section*{Declaration of Generative AI in Scientific Writing}
 During the preparation of this manuscript, the author used generative AI tooling for editorial language polishing, LaTeX formatting and structural drafting, and for drafting analysis scripts that the author ran and checked. No reported test statistic, empirical metric or benchmark result was generated by AI models; the numerical results come from the released scripts. The author assumes full scientific and editorial responsibility for the content.
