@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "n_test": 528,
+    "B": 2000,
+    "boot_seed": 42,
+    "note": "no retraining; archived train-only probabilities"
+  },
+  "climatology": {
+    "auc": 0.6796345962926192,
+    "brier": 0.22240663640363825,
+    "ece_10": 0.08938445689238243,
+    "bss_vs_base_rate": 0.08158305095913365
+  },
+  "models": {
+    "Random Forest": {
+      "auc_mean": 0.6828900380814084,
+      "brier_mean": 0.22380009904667383,
+      "brier_sd": 0.000873866861973396,
+      "bss_clim_mean": -0.006265382479444718,
+      "bss_clim_min": -0.012544239695592818,
+      "bss_clim_max": 0.0013187668575675993,
+      "seeds_better_than_clim": 1,
+      "ece_mean": 0.0748884180840985,
+      "ece_sd": 0.0023169248624526372,
+      "brier_of_seed_average": 0.2234862472931416,
+      "brier_minus_clim": 0.0013934626430355812,
+      "brier_minus_clim_block_ci": [
+        -0.0061325473258925555,
+        0.009380815478927065
+      ]
+    },
+    "XGBoost": {
+      "auc_mean": 0.6615990240095623,
+      "brier_mean": 0.2456474689243877,
+      "brier_sd": 0.0025453428800043163,
+      "bss_clim_mean": -0.10449702804088283,
+      "bss_clim_min": -0.12695146818615166,
+      "bss_clim_max": -0.08458634290576672,
+      "seeds_better_than_clim": 0,
+      "ece_mean": 0.12484314941819945,
+      "ece_sd": 0.00944793784764634,
+      "brier_of_seed_average": 0.24234869967525652,
+      "brier_minus_clim": 0.02324083252074946,
+      "brier_minus_clim_block_ci": [
+        0.008591397195924519,
+        0.037978150262112084
+      ]
+    },
+    "Standalone LSTM": {
+      "auc_mean": 0.6682096798889663,
+      "brier_mean": 0.23947048778341978,
+      "brier_sd": 0.0045914909581849595,
+      "bss_clim_mean": -0.07672366101887773,
+      "bss_clim_min": -0.10873842421445756,
+      "bss_clim_max": -0.032955435110080256,
+      "seeds_better_than_clim": 0,
+      "ece_mean": 0.13661276691570734,
+      "ece_sd": 0.013585380632736727,
+      "brier_of_seed_average": 0.23706752172144963,
+      "brier_minus_clim": 0.01706385137978153,
+      "brier_minus_clim_block_ci": [
+        0.00729357521597979,
+        0.026829021120778746
+      ]
+    },
+    "Linear-4D control": {
+      "auc_mean": 0.653933350126691,
+      "brier_mean": 0.2429395514280186,
+      "brier_sd": 0.004185252768506676,
+      "bss_clim_mean": -0.09232150333462096,
+      "bss_clim_min": -0.11677156433402414,
+      "bss_clim_max": -0.05135229765732152,
+      "seeds_better_than_clim": 0,
+      "ece_mean": 0.1308133515878935,
+      "ece_sd": 0.010679551999893505,
+      "brier_of_seed_average": 0.241590927884876,
+      "brier_minus_clim": 0.020532915024380344,
+      "brier_minus_clim_block_ci": [
+        0.009640068216449697,
+        0.03223879424495645
+      ]
+    },
+    "LSTM+QNN": {
+      "auc_mean": 0.6633652901052547,
+      "brier_mean": 0.24206152851486856,
+      "brier_sd": 0.00606048851477002,
+      "bss_clim_mean": -0.08837367638418521,
+      "bss_clim_min": -0.12641353781176412,
+      "bss_clim_max": -0.052502250224055746,
+      "seeds_better_than_clim": 0,
+      "ece_mean": 0.13137185078414088,
+      "ece_sd": 0.018163328221777776,
+      "brier_of_seed_average": 0.23681567978922283,
+      "brier_minus_clim": 0.01965489211123031,
+      "brier_minus_clim_block_ci": [
+        0.01090275059985844,
+        0.02838053125688085
+      ]
+    },
+    "LbL-QNN": {
+      "auc_mean": 0.6631627819678853,
+      "brier_mean": 0.2392716107450282,
+      "brier_sd": 0.004417035783439673,
+      "bss_clim_mean": -0.07582945641416129,
+      "bss_clim_min": -0.1106136293482669,
+      "bss_clim_max": -0.051846986679777274,
+      "seeds_better_than_clim": 0,
+      "ece_mean": 0.12753302223743762,
+      "ece_sd": 0.014401027163099028,
+      "brier_of_seed_average": 0.2350587163955334,
+      "brier_minus_clim": 0.01686497434138995,
+      "brier_minus_clim_block_ci": [
+        0.00757173062699295,
+        0.025254683380677437
+      ]
+    },
+    "LSTM+PI-QNN": {
+      "auc_mean": 0.6600649013884156,
+      "brier_mean": 0.23911039275480858,
+      "brier_sd": 0.006738732141589753,
+      "bss_clim_mean": -0.07510457700936254,
+      "bss_clim_min": -0.11941750305175503,
+      "bss_clim_max": -0.025148404775271915,
+      "seeds_better_than_clim": 0,
+      "ece_mean": 0.12455804407331114,
+      "ece_sd": 0.026611300163576327,
+      "brier_of_seed_average": 0.23371766100009406,
+      "brier_minus_clim": 0.01670375635117033,
+      "brier_minus_clim_block_ci": [
+        0.007069410554982341,
+        0.025757512190993113
+      ]
+    },
+    "LSTM+QTL": {
+      "auc_mean": 0.6564543294758003,
+      "brier_mean": 0.2399523086381966,
+      "brier_sd": 0.006868641320095877,
+      "bss_clim_mean": -0.07889005705169386,
+      "bss_clim_min": -0.12831376268529082,
+      "bss_clim_max": -0.02981683618228992,
+      "seeds_better_than_clim": 0,
+      "ece_mean": 0.11951144012553946,
+      "ece_sd": 0.024083260616299968,
+      "brier_of_seed_average": 0.23501973534467827,
+      "brier_minus_clim": 0.017545672234558357,
+      "brier_minus_clim_block_ci": [
+        0.00834175589172072,
+        0.026982602359015975
+      ]
+    }
+  }
+}

@@ -52,6 +52,8 @@ def load_context():
         "exp13_core": load_json("results/json/results_exp13_label_sensitivity_fixet0.json"),
         "exp16_core": load_json("results/local_exp16_block_c_fixet0.json"),
         "exp20": load_json("results/local_exp20_rf_fitting_rows.json"),
+        "exp21": load_json("results/local_exp21_brier_trainonly.json"),
+        "exp22": load_json("results/local_exp22_same_arch_core.json"),
         "rerun": load_json("results/json/results_rerun_train_only_canonical.json"),
         "noise_b": load_json("results/local_exp7_noise_budget.json"),
         "pos_ctrl": load_json("results/local_exp8_positive_control.json"),
@@ -439,10 +441,27 @@ def evaluate_claims(ctx):
     st66, sv66 = check_num(auc_pers, 0.589, 0.001)
     rows.append(("TR-066", "main.tex:390 (Persistence)", "Persistence lag-1 AUC", "0.589", "results/local_exp2_persistence.json", f"auc={auc_pers:.4f}", st66))
 
-    # TR-067
-    auc_br = get_path(br, "models.RF.auc") or 0.6876
-    st67, sv67 = check_num(auc_br, 0.688, 0.001)
-    rows.append(("TR-067", "Table brier (main.tex:392)", "Single-run models AUC, Brier, BSS", "RF: 0.688 / 0.2230 / -0.003; GradBoost: 0.671 / 0.2236 / -0.005; LogReg: 0.655 / 0.2258 / -0.015", "results/local_exp3_brier_reliability.json", f"RF: {auc_br:.4f}", st67))
+    # TR-067 (Table brier: 15-seed train-only Brier, no retraining)
+    e21 = ctx["exp21"] or {}
+    g21 = lambda m, f: get_path(e21, f"models.{m}.{f}")
+    strict("TR-067", "Table brier", "Climatology BS; RF and LSTM+QNN mean BS, BSS, dBS CI; ECE range of non-RF models",
+           "0.2224; RF 0.2238 / -0.006 / [-0.006,+0.009]; QNN 0.2421 / -0.088; ECE 0.120--0.137",
+           "results/local_exp21_brier_trainonly.json",
+           [("clim_bs", get_path(e21, "climatology.brier"), 0.2224, 0.00005),
+            ("rf_bs", g21("Random Forest", "brier_mean"), 0.2238, 0.00005),
+            ("rf_bss", g21("Random Forest", "bss_clim_mean"), -0.006, 0.0005),
+            ("rf_ci_lo", get_path(e21, "models.Random Forest.brier_minus_clim_block_ci.0"), -0.006, 0.0005),
+            ("rf_ci_hi", get_path(e21, "models.Random Forest.brier_minus_clim_block_ci.1"), 0.009, 0.0005),
+            ("qnn_bs", g21("LSTM+QNN", "brier_mean"), 0.2421, 0.00005),
+            ("qnn_bss", g21("LSTM+QNN", "bss_clim_mean"), -0.088, 0.0005),
+            ("ece_min", min((v["ece_mean"] for k, v in (e21.get("models") or {}).items() if k != "Random Forest"), default=None), 0.120, 0.0005),
+            ("ece_max", max((v["ece_mean"] for k, v in (e21.get("models") or {}).items() if k != "Random Forest"), default=None), 0.137, 0.0005)])
+    e22 = ctx["exp22"] or {}
+    fc = [get_path(e22, f"models.{k}.false_claim_rate_iid") for k in ("LSTM_QNN", "LBL_QNN", "LSTM_QTL", "LSTM_PIQNN", "CTRL_LINEAR4D")]
+    strict("TR-067b", "supp App. single-seed pairings", "Same-architecture false claims (DeLong): QNN, LbL, QTL, PI-QNN, Linear-4D",
+           "2 / 11 / 13 / 21 / 20 %", "results/local_exp22_same_arch_core.json",
+           [(k, None if v is None else 100 * v, e, 0.5) for k, v, e in
+            zip(("QNN", "LbL", "QTL", "PIQNN", "Linear"), fc, (2, 11, 13, 21, 20))])
 
     # TR-068 (Table case: 15-seed mean and SD of every core model)
     case = [("RF_2273", 0.6829, 0.0035), ("PureLSTM", 0.6682, 0.0063), ("LSTM_QNN", 0.6634, 0.0098), ("LBL_QNN", 0.6632, 0.0129),
