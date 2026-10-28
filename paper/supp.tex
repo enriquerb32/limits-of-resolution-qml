@@ -74,7 +74,7 @@
 
 The map of experiments is \Cref{M-tab:expmap} of the main text.
 
-\textbf{Experiment identifiers.} \emph{Core}: the matched train-only QML experiment of the main text (15 seeds, same 2{,}273 fitting rows, all probabilities stored; \Cref{tab:core_spec}). \emph{Rerun}: the train-only classical 15-seed reruns of Random Forest, XGBoost and the LSTM. \emph{Historical}: the canonical-pipeline experiments, whose per-seed AUCs were archived but whose per-seed test probabilities were not. For the four historical hybrids, the test probabilities of the seed-42 single run are stored, and seed-0 probabilities were regenerated afterwards; the regeneration reproduces the archived seed-0 AUC exactly for \texttt{LbL-QNN} and within 0.015 for \texttt{LSTM+QNN}, \texttt{LSTM+PI-QNN} and \texttt{LSTM+QTL} (\path{results_hybrid_perseed_probs.json}). The 15-seed probabilities of \texttt{LSTM+QNN} belong to the Core experiment. No paired comparisons are made for the three hybrids with seed-0 probabilities only. Historical results are descriptive and are not used for the inferential claims of the main text.
+\textbf{Experiment identifiers.} \emph{Core}: the matched train-only QML experiment of the main text (15 seeds, same 2{,}273 fitting rows, all probabilities stored; \Cref{tab:core_spec}). \emph{Rerun}: the train-only classical 15-seed reruns of Random Forest, XGBoost and the LSTM. \emph{Historical}: the canonical-pipeline experiments, whose per-seed AUCs were archived but whose per-seed test probabilities were not. For the four historical hybrids, the test probabilities of the seed-42 single run are stored, and seed-0 probabilities were regenerated afterwards; the regeneration reproduces the archived seed-0 AUC exactly for \texttt{LbL-QNN} and within 0.015 for \texttt{LSTM+QNN}, \texttt{LSTM+PI-QNN} and \texttt{LSTM+QTL} (\path{results_hybrid_perseed_probs.json}). The 15-seed train-only probabilities of all four variational hybrids belong to the Core experiment, which re-ran them on the dataset of the Rerun (\Cref{tab:core_spec}); no paired comparisons are made with the historical canonical-pipeline runs, for which only seed-0 probabilities exist. Historical results are descriptive and are not used for the inferential claims of the main text.
 
 
 \subsection{Single-Seed Pairings}
@@ -146,14 +146,14 @@ The same-seed design fixes $\delta$ exactly on the test set; the different-seed 
 \label{sec:core_spec}
 \begin{table}[htbp]
 \centering
-\caption{Specification of the matched 15-seed QML core experiment (script \protect\path{qml_core_trainonly.py}; outputs \protect\path{results_qml_core_trainonly.json} and \protect\path{results_qml_core_trainonly_probs.npz}, storing 528 test probabilities for every seed).}
+\caption{Specification of the matched 15-seed QML core experiment (script \protect\path{exp17_hybrids_multiseed.py} with \texttt{-{}-fix-et0 -{}-p60 28.1}; outputs \protect\path{results_hybrids_trainonly_fixet0_p60_28.1.json} and \protect\path{results_hybrids_trainonly_fixet0_p60_28.1_probs.npz}, storing 528 test probabilities for every seed and model). The Random Forest, standalone LSTM, Linear-4D and \texttt{LSTM+QNN} classes and training loop are those of \protect\path{qml_core_trainonly.py}; the other three hybrids use the training code of the historical runs unchanged.}
 \label{tab:core_spec}
 \small
 \begin{tabular}{@{}p{0.2\textwidth}p{0.74\textwidth}@{}}
 \toprule
 \textbf{Item} & \textbf{Specification} \\
 \midrule
-Pipeline & Train-only: anomalies standardized with years up to 1996 only; threshold $P_{60}=28.1$\,mm from the training partition; 35 input features. \\
+Pipeline & Train-only: anomalies standardized with years up to 1996 only; threshold $P_{60}=28.1$\,mm from the training partition; 35 input features. Identical to the dataset of the classical train-only rerun (the Random Forest and LSTM test probabilities agree with the rerun to within $10^{-11}$). An earlier execution of this experiment (\protect\path{qml_core_trainonly.py}) used a build in which \texttt{et0\_verano\_prev} and \texttt{potencial\_convectivo} were misaligned across stations and $P_{60}$ was 28.00\,mm; it is not used. \\
 Rows & Fit: 2{,}273 training windows (1938--1996); validation: 514 windows (1997--2007), used only for early stopping; test: 528 windows (2008--2026). \\
 Seeds & 0--14 for every stochastic model (\texttt{torch.manual\_seed} and \texttt{numpy.random.seed}; \texttt{random\_state} for Random Forest). The seed index is nominal across frameworks. \\
 Random Forest & 300 trees, maximum depth 8, balanced class weights, mean imputation fitted on the 2{,}273 rows. \\
@@ -161,12 +161,13 @@ Standalone LSTM & 2-layer bidirectional LSTM (16 units per direction, dropout 0.
 Linear-4D control & 2-layer bidirectional LSTM (8 units per direction, dropout 0.2) over the first 12 input columns; projection of the LSTM states and features to 4 dimensions (dropout 0.1), sigmoid scaled to $[0,\pi]$, linear $4\to4$ map (20 parameters), layer normalization, linear output. \\
 LSTM+QNN & Same as the control with the linear map replaced by a 4-qubit circuit (two repetitions of RY/RZ encoding followed by a strongly entangling layer; Pauli-$Z$ expectations; 24 trainable quantum parameters; \texttt{default.qubit}, backpropagation). \\
 Parameter counts & \texttt{LSTM+QNN}: 2{,}368 (LSTM) + 208 (projection $51\to4$) + 8 (layer norm) + 5 (output) + 24 (circuit) = 2{,}613, of which 24 quantum (0.9\,\%); Linear-4D control: the same classical parts with the 20-parameter linear map instead of the circuit = 2{,}609. \\
+Further hybrids & \texttt{LSTM+PI-QNN}: \texttt{LSTM+QNN} architecture trained with the heuristic thermodynamic loss (\Cref{app:heuristic_regularization}). \texttt{LbL-QNN}: 3-layer circuit trained layer by layer (10 epochs per layer) and then fine-tuned. \texttt{LSTM+QTL}: in each seed, a standalone LSTM is trained as above (its test probabilities are stored as the extractor) and frozen, and a quantum head is trained on it; the frozen extractor stays in training mode during this phase, so its batch-normalization statistics are updated and its dropout is active, as in the historical code. Hyperparameters in \Cref{tab:hyperparams}. \\
 Neural training & AdamW (learning rate $5\times10^{-3}$, weight decay $10^{-4}$), learning-rate reduction on plateau (patience 3, factor 0.5), binary cross-entropy with positive-class weight, batch size 16, at most 25 epochs, gradient clipping at 1.0, double precision. \\
 Selection & Early stopping on validation loss (patience 6, minimum improvement $10^{-4}$); the checkpoint with the lowest validation loss is restored. \\
 \bottomrule
 \end{tabular}
 \end{table}
-Equal capacity or tuning effort across the four models should not be assumed.
+Equal capacity or tuning effort across the models should not be assumed. The \emph{Neural training} and \emph{Selection} rows apply to the standalone LSTM, the Linear-4D control and \texttt{LSTM+QNN}.
 
 \subsection{Simulation: All Scenarios}
 \label{app:sim_all}
@@ -223,7 +224,7 @@ $\Delta_{\text{true}}$ & \textbf{Rej. DeLong} & \textbf{Rej. block} & \textbf{Co
 \subsection{Hybrid Architectures and Further Comparisons}
 \label{app:hybrids}
 
-\Cref{tab:multiseed} gives the 15-seed AUC of the main models next to the climatology. Random Forest has the highest mean in every pipeline and every hybrid is below it; this point-estimate ordering is consistent across seeds but has limited evidential weight. The largest gap between Random Forest and any hybrid was 0.031 with the train-only Random Forest and 0.033 with the canonical one, in both cases against the same canonical-pipeline hybrids, which were not re-run train-only. For the hybrids, only seed-0 test probabilities were stored, so no paired comparison with Random Forest is made; the gaps above are point estimates. Fitting Random Forest on the 2{,}273 rows used by the neural models gives $0.6802\pm0.0035$ against $0.6851\pm0.0026$ on 2{,}787 rows; in the train-only pipeline the sign of this difference reverses (\Cref{M-sec:validation_protocol}), so the training-size effect is not consistent in direction, and its magnitude (0.005) is small relative to the test-sampling error.
+\Cref{tab:multiseed} gives the 15-seed AUC of the main models next to the climatology. Random Forest has the highest mean in every pipeline and every hybrid is below it. In the train-only Core experiment the four variational hybrids lie 0.020--0.026 below Random Forest, with paired intervals in \Cref{M-tab:qnn_paired,M-tab:hyb_paired}; the canonical-pipeline values are historical runs with seed-0 probabilities only, and their gaps to Random Forest (up to 0.033) are point estimates. In the canonical pipeline Random Forest fitted on 2{,}273 rows gives $0.6802\pm0.0035$ against $0.6851\pm0.0026$ for the run labelled 2{,}787 rows. The train-only Random Forest labelled 2{,}787 rows in an earlier version of this table turned out to be the 2{,}273-row fit (\Cref{M-sec:validation_protocol}), and its row is removed.
 
 
 \begin{table}[htbp]
@@ -236,19 +237,23 @@ $\Delta_{\text{true}}$ & \textbf{Rej. DeLong} & \textbf{Rej. block} & \textbf{Co
 \textbf{Model} & \textbf{Pipeline} & \textbf{Mean AUC} & \textbf{SD} & \textbf{Gap to clim.} \\
 \midrule
 Random Forest (2,787 rows) & C & 0.6851 & 0.0026 & $+0.006$ \\
-Random Forest (2,273 rows) & TO & 0.6846 & 0.0036 & $+0.005$ \\
-Random Forest (2,787 rows) & TO & 0.683 & 0.0035 & $+0.003$ \\
+Random Forest (2,273 rows) & TO & 0.6829 & 0.0035 & $+0.003$ \\
 Random Forest (2,273 rows) & C & 0.6802 & 0.0035 & $+0.001$ \\
 Gradient Boosting & C & 0.6692 & 0.0022 & $-0.010$ \\
 Reuploading-3$\times$4D & C & 0.6688 & 0.0085 & $-0.011$ \\
-Standalone LSTM & TO & 0.668 & 0.0063 & $-0.011$ \\
+Standalone LSTM & TO & 0.6682 & 0.0063 & $-0.011$ \\
 Standalone LSTM & C & 0.6657 & 0.0091 & $-0.014$ \\
 Amplitude-16D & C & 0.6643 & 0.0114 & $-0.015$ \\
+LSTM+QNN & TO & 0.6634 & 0.0098 & $-0.016$ \\
+LbL-QNN & TO & 0.6632 & 0.0129 & $-0.016$ \\
 XGBoost & TO & 0.662 & 0.0054 & $-0.018$ \\
 LbL-QNN & C & 0.6605 & 0.0089 & $-0.019$ \\
+LSTM+PI-QNN & TO & 0.6601 & 0.0170 & $-0.020$ \\
 LSTM+QNN & C & 0.6589 & 0.0153 & $-0.021$ \\
 XGBoost & C & 0.6575 & 0.0051 & $-0.022$ \\
+LSTM+QTL & TO & 0.6565 & 0.0147 & $-0.023$ \\
 LSTM+PI-QNN & C & 0.6555 & 0.0172 & $-0.024$ \\
+Linear-4D control & TO & 0.6539 & 0.0078 & $-0.026$ \\
 LSTM+QTL & C & 0.6519 & 0.0128 & $-0.028$ \\
 Bottleneck-free LSTM (hidden 8) & C & 0.6435 & 0.0065 & $-0.036$ \\
 \bottomrule
@@ -256,9 +261,9 @@ Bottleneck-free LSTM (hidden 8) & C & 0.6435 & 0.0065 & $-0.036$ \\
 }
 \end{table}
 
-\textbf{Single-run claims among hybrids.} In a single run, \texttt{LbL-QNN} reached an AUC of 0.672, tracking Random Forest (DeLong $p=0.2124$) and nominally above \texttt{LSTM+QNN} ($p=0.0070$) and the standalone LSTM (0.653, $p=0.0263$; the latter comparison is also confounded by the capacity mismatch). Across 15 seeds the means of \texttt{LbL-QNN} and \texttt{LSTM+QNN} are 0.6605 and 0.6589. Over the $15\times15=225$ seed pairs, \texttt{LbL-QNN} has the higher AUC in 52.0\,\% of cases and \texttt{LSTM+QNN} in 48.0\,\%, an almost symmetric distribution. A paired DeLong test on every seed pair would need the per-seed test probabilities, which were archived only for seed 0, so none is made. An omnibus Friedman test finds no difference among the four quantum models ($\chi^2(3)=2.600$, $p=0.458$, Kendall's $W=0.058$). These are seed-level statements; the sampling-error argument of \Cref{M-sec:budget} applies to them as well.
+\textbf{Single-run claims among hybrids.} In a single run, \texttt{LbL-QNN} reached an AUC of 0.672, tracking Random Forest (DeLong $p=0.2124$) and nominally above \texttt{LSTM+QNN} ($p=0.0070$) and the standalone LSTM (0.653, $p=0.0263$; the latter comparison is also confounded by the capacity mismatch). Across 15 seeds the means of \texttt{LbL-QNN} and \texttt{LSTM+QNN} are 0.6605 and 0.6589. Over the $15\times15=225$ seed pairs, \texttt{LbL-QNN} has the higher AUC in 52.0\,\% of cases and \texttt{LSTM+QNN} in 48.0\,\%, an almost symmetric distribution. A paired DeLong test on every seed pair would need the per-seed test probabilities, which were archived only for seed 0 in these canonical runs, so none is made; in the train-only Core experiment the two models have 15-seed means of 0.6632 and 0.6634 (\Cref{M-tab:case}). An omnibus Friedman test finds no difference among the four quantum models ($\chi^2(3)=2.600$, $p=0.458$, Kendall's $W=0.058$). These are seed-level statements; the sampling-error argument of \Cref{M-sec:budget} applies to them as well.
 
-\textbf{Equivalence margins.} In the historical fixed-test seed-level analysis, GELU satisfied the $\pm0.010$ margin and the linear controller satisfied $\pm0.015$; LeakyReLU required $\pm0.020$ (for \texttt{LSTM+QNN} versus \texttt{LbL-QNN}: mean difference $-0.0016$, 90\,\% CI $[-0.0095,+0.0062]$, $p_{\text{TOST}}=0.041$ at $\pm0.010$). These tests use seed variance only, the margins were not justified by a scientific or practical criterion, and the paired structure of the seed index is a convention. They do not establish sampling-aware equivalence of predictive performance; a TOST that includes sampling error would require the per-seed test probabilities of the hybrids, which are not available (\Cref{app:multiseed,app:bottleneck}).
+\textbf{Equivalence margins.} In the historical fixed-test seed-level analysis, GELU satisfied the $\pm0.010$ margin and the linear controller satisfied $\pm0.015$; LeakyReLU required $\pm0.020$ (for \texttt{LSTM+QNN} versus \texttt{LbL-QNN}: mean difference $-0.0016$, 90\,\% CI $[-0.0095,+0.0062]$, $p_{\text{TOST}}=0.041$ at $\pm0.010$). These tests use seed variance only, the margins were not justified by a scientific or practical criterion, and the paired structure of the seed index is a convention. They do not establish sampling-aware equivalence of predictive performance; a TOST that includes sampling error would require the per-seed test probabilities of these historical runs, which are not available (\Cref{app:multiseed,app:bottleneck}); for the train-only Core experiment the sampling-aware intervals are in \Cref{M-tab:qnn_paired,M-tab:hyb_paired}.
 
 \textbf{Bottleneck-matched controls.} The end-to-end hybrids compress a 51-dimensional vector to 4 angles. Three classical controllers on the identical 4-dimensional interface (linear, 20 parameters; LeakyReLU, 28; GELU, 180) obtain AUC $0.6545$, $0.6516$ and $0.6563$ against $0.6589$ for \texttt{LSTM+QNN}, with Wilcoxon $p\in[0.17,0.64]$ (\Cref{app:bottleneck}). The gaps are 0.003--0.007 on the historical seed-level data. A bottleneck-free LSTM with the same hidden size scores lower ($0.6435\pm0.0065$) than the 4-dimensional controls, and full-feature XGBoost (0.662 train-only; 0.6575 in the canonical pipeline of the hybrids, \Cref{tab:multiseed}) is comparable to \texttt{LSTM+QNN} (0.659). The evidence therefore does not support the hypothesis that the 4-dimensional bottleneck is the cause of the gap between hybrids and tree ensembles: the data do not identify the bottleneck as its cause, and removing the bottleneck did not raise the score of the small recurrent backbone.
 
@@ -761,7 +766,7 @@ the mean difference is \(-0.0016\) (with standard error \(\text{SE}_\Delta = 0.0
 \([-0.0095,+0.0062]\) contained within the \(\pm0.010\) bounds
 (\(p_{\mathrm{TOST}}=0.0407\)). Under sensitivity margins \(\Delta = \pm 0.015\) and \(\pm 0.020\), the margin is also satisfied at the wider margins (\(p_{\text{TOST}} \le 0.0028\)). These tests concern seed-level optimization only: test-set sampling uncertainty is far larger (standard error of one AUC 0.023--0.027; \Cref{M-sec:budget}), and the results do not establish sampling-aware equivalence.
 
-To describe how often one seed outcome exceeds another, we analyzed the complete pairwise cross-seed comparison matrix ($15 \times 15 = 225$ pairs) between \texttt{LbL-QNN} and \texttt{LSTM+QNN}. Across all 225 realizations, \texttt{LbL-QNN} yields a higher test AUC than \texttt{LSTM+QNN} in 52.0\% of cases (117/225), whereas \texttt{LSTM+QNN} is higher in 48.0\% of cases (108/225)---a virtually symmetric distribution. Per-seed test probabilities were archived only for seed 0, so no paired DeLong test is made on the 225 pairs; the 15-seed means of the two models differ by only 0.0016.
+To describe how often one seed outcome exceeds another, we analyzed the complete pairwise cross-seed comparison matrix ($15 \times 15 = 225$ pairs) between \texttt{LbL-QNN} and \texttt{LSTM+QNN}. Across all 225 realizations, \texttt{LbL-QNN} yields a higher test AUC than \texttt{LSTM+QNN} in 52.0\% of cases (117/225), whereas \texttt{LSTM+QNN} is higher in 48.0\% of cases (108/225)---a virtually symmetric distribution. Per-seed test probabilities of these canonical runs were archived only for seed 0, so no paired DeLong test is made on the 225 pairs; the 15-seed means of the two models differ by only 0.0016.
 
 The clearest secondary pattern emerging from the quantum tier is lower across-seed variability
 for the combined layer-wise/heuristic configuration. A depth-matched control for
@@ -941,7 +946,7 @@ Within-run uncertainty estimation can mislead architectural comparison: the boot
 \label{app:hyperparams}
 % ============================================================
 
-The Core experiment uses the configuration of \Cref{tab:core_spec}; for the standalone LSTM, the architecture and training loop coincide with the historical configuration below. \Cref{tab:hyperparams} reports the full hyperparameter configuration for all evaluated
+The Core experiment uses the configuration of \Cref{tab:core_spec}; for the standalone LSTM, the architecture and training loop coincide with the historical configuration below, and \texttt{LSTM+PI-QNN}, \texttt{LbL-QNN} and \texttt{LSTM+QTL} use the hyperparameters of \Cref{tab:hyperparams}. \Cref{tab:hyperparams} reports the full hyperparameter configuration for all evaluated
 architectures, to support exact reproducibility.
 
 \begin{table}[htbp]
