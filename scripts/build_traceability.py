@@ -55,6 +55,7 @@ def load_context():
         "exp21": load_json("results/local_exp21_brier_trainonly.json"),
         "exp22": load_json("results/local_exp22_same_arch_core.json"),
         "exp23": load_json("results/local_exp23_within_station_auc.json"),
+        "exp24": load_json("results/local_exp24_resolution_curve.json"),
         "rerun": load_json("results/json/results_rerun_train_only_canonical.json"),
         "noise_b": load_json("results/local_exp7_noise_budget.json"),
         "pos_ctrl": load_json("results/local_exp8_positive_control.json"),
@@ -466,6 +467,20 @@ def evaluate_claims(ctx):
            [("clim", w("Climatology"), 0.670, 0.0005), ("rf", w("Random Forest"), 0.660, 0.0005), ("qnn", w("LSTM+QNN"), 0.639, 0.0005),
             ("qnn_clim_lo", pq[0] if pq else None, -0.060, 0.0005), ("qnn_clim_hi", pq[1] if pq else None, -0.005, 0.0005),
             ("rf_clim_lo", pr[0] if pr else None, -0.034, 0.0005), ("rf_clim_hi", pr[1] if pr else None, 0.009, 0.0005)])
+    e24 = ctx["exp24"] or {}
+    g24 = lambda K, f: get_path(e24, f"by_K.{K}.pairs.RF-LSTM_QNN.{f}")
+    ex = [get_path(e24, f"fit.{p}.{s}.exponent") for p in ("RF-XGB", "RF-LSTM", "RF-LSTM_QNN", "CTRL_LINEAR4D-LSTM_QNN", "LSTM-LSTM_QNN")
+          for s in ("se_single", "se_mean_delong", "se_mean_jk")]
+    nstar = lambda p, s: get_path(e24, f"fit.{p}.{s}.N_for_mde_equal_gap")
+    strict("TR-067d", "Table resolution / Limitations", "Resolution curve: RF-QNN MDEs at N=144 and 528; exponent range; N* for RF-QNN and Linear-QNN",
+           "0.060/0.035 and 0.031/0.017; 0.46--0.53; ~1,300 / ~420; 2,800--3,500", "results/local_exp24_resolution_curve.json",
+           [("mde_dl_5y", g24(5, "mde_mean_delong"), 0.060, 0.0005), ("mde_jk_5y", g24(5, "mde_mean_jk"), 0.035, 0.0005),
+            ("mde_dl_19y", g24(19, "mde_mean_delong"), 0.031, 0.0005), ("mde_jk_19y", g24(19, "mde_mean_jk"), 0.017, 0.0005),
+            ("exp_min", min(ex) if all(v is not None for v in ex) else None, 0.46, 0.005),
+            ("exp_max", max(ex) if all(v is not None for v in ex) else None, 0.53, 0.005),
+            ("nstar_dl", nstar("RF-LSTM_QNN", "se_mean_delong"), 1300, 50), ("nstar_jk", nstar("RF-LSTM_QNN", "se_mean_jk"), 420, 50),
+            ("nstar_ctrl_dl", nstar("CTRL_LINEAR4D-LSTM_QNN", "se_mean_delong"), 2800, 50),
+            ("nstar_ctrl_jk", nstar("CTRL_LINEAR4D-LSTM_QNN", "se_mean_jk"), 3500, 50)])
     e22 = ctx["exp22"] or {}
     fc = [get_path(e22, f"models.{k}.false_claim_rate_iid") for k in ("LSTM_QNN", "LBL_QNN", "LSTM_QTL", "LSTM_PIQNN", "CTRL_LINEAR4D")]
     strict("TR-067b", "supp App. single-seed pairings", "Same-architecture false claims (DeLong): QNN, LbL, QTL, PI-QNN, Linear-4D",

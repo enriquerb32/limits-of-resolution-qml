@@ -578,6 +578,9 @@ For the quantum results, \texttt{LSTM+QNN} scores 0.020 AUC below Random Forest 
 
 \textbf{Generality beyond this dataset.} All empirical conclusions concern the complete-variable panel retained by the processing pipeline, not the full set of station-months with precipitation observations (897 station-months with at least 10 observed days do not enter it; \Cref{sec:labels}), and the evidence is empirical for one panel, but the sampling-error argument does not depend on the climate application. For a binary classifier with AUC $A$, $n_1$ positives and $n_0$ negatives, the Hanley--McNeil approximation \citep{hanley1982} gives the standard error of one AUC from $(A,n_1,n_0)$ alone; for the present test set it returns 0.024, matching the DeLong value. Assuming a correlation of 0.75 between the AUCs of two models scored on the same rows (the paired standard errors measured here imply 0.72--0.83), \Cref{tab:hm_mde} gives the approximate 80\,\%-power MDE for other test-set sizes: about 0.049 for $N=500$ at prevalence 0.41 and about 0.086 at prevalence 0.10. These values are specific to the assumed AUC (0.68), inter-model correlation and iid approximation; an MDE is a design sensitivity and not a bound on detectable effects, and temporal and spatial dependence can change it in either direction for paired comparisons (for RF $-$ LSTM the block standard error here is smaller than the DeLong one). They do not replace validation on further datasets.
 
+An empirical version of this scaling is obtained from the panel itself (\Cref{tab:resolution}; \path{exp24_resolution_curve.py}, no retraining): random subsets of 5 to 16 of the 19 test years (300 per size, all stations of a year together) are re-evaluated with the archived predictions. For every pair and every procedure the standard error falls approximately as $N^{-1/2}$ (fitted exponents 0.46--0.53), and the single-run MDEs lie about 10--20\,\% below the Hanley--McNeil values, so \Cref{tab:hm_mde} is slightly conservative here. Extrapolating with this scaling, the MDE of the 15-seed means would equal the observed Random Forest $-$ \texttt{LSTM+QNN} gap (0.020) at about 1{,}300 test rows under DeLong, 2.5 times the present test set, but already at about 420 rows under the year jackknife, so the two procedures also disagree on how much data the comparison needs. The comparisons that bear on a quantum contribution are much further from resolution: the hybrid against the circuit-free control ($-0.009$) would need about 2{,}800--3{,}500 rows and the hybrid against the standalone LSTM ($+0.005$) about 3{,}300--4{,}400.
+
+
 \begin{table}[htbp]
 \centering
 \caption{Approximate MDE for the AUC difference of two models on the same test set (Hanley--McNeil standard error, AUC 0.68, inter-model correlation 0.75, $\alpha=0.05$, power 0.80). Test-set size $N$ and positive-class prevalence $\pi$.}
@@ -592,6 +595,28 @@ $N$ & MDE, $\pi=0.41$ & MDE, $\pi=0.10$ \\
 1{,}000 & 0.035 & 0.061 \\
 2{,}500 & 0.022 & 0.038 \\
 5{,}000 & 0.015 & 0.027 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Empirical resolution curve: median 80\,\%-power MDE over random subsets of test years (300 subsets per size; archived train-only predictions). Single run: paired DeLong MDE of seed $s$ against seed $s$, averaged over the 15 seeds. 15-seed means: paired DeLong on seed-averaged components and delete-one-year jackknife. The last row is the full test set; HM: Hanley--McNeil single-run value of \Cref{tab:hm_mde} at the same $N$.}
+\label{tab:resolution}
+{\small
+\begin{tabular}{rrccccc}
+\toprule
+& & & \multicolumn{2}{c}{\textbf{Single run}} & \multicolumn{2}{c}{\textbf{RF $-$ LSTM+QNN, 15-seed means}} \\
+\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+\textbf{Years} & $N$ & \textbf{HM} & \textbf{RF $-$ LSTM} & \textbf{RF $-$ LSTM+QNN} & \textbf{DeLong} & \textbf{Jackknife} \\
+\midrule
+5 & 144 & 0.091 & 0.077 & 0.084 & 0.060 & 0.035 \\
+8 & 218 & 0.074 & 0.060 & 0.067 & 0.047 & 0.027 \\
+10 & 282 & 0.065 & 0.053 & 0.059 & 0.042 & 0.024 \\
+13 & 360 & 0.058 & 0.046 & 0.052 & 0.037 & 0.021 \\
+16 & 444 & 0.052 & 0.042 & 0.047 & 0.033 & 0.019 \\
+19 & 528 & 0.048 & 0.038 & 0.043 & 0.031 & 0.017 \\
 \bottomrule
 \end{tabular}%
 }
