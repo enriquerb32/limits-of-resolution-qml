@@ -151,12 +151,19 @@ def compare_seedmean_vs_fixed(y, years, P, p_fixed):
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--core', default=os.path.join(ROOT, 'results', 'json', 'results_qml_core_trainonly_probs.npz'),
+                    help='core archive; extra hybrids in it (e.g. results_hybrids_trainonly_fixet0_p60_28.1_probs.npz) '
+                         'are analysed like the merged archive')
+    ap.add_argument('--out', default=OUT)
+    args = ap.parse_args()
     ds, y, m_te, X_te, years, _ = load_test_partition()
     out = {'meta': dict(B=B, boot_seed=BOOT_SEED, n_test=int(len(y)), n_years=int(len(np.unique(years))),
-                        note='No retraining; archived test probabilities only.')}
+                        core=os.path.basename(args.core), note='No retraining; archived test probabilities only.')}
 
     rr = np.load(os.path.join(ROOT, 'results', 'json', 'results_rerun_train_only_canonical_probs.npz'))
-    core = np.load(os.path.join(ROOT, 'results', 'json', 'results_qml_core_trainonly_probs.npz'))
+    core = np.load(args.core)
     assert np.array_equal(rr['y_te'].astype(int), y) and np.array_equal(core['y_te'].astype(int), y)
 
     rerun = {k: rr[f'train_only_{k}_probs'].astype(float) for k in ['RF', 'XGB', 'LSTM']}
@@ -182,6 +189,8 @@ def main():
 
     # ---- C1/C4 for the remaining hybrids, once exp17_hybrids_multiseed.py has produced the merged archive
     merged = os.path.join(ROOT, 'results', 'json', 'results_core_plus_hybrids_probs.npz')
+    if len(core.files) > 5:     # the core archive already holds the extra hybrids
+        merged = args.core
     if os.path.exists(merged):
         z = np.load(merged)
         assert np.array_equal(z['y_te'].astype(int), y)
@@ -271,9 +280,9 @@ def main():
     except Exception as e:  # pragma: no cover
         out['C6_mottonen_generic_real_state'] = {'error': repr(e)}
 
-    with open(OUT, 'w', encoding='utf-8') as f:
+    with open(args.out, 'w', encoding='utf-8') as f:
         json.dump(out, f, indent=2)
-    print('saved', OUT)
+    print('saved', args.out)
 
 
 if __name__ == '__main__':

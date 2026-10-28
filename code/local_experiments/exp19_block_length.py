@@ -54,9 +54,15 @@ def mbb_diffs(PA, PB, y, years, L, rng):
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--core', default=os.path.join(ROOT, 'results', 'json', 'results_qml_core_trainonly_probs.npz'),
+                    help='core archive; extra hybrids in it are added like the merged archive')
+    ap.add_argument('--out', default=OUT)
+    args = ap.parse_args()
     ds, y, m_te, X_te, years, _ = load_test_partition()
     rr = np.load(os.path.join(ROOT, 'results', 'json', 'results_rerun_train_only_canonical_probs.npz'))
-    core = np.load(os.path.join(ROOT, 'results', 'json', 'results_qml_core_trainonly_probs.npz'))
+    core = np.load(args.core)
     assert np.array_equal(rr['y_te'].astype(int), y) and np.array_equal(core['y_te'].astype(int), y)
     P = {k: rr[f'train_only_{k}_probs'].astype(float) for k in ['RF', 'XGB', 'LSTM']}
     P.update({k: core[f'{k}_probs'].astype(float) for k in ['RF_2273', 'PureLSTM', 'CTRL_LINEAR4D', 'LSTM_QNN']})
@@ -65,6 +71,8 @@ def main():
              ('CTRL_LINEAR4D', 'LSTM_QNN'), ('PureLSTM', 'LSTM_QNN'), ('RF', 'CLIM_TRAIN')]
 
     merged = os.path.join(ROOT, 'results', 'json', 'results_core_plus_hybrids_probs.npz')
+    if len(core.files) > 5:     # the core archive already holds the extra hybrids
+        merged = args.core
     if os.path.exists(merged):
         z = np.load(merged)
         assert np.array_equal(z['y_te'].astype(int), y)
@@ -93,10 +101,10 @@ def main():
         res[f'{a}-{b}'] = row
         print(line, flush=True)
 
-    with open(OUT, 'w', encoding='utf-8') as f:
+    with open(args.out, 'w', encoding='utf-8') as f:
         json.dump(dict(meta=dict(B=B, seed=SEED, lengths=LENGTHS, n_years=int(len(np.unique(years))),
                                  scheme='circular moving-block bootstrap over calendar years'), pairs=res), f, indent=2)
-    print('saved', OUT)
+    print('saved', args.out)
 
 
 if __name__ == '__main__':
