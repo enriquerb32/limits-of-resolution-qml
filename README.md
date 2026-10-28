@@ -1,6 +1,6 @@
-# Limits of Resolution in Quantum Machine Learning
+# Limits of Resolution in Small Machine-Learning Benchmarks
 
-Reproducibility repository for the manuscript **"Limits of Resolution in Quantum Machine Learning: A Statistical Noise Budget for Small Benchmarks"** (Enrique Real, ORCID [0009-0006-3862-9797](https://orcid.org/0009-0006-3862-9797)).
+Reproducibility repository for the manuscript **"Limits of Resolution in Small Machine-Learning Benchmarks: A Noise Budget with a Quantum Case Study"** (Enrique Real, ORCID [0009-0006-3862-9797](https://orcid.org/0009-0006-3862-9797)).
 
 [![Code: MIT](https://img.shields.io/badge/Code-MIT-yellow.svg)](LICENSE)
 [![Data and text: CC BY 4.0](https://img.shields.io/badge/Data%20%26%20Text-CC%20BY%204.0-lightgrey.svg)](LICENSE-DATA)
