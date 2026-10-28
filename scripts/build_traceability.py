@@ -46,7 +46,12 @@ def load_context():
         "exp13": load_json("results/json/results_exp13_label_sensitivity.json"),
         "exp14": load_json("results/json/results_exp14_innerjoin.json"),
         "exp15": load_json("results/json/results_exp15_panel_sim.json"),
-        "qml_core": load_json("results/json/results_qml_core_trainonly.json"),
+        "qml_core": load_json("results/json/results_hybrids_trainonly_fixet0_p60_28.1.json"),
+        "exp10_core": load_json("results/json/results_exp10_paired_ci_fixet0.json"),
+        "exp10_hyb": load_json("results/json/results_exp10_hybrids_fixet0.json"),
+        "exp13_core": load_json("results/json/results_exp13_label_sensitivity_fixet0.json"),
+        "exp16_core": load_json("results/local_exp16_block_c_fixet0.json"),
+        "exp20": load_json("results/local_exp20_rf_fitting_rows.json"),
         "rerun": load_json("results/json/results_rerun_train_only_canonical.json"),
         "noise_b": load_json("results/local_exp7_noise_budget.json"),
         "pos_ctrl": load_json("results/local_exp8_positive_control.json"),
@@ -94,6 +99,26 @@ def evaluate_claims(ctx):
             return "VERIFIED", val_str
         return "MISMATCH", f"MISMATCH: got {val_str}, expected {expected}"
 
+    def strict(tr_id, loc, desc, paper, src, checks):
+        """checks: list of (label, value, expected, tol). No fallbacks: a missing value gives UNVERIFIED."""
+        if any(v is None for _, v, _, _ in checks):
+            missing = [lab for lab, v, _, _ in checks if v is None]
+            rows.append((tr_id, loc, desc, paper, src, f"NOT_FOUND: {', '.join(missing)}", "UNVERIFIED"))
+            return
+        ok = all(abs(v - e) <= t for _, v, e, t in checks)
+        sv = "; ".join(f"{lab}={v:.4f}" for lab, v, _, _ in checks)
+        rows.append((tr_id, loc, desc, paper, src, sv if ok else f"MISMATCH: {sv}", "VERIFIED" if ok else "MISMATCH"))
+
+    def seed_mean_sd(model):
+        a = get_path(qc, f"models.{model}.auc")
+        return (float(np.mean(a)), float(np.std(a, ddof=1))) if a else (None, None)
+
+    e10c = ctx["exp10_core"] or {}
+    e10h = ctx["exp10_hyb"] or {}
+    e13c = ctx["exp13_core"] or {}
+    e16c = ctx["exp16_core"] or {}
+    e20 = ctx["exp20"] or {}
+
     # TR-001
     n_te = len(d01_data.get("y_te", [])) if "y_te" in d01_data else 528
     st, sv = check_num(n_te, 528, 0, str)
@@ -129,19 +154,18 @@ def evaluate_claims(ctx):
         rows.append(("TR-005", "main.tex:67 (Abstract)", "RF - LSTM gap and DeLong p-value", "+0.015, p=0.19", "results/json/results_exp10_paired_ci.json:pairs.RF-LSTM", f"{d5}, {p5}", "MISMATCH"))
 
     # TR-006
-    d6 = get_path(e10, "pairs.RF_2273-LSTM_QNN.delta")
-    p6 = get_path(e10, "pairs.RF_2273-LSTM_QNN.p_delong")
-    if d6 is not None and p6 is not None and abs(d6 - 0.029) <= 0.001 and abs(p6 - 0.026) <= 0.002:
-        rows.append(("TR-006", "main.tex:67 (Abstract)", "RF - LSTM+QNN gap and DeLong p-value", "0.029, p=0.026", "results/json/results_exp10_paired_ci.json:pairs.RF_2273-LSTM_QNN", f"{d6:.4f}, p={p6:.4f}", "VERIFIED"))
-    else:
-        rows.append(("TR-006", "main.tex:67 (Abstract)", "RF - LSTM+QNN gap and DeLong p-value", "0.029, p=0.026", "results/json/results_exp10_paired_ci.json:pairs.RF_2273-LSTM_QNN", f"{d6}, {p6}", "MISMATCH"))
+    pq = "pairs.RF_2273-LSTM_QNN"
+    strict("TR-006", "main.tex Abstract", "RF - LSTM+QNN gap, DeLong p, year-block CI", "0.020, p=0.074; block +0.007 to +0.031",
+           f"results/json/results_exp10_paired_ci_fixet0.json:{pq}",
+           [("delta", get_path(e10c, f"{pq}.delta"), 0.0195, 0.0006), ("p", get_path(e10c, f"{pq}.p_delong"), 0.074, 0.0006),
+            ("ci_lo", get_path(e10c, f"{pq}.ci_block.0"), 0.007, 0.0006), ("ci_hi", get_path(e10c, f"{pq}.ci_block.1"), 0.031, 0.0006)])
 
     # TR-007
-    d7 = get_path(e10, "pairs.CTRL_LINEAR4D-LSTM_QNN.delta")
-    if d7 is not None and abs(d7 - 0.001) <= 0.001:
-        rows.append(("TR-007", "main.tex:67 (Abstract)", "Linear-4D - LSTM+QNN gap and interval bounds", "0.001 (intervals +-0.012--0.017)", "results/json/results_exp10_paired_ci.json:pairs.CTRL_LINEAR4D-LSTM_QNN", f"delta={d7:.4f}", "VERIFIED"))
-    else:
-        rows.append(("TR-007", "main.tex:67 (Abstract)", "Linear-4D - LSTM+QNN gap and interval bounds", "0.001 (intervals +-0.012--0.017)", "results/json/results_exp10_paired_ci.json:pairs.CTRL_LINEAR4D-LSTM_QNN", f"{d7}", "MISMATCH"))
+    pc7 = "pairs.CTRL_LINEAR4D-LSTM_QNN"
+    strict("TR-007", "main.tex Abstract", "Linear-4D - LSTM+QNN gap and interval bounds", "-0.009 (intervals about -0.03 to +0.008)",
+           f"results/json/results_exp10_paired_ci_fixet0.json:{pc7}",
+           [("delta", get_path(e10c, f"{pc7}.delta"), -0.0094, 0.0006), ("two_way_lo", get_path(e10c, f"{pc7}.ci_two_way.0"), -0.030, 0.0006),
+            ("two_way_hi", get_path(e10c, f"{pc7}.ci_two_way.1"), 0.008, 0.0006)])
 
     # TR-008
     r8 = get_path(sB, "rows.0.rejection_delong")
@@ -237,19 +261,27 @@ def evaluate_claims(ctx):
     else:
         rows.append(("TR-023", "main.tex:136", "LeakyReLU / GELU control params", "28 and 180 parameters", "results/json/results_wp3_accounting.json", f"Leaky={p23l}, GELU={p23g}", "MISMATCH"))
 
-    # TR-024
-    auc_c2273 = get_path(nb, "canonical.per_model.RF.auc_mean") or 0.6802
-    auc_c2787 = 0.6851
-    rows.append(("TR-024", "main.tex:138", "RF canonical 2,273 rows vs 2,787 rows AUC", "0.6802 +- 0.0035 vs 0.6851 +- 0.0026", "results/local_exp7_noise_budget.json & results/results_master.csv", f"{auc_c2273:.4f} +- 0.0035 vs {auc_c2787:.4f} +- 0.0026", "VERIFIED"))
+    # TR-024 (pipeline x fitting rows, one environment)
+    strict("TR-024", "main.tex Sec. 2.3 / supp App. leakage", "RF refits: canonical 2,787/2,273; train-only 2,787/2,273",
+           "0.6875 / 0.6802; 0.6860 / 0.6831", "results/local_exp20_rf_fitting_rows.json:RF.*.mean_auc",
+           [(k, get_path(e20, f"RF.{k}.mean_auc"), e, 0.00005) for k, e in
+            [("canonical_2787", 0.6875), ("canonical_2273", 0.6802), ("train_only_2787", 0.6860), ("train_only_2273", 0.6831)]])
+    strict("TR-024b", "supp App. leakage", "XGB refits: canonical 2,787/2,273; train-only 2,787/2,273",
+           "0.6599 / 0.6636; 0.6596 / 0.6630", "results/local_exp20_rf_fitting_rows.json:XGB.*.mean_auc",
+           [(k, get_path(e20, f"XGB.{k}.mean_auc"), e, 0.00005) for k, e in
+            [("canonical_2787", 0.6599), ("canonical_2273", 0.6636), ("train_only_2787", 0.6596), ("train_only_2273", 0.6630)]])
+    strict("TR-024c", "supp App. leakage", "Standardization effect with rows fixed (RF at 2,273 / 2,787; XGB at 2,273 / 2,787)",
+           "+0.003 / -0.0015; -0.0006 / -0.0004", "results/local_exp20_rf_fitting_rows.json:*.effects",
+           [("RF_2273", get_path(e20, "RF.effects.pipeline_to_minus_c_at_2273"), 0.003, 0.0005),
+            ("RF_2787", get_path(e20, "RF.effects.pipeline_to_minus_c_at_2787"), -0.0015, 0.0005),
+            ("XGB_2273", get_path(e20, "XGB.effects.pipeline_to_minus_c_at_2273"), -0.0006, 0.00005),
+            ("XGB_2787", get_path(e20, "XGB.effects.pipeline_to_minus_c_at_2787"), -0.0004, 0.00005)])
 
-    # TR-025
-    auc_rf_qc = qc.get("models", {}).get("RF_2273", {}).get("auc", [])
-    if auc_rf_qc:
-        m25, s25 = float(np.mean(auc_rf_qc)), float(np.std(auc_rf_qc, ddof=1))
-        st, sv = ("VERIFIED", f"mean={m25:.4f}, sd={s25:.4f}") if abs(m25 - 0.6846) <= 0.0005 else ("MISMATCH", f"{m25:.4f}")
-        rows.append(("TR-025", "main.tex:138", "RF train-only 2,273 rows AUC", "0.6846 +- 0.0036", "results/json/results_qml_core_trainonly.json:models.RF_2273", sv, st))
-    else:
-        rows.append(("TR-025", "main.tex:138", "RF train-only 2,273 rows AUC", "0.6846 +- 0.0036", "results/json/results_qml_core_trainonly.json:models.RF_2273", "0.6846 +- 0.0036", "VERIFIED"))
+    # TR-025 (core RF equals rerun RF)
+    m25, s25 = seed_mean_sd("RF_2273")
+    strict("TR-025", "Table case", "RF train-only 2,273 rows AUC (core = rerun fit)", "0.6829 +- 0.0035",
+           "results/json/results_hybrids_trainonly_fixet0_p60_28.1.json:models.RF_2273",
+           [("mean", m25, 0.6829, 0.00005), ("sd", s25, 0.0035, 0.00005)])
 
     # TR-026
     m_rf = get_path(nb, "train_only.per_model.RF.auc_mean") or 0.6829
@@ -382,9 +414,20 @@ def evaluate_claims(ctx):
     rows.append(("TR-059", "Table label_sens (main.tex:326)", "S5 coverage-corrected new thr", "n=528, Pos=227, Prev=0.430, Flips=14, AUC 0.690/0.670/0.680", "results/json/results_exp13_label_sensitivity.json:classical.S5", "n=528, pos=227, prev=0.4299, flips=14, AUC 0.690/0.670/0.680", "VERIFIED"))
     rows.append(("TR-060", "Table label_sens_delta (main.tex:346)", "S0 RF-XGB and RF-LSTM deltas and p", "RF-XGB: +0.021 [-0.002, +0.045] p=0.054; RF-LSTM: +0.015 [+0.001, +0.026] p=0.189", "results/json/results_exp13_label_sensitivity.json:classical_deltas.S0", "RF-XGB: 0.0213, p=0.0536; RF-LSTM: 0.0147, p=0.1891", "VERIFIED"))
     rows.append(("TR-061", "Table label_sens_delta (main.tex:346)", "S6 unjoined sum same thr", "RF-XGB: +0.026 [+0.002, +0.049] p=0.019; RF-LSTM: +0.007 [-0.009, +0.021] p=0.541", "results/json/results_exp13_label_sensitivity.json:classical_deltas.S6", "RF-XGB: 0.0264, p=0.0189; RF-LSTM: 0.0069, p=0.5407", "VERIFIED"))
-    rows.append(("TR-062", "Table label_sens_qnn (main.tex:366)", "S0 AUC RF / LSTM / Linear-4D / QNN", "0.685 / 0.663 / 0.656 / 0.655", "results/json/results_exp13_label_sensitivity.json:qnn.S0", "RF=0.6846, LSTM=0.6630, Linear=0.6559, QNN=0.6552", "VERIFIED"))
-    rows.append(("TR-063", "Table label_sens_qnn (main.tex:366)", "S0 RF-QNN Delta [CI] and p", "+0.029 [+0.012, +0.045]; p=0.026", "results/json/results_exp13_label_sensitivity.json:qnn.S0.RF_minus_QNN", "delta=0.0294, ci=[0.0120, 0.0449], p=0.0263", "VERIFIED"))
-    rows.append(("TR-064", "Table label_sens_qnn (main.tex:366)", "S0 Linear-4D - QNN Delta [CI] and p", "+0.001 [-0.013, +0.012]; p=0.917", "results/json/results_exp13_label_sensitivity.json:qnn.S0.Linear_minus_QNN", "delta=0.0007, ci=[-0.0117, 0.0125], p=0.9171", "VERIFIED"))
+    s0 = "scenarios.S0 all rows, project labels"
+    src13 = "results/json/results_exp13_label_sensitivity_fixet0.json"
+    strict("TR-062", "Table label_sens_qnn", "S0 AUC RF / LSTM / Linear-4D / QNN", "0.683 / 0.668 / 0.654 / 0.663", f"{src13}:S0.models",
+           [(k, get_path(e13c, f"{s0}.models.{k}.auc"), e, 0.0005) for k, e in
+            [("RF_2273", 0.683), ("PureLSTM", 0.668), ("CTRL_LINEAR4D", 0.654), ("LSTM_QNN", 0.663)]])
+    for tr_id, pk, paper, ed, elo, ehi, ep in [
+            ("TR-063", "RF_2273-LSTM_QNN", "+0.020 [+0.007, +0.031]; p=0.074", 0.020, 0.007, 0.031, 0.074),
+            ("TR-064", "CTRL_LINEAR4D-LSTM_QNN", "-0.009 [-0.028, +0.006]; p=0.223", -0.009, -0.028, 0.006, 0.223),
+            ("TR-064b", "PureLSTM-LSTM_QNN", "+0.005 [-0.003, +0.013]; p=0.334", 0.005, -0.003, 0.013, 0.334)]:
+        strict(tr_id, "Table label_sens_qnn", f"S0 {pk} Delta [block CI]; p", paper, f"{src13}:S0.pairs.{pk}",
+               [("delta", get_path(e13c, f"{s0}.pairs.{pk}.delta"), ed, 0.0005),
+                ("ci_lo", get_path(e13c, f"{s0}.pairs.{pk}.ci_block.0"), elo, 0.0005),
+                ("ci_hi", get_path(e13c, f"{s0}.pairs.{pk}.ci_block.1"), ehi, 0.0005),
+                ("p", get_path(e13c, f"{s0}.pairs.{pk}.p"), ep, 0.0005)])
 
     # TR-065
     auc_clim = get_path(clim, "climatology.auc") or 0.6796
@@ -401,33 +444,71 @@ def evaluate_claims(ctx):
     st67, sv67 = check_num(auc_br, 0.688, 0.001)
     rows.append(("TR-067", "Table brier (main.tex:392)", "Single-run models AUC, Brier, BSS", "RF: 0.688 / 0.2230 / -0.003; GradBoost: 0.671 / 0.2236 / -0.005; LogReg: 0.655 / 0.2258 / -0.015", "results/local_exp3_brier_reliability.json", f"RF: {auc_br:.4f}", st67))
 
-    # TR-068
-    auc_qnn_lst = qc.get("models", {}).get("LSTM_QNN", {}).get("auc", [])
-    m68 = float(np.mean(auc_qnn_lst)) if auc_qnn_lst else 0.6552
-    st68, sv68 = check_num(m68, 0.6552, 0.0005)
-    rows.append(("TR-068", "Table case (main.tex:418)", "15-seed test AUC Mean and SD (2,273 rows)", "RF: 0.6846 (0.0036); LSTM: 0.6630 (0.0067); Linear-4D: 0.6559 (0.0074); LSTM+QNN: 0.6552 (0.0152)", "results/json/results_qml_core_trainonly.json", f"LSTM_QNN: {m68:.4f}", st68))
+    # TR-068 (Table case: 15-seed mean and SD of every core model)
+    case = [("RF_2273", 0.6829, 0.0035), ("PureLSTM", 0.6682, 0.0063), ("LSTM_QNN", 0.6634, 0.0098), ("LBL_QNN", 0.6632, 0.0129),
+            ("LSTM_PIQNN", 0.6601, 0.0170), ("LSTM_QTL", 0.6565, 0.0147), ("CTRL_LINEAR4D", 0.6539, 0.0078)]
+    chk = []
+    for k, em, es in case:
+        m, s = seed_mean_sd(k)
+        chk += [(f"{k}_mean", m, em, 0.00005), (f"{k}_sd", s, es, 0.00005)]
+    strict("TR-068", "Table case", "15-seed test AUC mean and SD, seven core models",
+           "RF 0.6829 (0.0035) ... Linear-4D 0.6539 (0.0078)", "results/json/results_hybrids_trainonly_fixet0_p60_28.1.json:models", chk)
+    pe, px = seed_mean_sd("QTL_EXTRACTOR")
+    pl, _ = seed_mean_sd("PureLSTM")
+    strict("TR-068b", "Table case caption", "QTL extractor equals the standalone LSTM", "identical test probabilities",
+           "results/json/results_hybrids_trainonly_fixet0_p60_28.1.json:models.QTL_EXTRACTOR",
+           [("extractor_minus_lstm", None if pe is None or pl is None else pe - pl, 0.0, 1e-12)])
 
-    # TR-069..74 (hybrid paired comparisons in exp10)
-    qnn_pairs = [
-        ("TR-069", "RF_2273-LSTM_QNN", "RF - LSTM+QNN Delta, SE, z, p", "+0.029, SE=0.0132, z=2.22, p=0.026", 0.0294, 0.0132, 0.0263),
-        ("TR-070", "RF_2273-LSTM_QNN", "RF - LSTM+QNN Block CI, Two-way CI, MDE", "Block: [+0.012, +0.045] (0.0084); Two-way: [+0.010, +0.048]; MDE: 0.037 / 0.024", None, None, None),
-        ("TR-071", "CTRL_LINEAR4D-LSTM_QNN", "Linear-4D - LSTM+QNN Delta, SE, z, p", "+0.001, SE=0.0066, z=0.10, p=0.917", 0.0007, 0.0066, 0.9171),
-        ("TR-072", "CTRL_LINEAR4D-LSTM_QNN", "Linear-4D - LSTM+QNN Block & Two-way CI", "Block: [-0.012, +0.012] (0.0062); Two-way: [-0.016, +0.017]; MDE: 0.019 / 0.017", None, None, None),
-        ("TR-073", "PureLSTM-LSTM_QNN", "LSTM - LSTM+QNN Delta, SE, z, p", "+0.008, SE=0.0061, z=1.28, p=0.200", 0.0078, 0.0061, 0.2003),
-        ("TR-074", "PureLSTM-LSTM_QNN", "LSTM - LSTM+QNN Block & Two-way CI", "Block: [-0.002, +0.017] (0.0047); Two-way: [-0.005, +0.021]; MDE: 0.017 / 0.013", None, None, None),
+    # TR-069..74 (Table qnn_paired) and TR-083.. (Table hyb_paired): delta, SE, p, block CI, two-way CI, MDEs
+    def paired_rows(ids, table, src_file, data, specs):
+        for tr_id, pk, paper, (d, se, p, blo, bhi, tlo, thi, mi, mb) in zip(ids, *zip(*specs)):
+            g = lambda f: get_path(data, f"pairs.{pk}.{f}")
+            strict(tr_id, table, f"{pk}: delta, SE, p, block CI, two-way CI, MDE", paper, f"{src_file}:pairs.{pk}",
+                   [("delta", g("delta"), d, 0.0005), ("se", g("se_delong"), se, 0.00005), ("p", g("p_delong"), p, 0.0005),
+                    ("blk_lo", g("ci_block.0"), blo, 0.0005), ("blk_hi", g("ci_block.1"), bhi, 0.0005),
+                    ("2w_lo", g("ci_two_way.0"), tlo, 0.0005), ("2w_hi", g("ci_two_way.1"), thi, 0.0005),
+                    ("mde_iid", g("mde_delong"), mi, 0.0005), ("mde_blk", g("mde_block"), mb, 0.0005)])
+
+    qnn_specs = [
+        ("RF_2273-LSTM_QNN", "+0.020, 0.0109, p=0.074, [+0.007,+0.031], [+0.006,+0.034], 0.031/0.017",
+         (0.020, 0.0109, 0.074, 0.007, 0.031, 0.006, 0.034, 0.031, 0.017)),
+        ("CTRL_LINEAR4D-LSTM_QNN", "-0.009, 0.0077, p=0.223, [-0.026,+0.006], [-0.030,+0.008], 0.022/0.023",
+         (-0.009, 0.0077, 0.223, -0.026, 0.006, -0.030, 0.008, 0.022, 0.023)),
+        ("PureLSTM-LSTM_QNN", "+0.005, 0.0050, p=0.334, [-0.003,+0.013], [-0.007,+0.018], 0.014/0.012",
+         (0.005, 0.0050, 0.334, -0.003, 0.013, -0.007, 0.018, 0.014, 0.012)),
     ]
-    for tr_id, pair_k, desc, pap_val, exp_d, exp_se, exp_p in qnn_pairs:
-        p_data = get_path(e10, f"pairs.{pair_k}") or {}
-        if exp_d is not None:
-            d_val = p_data.get("delta", exp_d)
-            se_val = p_data.get("se_delong", exp_se)
-            p_val = p_data.get("p_delong", exp_p)
-            st = "VERIFIED" if (abs(d_val - exp_d) <= 0.0005 and abs(se_val - exp_se) <= 0.0005) else "MISMATCH"
-            rows.append((tr_id, "Table qnn_paired (main.tex:436)", desc, pap_val, f"results/json/results_exp10_paired_ci.json:pairs.{pair_k}", f"delta={d_val:.4f}, se={se_val:.4f}, p={p_val:.4f}", st))
-        else:
-            ci_b = p_data.get("ci_block", [0.012, 0.045])
-            se_b = p_data.get("se_block", 0.0084)
-            rows.append((tr_id, "Table qnn_paired (main.tex:436)", desc, pap_val, f"results/json/results_exp10_paired_ci.json:pairs.{pair_k}", f"ci_block=[{ci_b[0]:.4f}, {ci_b[1]:.4f}], se={se_b:.4f}", "VERIFIED"))
+    paired_rows(["TR-069", "TR-071", "TR-073"], "Table qnn_paired", "results/json/results_exp10_paired_ci_fixet0.json", e10c,
+                [(pk, paper, v) for pk, paper, v in qnn_specs])
+    p_fam = [get_path(e10c, f"pairs.{k}.p_delong") for k, _, _ in qnn_specs]
+    holm = None
+    if all(p is not None for p in p_fam):
+        holm = min(1.0, 3 * min(p_fam))
+    strict("TR-070", "main.tex Sec. 4.5", "Holm-adjusted p of RF - LSTM+QNN (family of three)", "0.22",
+           "results/json/results_exp10_paired_ci_fixet0.json", [("holm_p", holm, 0.22, 0.005)])
+    jk = lambda k: get_path(e16c, f"C4_year_jackknife.{k}.se_jackknife")
+    strict("TR-072", "main.tex Limitations", "Year jackknife SE for the LSTM+QNN comparisons (RF, linear, LSTM)", "0.0062, 0.0087, 0.0043",
+           "results/local_exp16_block_c_fixet0.json:C4_year_jackknife",
+           [("RF", jk("RF_2273-LSTM_QNN"), 0.0062, 0.00005), ("CTRL", jk("CTRL_LINEAR4D-LSTM_QNN"), 0.0087, 0.00005),
+            ("LSTM", jk("PureLSTM-LSTM_QNN"), 0.0043, 0.00005)])
+    sh = lambda k, f: get_path(e16c, f"C1_seed_share.qml_core_plus_hybrids.per_model.{k}.{f}")
+    strict("TR-074", "Table budget / main.tex Sec. 4.1 / App.", "Seed share of one AUC (DeLong): QNN, LbL, QTL, PI-QNN",
+           "14.7 / 22.7 / 27.4 / 33.9 %", "results/local_exp16_block_c_fixet0.json:C1_seed_share",
+           [(k, None if sh(k, "seed_share_one_auc_iid") is None else 100 * sh(k, "seed_share_one_auc_iid"), e, 0.05)
+            for k, e in [("LSTM_QNN", 14.7), ("LBL_QNN", 22.7), ("LSTM_QTL", 27.4), ("LSTM_PIQNN", 33.9)]])
+
+    hyb_specs = [
+        ("RF_2273-LSTM_PIQNN", "+0.023 ... 0.033/0.019", (0.023, 0.0116, 0.050, 0.010, 0.036, 0.005, 0.039, 0.033, 0.019)),
+        ("RF_2273-LBL_QNN", "+0.020 ... 0.033/0.022", (0.020, 0.0116, 0.089, 0.004, 0.035, 0.002, 0.038, 0.033, 0.022)),
+        ("RF_2273-LSTM_QTL", "+0.026 ... 0.033/0.020", (0.026, 0.0118, 0.025, 0.012, 0.039, 0.010, 0.043, 0.033, 0.020)),
+        ("CTRL_LINEAR4D-LSTM_PIQNN", "-0.006 ... 0.019/0.023", (-0.006, 0.0069, 0.376, -0.023, 0.008, -0.026, 0.013, 0.019, 0.023)),
+        ("CTRL_LINEAR4D-LBL_QNN", "-0.009 ... 0.018/0.024", (-0.009, 0.0065, 0.158, -0.027, 0.005, -0.031, 0.009, 0.018, 0.024)),
+        ("CTRL_LINEAR4D-LSTM_QTL", "-0.003 ... 0.021/0.021", (-0.003, 0.0075, 0.736, -0.018, 0.012, -0.020, 0.015, 0.021, 0.021)),
+        ("PureLSTM-LSTM_PIQNN", "+0.008 ... 0.015/0.012", (0.008, 0.0055, 0.139, -0.0005, 0.017, -0.005, 0.023, 0.015, 0.012)),
+        ("PureLSTM-LBL_QNN", "+0.005 ... 0.014/0.019", (0.005, 0.0049, 0.299, -0.008, 0.018, -0.011, 0.021, 0.014, 0.019)),
+        ("QTL_EXTRACTOR-LSTM_QTL", "+0.012 ... 0.012/0.012", (0.012, 0.0044, 0.007, 0.003, 0.020, -0.002, 0.025, 0.012, 0.012)),
+    ]
+    paired_rows([f"TR-{83 + i:03d}" for i in range(len(hyb_specs))], "Table hyb_paired",
+                "results/json/results_exp10_hybrids_fixet0.json", e10h, hyb_specs)
 
     # TR-075..77
     rows.append(("TR-075", "Table mde (supp.tex:82)", "Single-seed pairings SE, MDE, declared significant", "RF-XGB: SE 0.013/0.014, MDE 0.036/0.039, 27%/21%", "results/local_exp7_noise_budget.json:train_only.pairs.RF-XGB", "se=0.0128/0.0140, mde=0.0360/0.0392, sig=27.1%/21.3%", "VERIFIED"))
@@ -441,7 +522,11 @@ def evaluate_claims(ctx):
     rows.append(("TR-078", "Table positive (supp.tex:121)", "Positive control detection rates delta=0..0.05", "delta=0: --/(2/5); delta=0.01: 8/15 (7/12); delta=0.04: 84/80 (75/76); delta=0.05: 97/92 (93/92)", "results/local_exp8_positive_control.json:by_delta", f"delta=0.04: {p78_iid*100:.0f}/{p78_blk*100:.0f}", st78))
 
     # TR-079 (qualitative rankings summary table)
-    rows.append(("TR-079", "Table multiseed (supp.tex:233)", "Canonical & train-only 15-seed rankings", "RF(C,2787): 0.6851; RF(TO,2273): 0.6846; RF(TO,2787): 0.683; RF(C,2273): 0.6802", "results/results_master.csv & results/json/results_qml_core_trainonly.json", "Matches historical and rerun results tables", "READ_ONLY"))
+    strict("TR-079", "Table multiseed (supp)", "RF rows: C 2,787 archived; TO 2,273 archived; C 2,273 (sklearn 1.9.1)",
+           "0.6851; 0.6829; 0.6802", "results/local_exp20_rf_fitting_rows.json",
+           [("C_2787_archived", get_path(e20, "RF.canonical_2787.archived_mean_auc"), 0.6851, 0.00005),
+            ("TO_2273_archived", get_path(e20, "RF.train_only_2273.archived_mean_auc"), 0.6829, 0.00005),
+            ("C_2273", get_path(e20, "RF.canonical_2273.mean_auc"), 0.6802, 0.00005)])
 
     # TR-080
     rows.append(("TR-080", "Table bottleneck_control (supp.tex:622)", "4D classical controls Mean AUC & SD", "GELU: 0.6563 (0.0071); Linear: 0.6545 (0.0069); LeakyReLU: 0.6516 (0.0083)", "results/json/results_capacity_matched_lstm.json & results/results_master.csv", "GELU=0.6563(0.0071), Linear=0.6545(0.0069), Leaky=0.6516(0.0083)", "VERIFIED"))
