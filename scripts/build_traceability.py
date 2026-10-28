@@ -54,6 +54,7 @@ def load_context():
         "exp20": load_json("results/local_exp20_rf_fitting_rows.json"),
         "exp21": load_json("results/local_exp21_brier_trainonly.json"),
         "exp22": load_json("results/local_exp22_same_arch_core.json"),
+        "exp23": load_json("results/local_exp23_within_station_auc.json"),
         "rerun": load_json("results/json/results_rerun_train_only_canonical.json"),
         "noise_b": load_json("results/local_exp7_noise_budget.json"),
         "pos_ctrl": load_json("results/local_exp8_positive_control.json"),
@@ -456,6 +457,15 @@ def evaluate_claims(ctx):
             ("qnn_bss", g21("LSTM+QNN", "bss_clim_mean"), -0.088, 0.0005),
             ("ece_min", min((v["ece_mean"] for k, v in (e21.get("models") or {}).items() if k != "Random Forest"), default=None), 0.120, 0.0005),
             ("ece_max", max((v["ece_mean"] for k, v in (e21.get("models") or {}).items() if k != "Random Forest"), default=None), 0.137, 0.0005)])
+    e23 = ctx["exp23"] or {}
+    w = lambda m: get_path(e23, f"models.{m}.within_auc")
+    pq = get_path(e23, "pairs.LSTM+QNN - Climatology.ci_block")
+    pr = get_path(e23, "pairs.Random Forest - Climatology.ci_block")
+    strict("TR-067c", "Table within / Sec. 4.4", "Within-station AUC: climatology, RF, LSTM+QNN; QNN-clim and RF-clim block CI",
+           "0.670, 0.660, 0.639; [-0.060,-0.005]; [-0.034,+0.009]", "results/local_exp23_within_station_auc.json",
+           [("clim", w("Climatology"), 0.670, 0.0005), ("rf", w("Random Forest"), 0.660, 0.0005), ("qnn", w("LSTM+QNN"), 0.639, 0.0005),
+            ("qnn_clim_lo", pq[0] if pq else None, -0.060, 0.0005), ("qnn_clim_hi", pq[1] if pq else None, -0.005, 0.0005),
+            ("rf_clim_lo", pr[0] if pr else None, -0.034, 0.0005), ("rf_clim_hi", pr[1] if pr else None, 0.009, 0.0005)])
     e22 = ctx["exp22"] or {}
     fc = [get_path(e22, f"models.{k}.false_claim_rate_iid") for k in ("LSTM_QNN", "LBL_QNN", "LSTM_QTL", "LSTM_PIQNN", "CTRL_LINEAR4D")]
     strict("TR-067b", "supp App. single-seed pairings", "Same-architecture false claims (DeLong): QNN, LbL, QTL, PI-QNN, Linear-4D",
