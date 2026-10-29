@@ -4,15 +4,25 @@ Shared helpers for the noise-budget analysis (exp7) and the positive control (ex
 
 - Fast DeLong (Sun & Xu, 2014) for k correlated predictors scored on the same labels.
 - Vectorised rank-based AUC for year-block bootstrap.
+(Both delegate to the `qml_resolution` library in src/.)
 - Year inference for the 528-row test partition (same rule as exp4) with a sanity check.
 """
 
 from pathlib import Path
 import json
+import sys
 import numpy as np
-from scipy.stats import rankdata, norm
+from scipy.stats import norm
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / 'src'))  # use the repository copy if the package is not installed
+
+from qml_resolution import (  # noqa: E402
+    cluster_bootstrap_aucs,
+    delong_covariance,
+    paired_delong,
+    rank_auc,
+)
 
 Z975 = norm.ppf(0.975)
 Z80 = norm.ppf(0.80)
@@ -50,56 +60,30 @@ def load_test_partition():
     return ds, y_te, m_te, X_te, years, max_rows_per_month
 
 
+# Thin wrappers that keep the historical signatures used by exp7, exp8, exp16 and exp22.
+# The implementations live in the tested library `qml_resolution`.
+
 def delong_cov(y, preds):
     """Fast DeLong. preds: (k, n). Returns (aucs (k,), covariance (k, k))."""
-    y = np.asarray(y).astype(int)
-    preds = np.atleast_2d(np.asarray(preds, dtype=float))
-    pos, neg = preds[:, y == 1], preds[:, y == 0]
-    m, n = pos.shape[1], neg.shape[1]
-    tx = np.apply_along_axis(rankdata, 1, pos)
-    ty = np.apply_along_axis(rankdata, 1, neg)
-    tz = np.apply_along_axis(rankdata, 1, np.concatenate([pos, neg], axis=1))
-    aucs = (tz[:, :m].sum(axis=1) / m - (m + 1) / 2.0) / n
-    v10 = (tz[:, :m] - tx) / n
-    v01 = 1.0 - (tz[:, m:] - ty) / m
-    s10 = np.atleast_2d(np.cov(v10))
-    s01 = np.atleast_2d(np.cov(v01))
-    return aucs, s10 / m + s01 / n
+    return delong_covariance(y, preds)
 
 
 def delong_se(y, p):
-    a, c = delong_cov(y, p[None, :])
+    a, c = delong_covariance(y, p)
     return float(a[0]), float(np.sqrt(c[0, 0]))
 
 
 def delong_paired(y, p1, p2):
     """Returns (auc1 - auc2, SE of the difference, two-sided p)."""
-    a, c = delong_cov(y, np.vstack([p1, p2]))
-    d = a[0] - a[1]
-    se = np.sqrt(max(c[0, 0] + c[1, 1] - 2 * c[0, 1], 1e-300))
-    return float(d), float(se), float(2 * norm.sf(abs(d) / se))
+    test = paired_delong(y, p1, p2)
+    return test.delta, test.se, test.p_value
 
 
 def auc_matrix(y, P):
     """Rank-based AUC for every row of P (k, n) against labels y (n,). Handles ties/duplicates."""
-    y = np.asarray(y).astype(bool)
-    n1 = y.sum()
-    n0 = len(y) - n1
-    R = rankdata(P, axis=1)
-    return (R[:, y].sum(axis=1) - n1 * (n1 + 1) / 2.0) / (n1 * n0)
+    return rank_auc(y, P)
 
 
 def year_block_bootstrap_aucs(y, P, years, B=2000, seed=42):
     """Returns (B_valid, k) matrix of bootstrap AUCs, resampling calendar-year blocks."""
-    rng = np.random.default_rng(seed)
-    uy = np.unique(years)
-    idx_by_year = [np.where(years == u)[0] for u in uy]
-    out = []
-    for _ in range(B):
-        pick = rng.integers(0, len(uy), size=len(uy))
-        idx = np.concatenate([idx_by_year[j] for j in pick])
-        yb = y[idx]
-        if yb.min() == yb.max():
-            continue
-        out.append(auc_matrix(yb, P[:, idx]))
-    return np.array(out)
+    return cluster_bootstrap_aucs(y, P, years, n_boot=B, random_state=seed)

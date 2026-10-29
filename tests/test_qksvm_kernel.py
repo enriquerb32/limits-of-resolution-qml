@@ -1,6 +1,7 @@
 """
 tests/test_qksvm_kernel.py - Verify equivalence between PennyLane circuit and analytical QKSVM kernel.
 """
+
 import numpy as np
 
 try:
@@ -10,6 +11,7 @@ except ImportError:
 
 try:
     import pennylane as qml
+
     HAS_PENNYLANE = True
 except ImportError:
     HAS_PENNYLANE = False

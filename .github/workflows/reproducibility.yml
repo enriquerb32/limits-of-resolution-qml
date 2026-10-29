@@ -1,20 +1,32 @@
-name: Reproducibility CI
+name: Reproducibility
 
+# Full environment from the hashed lockfile: figures, traceability audit, quantum-circuit
+# tests and end-to-end checks of the statistical scripts against the archived results.
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -23,11 +35,10 @@ jobs:
           python -m pip install --upgrade pip uv
           uv pip install --system --require-hashes --index-strategy unsafe-best-match -r requirements.lock
           uv pip install --system pytest
+          uv pip install --system --no-deps -e .
 
-      - name: Run reproduction checks
-        run: |
-          make check
+      - name: Reproduction checks (figures, partition, parameter counts, traceability)
+        run: make check
 
-      - name: Run Pytest verification
-        run: |
-          pytest tests/
+      - name: Full test suite (library, quantum circuit, archived-result regressions)
+        run: pytest
