@@ -1,0 +1,28 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: end-of-file-fixer
+        exclude: ^(results|paper|checkpoints)/
+      - id: trailing-whitespace
+        exclude: ^(results|paper|checkpoints)/
+      - id: check-added-large-files
+        args: [--maxkb=5000]
+        exclude: ^(checkpoints|results)/
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+        files: ^(src|tests)/
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy (src)
+        entry: mypy
+        language: system
+        pass_filenames: false
+        files: ^src/

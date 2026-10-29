@@ -65,7 +65,7 @@ p_fc1_pure = linear_params(32 + in_dim, 16) # Linear(67, 16)
 p_ln_pure = layernorm_params(16)            # LayerNorm(16)
 p_fc2_pure = linear_params(16, 1)           # Linear(16, 1)
 p_pure_lstm = p_lstm_pure + p_bn_pure + p_fc1_pure + p_ln_pure + p_fc2_pure
-print(f"\nStandalone LSTM (PureLSTM):")
+print("\nStandalone LSTM (PureLSTM):")
 print(f"  LSTM (hidden 16 bi): {p_lstm_pure}")
 print(f"  BatchNorm1d(67): {p_bn_pure}")
 print(f"  Head: Linear(67, 16)={p_fc1_pure}, LayerNorm(16)={p_ln_pure}, Linear(16, 1)={p_fc2_pure} -> {p_fc1_pure + p_ln_pure + p_fc2_pure}")
@@ -81,7 +81,7 @@ p_qtl_trainable_classical = p_adaptador + p_qtl_norm + p_qtl_clf
 p_qtl_trainable_quantum = p_q_w_2L # W (2, 4, 3) = 24
 p_qtl_trainable_total = p_qtl_trainable_classical + p_qtl_trainable_quantum
 p_qtl_grand_total = p_pure_lstm + p_qtl_trainable_total
-print(f"\nQuantum Transfer Learning (QTL):")
+print("\nQuantum Transfer Learning (QTL):")
 print(f"  Frozen encoder (PureLSTM): {p_pure_lstm}")
 print(f"  Trainable adapter: Linear(67, 8)={linear_params(67, 8)} + Linear(8, 4)={linear_params(8, 4)} -> {p_adaptador}")
 print(f"  Trainable norm + clf: {p_qtl_norm + p_qtl_clf}")
@@ -97,7 +97,7 @@ p_proj_amp = linear_params(16 + in_dim, 16)
 p_amp_classical = p_lstm_hybrid + p_proj_amp + p_norm_hybrid + p_clf_hybrid
 p_amp_quantum = p_q_w_2L # W (2, 4, 3) = 24
 p_amp_total = p_amp_classical + p_amp_quantum
-print(f"\nAmplitude-16D (LstmAmplitudeQNN):")
+print("\nAmplitude-16D (LstmAmplitudeQNN):")
 print(f"  Projection Linear(51, 16): {p_proj_amp}")
 print(f"  Classical total: {p_amp_classical}")
 print(f"  Quantum weights W (2, 4, 3): {p_amp_quantum}")
@@ -109,7 +109,7 @@ print(f"-> Amplitude-16D TOTAL: {p_amp_total} ({p_amp_quantum/p_amp_total*100:.2
 p_proj_reup = linear_params(16 + in_dim, 12)
 p_reup_classical = p_lstm_hybrid + p_proj_reup + p_norm_hybrid + p_clf_hybrid
 p_reup_quantum = 3 * 4 * 3 # (3, 4, 3) = 36 quantum weights
-print(f"\nRe-uploading-3x4D (LstmReuploadingQNN):")
+print("\nRe-uploading-3x4D (LstmReuploadingQNN):")
 print(f"  Projection Linear(51, 12): {p_proj_reup}")
 print(f"  Classical total: {p_reup_classical}")
 print(f"  Quantum weights W (3, 4, 3): {p_reup_quantum}")
@@ -119,20 +119,20 @@ print(f"-> Re-uploading-3x4D TOTAL: {p_reup_classical + p_reup_quantum} ({p_reup
 # Linear-4D: Linear(4, 4) = 20
 p_linear_bottleneck = linear_params(4, 4)
 p_linear_total = p_classical_backbone + p_linear_bottleneck
-print(f"\nLinear-4D Parity Control:")
+print("\nLinear-4D Parity Control:")
 print(f"  Bottleneck Linear(4, 4): {p_linear_bottleneck}")
 print(f"-> Linear-4D TOTAL: {p_linear_total}")
 
 # LeakyReLU-4D: Linear(4, 2) + Linear(2, 2) + Linear(2, 4) = 10 + 6 + 12 = 28
 p_leaky_bottleneck = linear_params(4, 2) + linear_params(2, 2) + linear_params(2, 4)
 p_leaky_total = p_classical_backbone + p_leaky_bottleneck
-print(f"\nLeakyReLU-4D Parity Control:")
+print("\nLeakyReLU-4D Parity Control:")
 print(f"  Bottleneck Linear(4, 2) + Linear(2, 2) + Linear(2, 4): {p_leaky_bottleneck}")
 print(f"-> LeakyReLU-4D TOTAL: {p_leaky_total}")
 
 # MLP-4D GELU: Linear(4, 16) + LayerNorm(16) + Linear(16, 4) = 80 + 32 + 68 = 180
 p_gelu_bottleneck = linear_params(4, 16) + layernorm_params(16) + linear_params(16, 4)
 p_gelu_total = p_classical_backbone + p_gelu_bottleneck
-print(f"\nMLP-4D GELU Control (hidden=16):")
+print("\nMLP-4D GELU Control (hidden=16):")
 print(f"  Bottleneck Linear(4, 16) + LayerNorm(16) + Linear(16, 4): {p_gelu_bottleneck}")
 print(f"-> MLP-4D GELU TOTAL: {p_gelu_total}")

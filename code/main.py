@@ -379,7 +379,7 @@ def _resumen(res_base, res_qml, res_qksvm, res_val, metricas_json, salida):
 
     tests = res_val.get('tests_delong', {})
     if tests:
-        print(f"\n  DeLong Tests (AUC Significance):")
+        print("\n  DeLong Tests (AUC Significance):")
         for etiq, t in tests.items():
             sig = "sig." if t['significativo_95'] else "not sig."
             nm_a = etiq.split('_vs_')[0].replace('_', '+')
@@ -388,7 +388,7 @@ def _resumen(res_base, res_qml, res_qksvm, res_val, metricas_json, salida):
 
     res_ruido = metricas_json.get('ruido', {})
     if res_ruido:
-        print(f"\n  [NISQ] Quantum Noise Impact (Monte Carlo 15 seeds, p=0.01):")
+        print("\n  [NISQ] Quantum Noise Impact (Monte Carlo 15 seeds, p=0.01):")
         for nm, mv in res_ruido.items():
             acc_s = mv.get('acc', 0) * 100
             f1_mean, f1_std = mv.get('f1', 0), mv.get('f1_std', 0)

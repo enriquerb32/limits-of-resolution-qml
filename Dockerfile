@@ -11,7 +11,7 @@
 # Fast 30-second pipeline audit (mounting checkpoints from host):
 #   docker run --rm -v "$PWD/out:/app/out" -v "$PWD/checkpoints:/app/checkpoints" limits-qml python code/main.py --use-checkpoints --output out
 #
-# Full 82-claim numerical traceability audit:
+# Full numerical traceability audit (every quantitative claim of the paper):
 #   docker run --rm limits-qml python scripts/build_traceability.py
 #
 # Any single statistical experiment:
@@ -50,9 +50,9 @@ FROM python:${PYTHON_VERSION}-slim AS runtime
 LABEL org.opencontainers.image.title="Limits of Resolution in QML - reproducibility image" \
       org.opencontainers.image.source="https://github.com/enriquerb32/limits-of-resolution-qml" \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.version="1.0"
+      org.opencontainers.image.version="1.1"
 
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONHASHSEED=0 \
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONHASHSEED=0 PYTHONPATH=/app/src \
     PATH="/opt/venv/bin:$PATH" \
     OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
 # Single thread by default: BLAS thread count can change floating-point summation order.
@@ -65,6 +65,7 @@ RUN useradd -u 1000 -m -s /bin/bash appuser && \
     mkdir -p /app/out /app/audit /app/paper/figs && \
     chown -R appuser:appuser /app
 
+COPY --chown=appuser:appuser src/ ./src/
 COPY --chown=appuser:appuser code/ ./code/
 COPY --chown=appuser:appuser scripts/ ./scripts/
 COPY --chown=appuser:appuser results/ ./results/
