@@ -574,7 +574,7 @@ loosely motivated by the exponential scaling of saturation water vapor pressure 
 \end{equation}
 where $q_j = \langle 0 | U^\dagger(\theta, x) \sigma_z^{(j)} U(\theta, x) | 0 \rangle$ denotes the expectation value of Pauli-$Z$ on qubit $j$. We use the notation $\mathcal{L}_{\text{hMSE}}$ to distinguish this heuristic coordinate penalty from standard regression Mean Squared Error.
 
-The internal constants ($0.07$, $10.0$, $0.6$, $0.5$) and outer penalty weights ($\lambda_{\text{cc}} = 0.2$, $\lambda_{\text{hMSE}} = 0.1$) were set by hand, with no tuning protocol recorded, based on qualitative heuristic reasoning and held fixed during main benchmark training.
+The internal constants ($0.07$, $10.0$, $0.6$, $0.5$) and outer penalty weights ($\lambda_{\text{cc}} = 0.2$, $\lambda_{\text{hMSE}} = 0.1$) were set by hand, with no tuning protocol recorded, based on qualitative heuristic reasoning and held fixed during main benchmark training. For these reasons the main text treats \texttt{LSTM+PI-QNN} as a regularization variant of \texttt{LSTM+QNN} and draws no conclusion about physics-informed learning from it.
 
 Physics-informed learning embeds domain constraints in the loss \citep{raissi2019,karniadakis2021}, including in quantum models \citep{jaderberg2024}; the penalties used here are a loose, heuristic version of that idea. Exact architectural symmetries, such as equivariant quantum neural networks \citep{meyer2023,nguyen2024}, are a more principled direction for physics-informed QML.
 
