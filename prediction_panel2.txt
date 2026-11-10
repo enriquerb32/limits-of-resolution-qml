@@ -1,0 +1,6 @@
+﻿Panel 2 (med2) - prediction written before analysis, 2026-11-10 16:06
+Test rows 882 (309 positive / 573 negative), 19 years, train 1660.
+Predicted SE of one AUC (Hanley-McNeil, AUC 0.70): 0.019 (panel 1: 0.024).
+Predicted MDE of paired 15-seed mean differences: 0.025-0.035 (panel 1: 0.031-0.044),
+assuming inter-model correlations as in panel 1 (r 0.8-0.9).
+No prediction for the RF-vs-neural cluster/iid ratio (panel 1: about 0.55).
