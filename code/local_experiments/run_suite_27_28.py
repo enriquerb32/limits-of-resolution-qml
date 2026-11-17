@@ -23,10 +23,10 @@ env = os.environ.copy()
 env["MPLCONFIGDIR"] = os.environ.get("TEMP", "C:\\Temp")
 
 for name, cmd in commands:
-    print(f"\n========================================================", flush=True)
+    print("\n========================================================", flush=True)
     print(f"STARTING {name} at {time.strftime('%Y-%m-%d %H:%M:%S')}", flush=True)
     print(f"Command: {' '.join(cmd)}", flush=True)
-    print(f"========================================================\n", flush=True)
+    print("========================================================\n", flush=True)
     t0 = time.time()
     res = subprocess.run(cmd, env=env)
     dt = time.time() - t0

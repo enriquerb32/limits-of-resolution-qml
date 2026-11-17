@@ -8,7 +8,7 @@ Fits, on the training rows only (the same rows as every neural model), with seed
   RF_untuned / XGB_untuned   the v1 configurations (300 trees depth 8; 500 trees depth 4, lr 0.05), for the record
 and writes results/json/results_rerun_train_only_canonical_probs.npz with the keys read by the analysis scripts
 (train_only_RF, train_only_XGB, train_only_LSTM, y_te, y_te_ext, train_only_acp_te). train_only_LSTM is copied from
-the v2 hybrids archive (PureLSTM, same seeds; file name kept from v1, see README_v2.md): run exp17 first.
+the v2 hybrids archive (PureLSTM, same seeds; file name kept from v1, see README.md, section 2): run exp17 first.
 v2 has a single pipeline: the canonical_* keys are copies of the train_only_* keys (scripts that compare the two
 pipelines are not part of the v2 run).
 Usage (LOR_DATASET=v2):  python code/local_experiments/exp41_v2_classical.py [--seeds 15]     ~5 min

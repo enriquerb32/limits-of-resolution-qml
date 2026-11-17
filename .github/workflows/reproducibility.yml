@@ -33,12 +33,12 @@ jobs:
       - name: Install dependencies from lockfile
         run: |
           python -m pip install --upgrade pip uv
-          uv pip install --system --require-hashes --index-strategy unsafe-best-match -r requirements.lock
-          uv pip install --system pytest
+          uv pip install --system --require-hashes --index-strategy unsafe-best-match -r requirements-v2.lock
+          uv pip install --system pytest pytest-cov
           uv pip install --system --no-deps -e .
 
       - name: Reproduction checks (figures, partition, parameter counts, traceability)
         run: make check
 
-      - name: Full test suite (library, quantum circuit, archived-result regressions)
+      - name: Full test suite (library, quantum circuit and controls, manuscript tables, archived-result regressions)
         run: pytest
