@@ -84,3 +84,11 @@ code/local_experiments/make_figs.py
 notebooks/
 *.ipynb
 
+
+# v2
+.venv-v2/
+code/local_experiments/datos_limpios_multiestacion.csv
+checkpoints/exp31*/
+*.aux
+*.log
+*.out

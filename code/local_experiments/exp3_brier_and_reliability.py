@@ -7,6 +7,7 @@ Evaluates the 10 single-run models on the test partition (N=528).
 from pathlib import Path
 import json
 import os
+import sys
 import numpy as np
 from sklearn.metrics import brier_score_loss, roc_auc_score
 from sklearn.linear_model import LogisticRegression
@@ -75,8 +76,10 @@ def compute_calibration_metrics(y_true, y_prob, n_bins=10):
 def main():
     os.makedirs(ROOT / 'results', exist_ok=True)
     
-    with open(ROOT / 'results' / 'json' / '01_data.json', 'r', encoding='utf-8') as f:
-        ds = json.load(f)[1]
+    # 01_data.json with the training labels of the train-only dataset (threshold 28.1 mm; see noise_utils)
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from noise_utils import load_test_partition
+    ds = load_test_partition()[0]
     with open(ROOT / 'results' / 'json' / '02_baselines.json', 'r', encoding='utf-8') as f:
         b = json.load(f)
     with open(ROOT / 'results' / 'json' / '03_qml.json', 'r', encoding='utf-8') as f:

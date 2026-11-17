@@ -7,6 +7,7 @@ experimental reruns).  Output feeds exp13_label_sensitivity.py.
   python export_test_meta.py --csv datos_limpios_multiestacion.csv --out test_meta.csv
 """
 import argparse
+import os
 import numpy as np, pandas as pd
 from trainonly_dataset import build_dataset
 
@@ -16,5 +17,5 @@ if __name__ == '__main__':
     _, ds = build_dataset(a.csv, train_only=True)
     print('sizes', len(ds.X_tr), len(ds.X_va), len(ds.X_te), '| P60', round(ds.umbral, 2))
     m = pd.DataFrame({'ciudad': ds.meta_te['ciudad'], 'fecha': pd.to_datetime(ds.meta_te['fecha']), 'y_te': ds.y_te.numpy().astype(int)})
-    assert len(m) == 528, len(m)
+    assert os.environ.get('LOR_DATASET', 'v1').lower() == 'v2' or len(m) == 528, len(m)
     m.to_csv(a.out, index=False); print('saved', a.out, '| prevalence', m['y_te'].mean().round(4))

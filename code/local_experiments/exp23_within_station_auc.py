@@ -61,6 +61,17 @@ def main():
          'Standalone LSTM': core['PureLSTM_probs'], 'Linear-4D control': core['CTRL_LINEAR4D_probs'],
          'LSTM+QNN': core['LSTM_QNN_probs'], 'LbL-QNN': core['LBL_QNN_probs'],
          'LSTM+PI-QNN': core['LSTM_PIQNN_probs'], 'LSTM+QTL': core['LSTM_QTL_probs']}
+    if '--controls' in sys.argv:   # corrected LSTM+QTL and the exp27 controls (merged archive written by exp27_controls.py)
+        global OUT
+        mg = np.load(os.path.join(ROOT, 'results', 'json', 'results_core_hybrids_controls_fixet0_p60_28.1_probs.npz'))
+        assert np.array_equal(mg['y_te'].astype(int), y)
+        P['LSTM+QTL (historical code)'] = P.pop('LSTM+QTL')
+        for k, n in [('QTL_FIXED', 'LSTM+QTL'), ('QTL_CLASSICAL', 'QTL-classical'), ('FOURIER1', 'Fourier-1'),
+                     ('FOURIER2', 'Fourier-2'), ('FROZEN_RANDOM', 'Frozen random circuit'),
+                     ('FROZEN_IDENTITY', 'Frozen identity circuit')]:
+            if f'{k}_probs' in mg.files:
+                P[n] = mg[f'{k}_probs']
+        OUT = OUT.replace('.json', '_controls.json')
     stations = sorted(np.unique(st))
     out = {'meta': dict(B=B, seed=SEED, stations={s: dict(n=int((st == s).sum()), pos=int(y[st == s].sum())) for s in stations}),
            'models': {}, 'pairs': {}}

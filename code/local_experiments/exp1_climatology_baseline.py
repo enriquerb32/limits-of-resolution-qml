@@ -6,6 +6,7 @@ Strictly fit on training partition (N=2,273; <= 1996) and evaluated on test part
 
 import json
 import os
+import sys
 import numpy as np
 from sklearn.metrics import (
     roc_auc_score, average_precision_score, brier_score_loss,
@@ -24,8 +25,10 @@ def wilson_ci(k, n, z=1.959964):
 def main():
     os.makedirs('results', exist_ok=True)
     
-    with open('results/json/01_data.json', 'r') as f:
-        ds = json.load(f)[1]
+    # 01_data.json with the training labels of the train-only dataset (threshold 28.1 mm; see noise_utils)
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from noise_utils import load_test_partition
+    ds = load_test_partition()[0]
 
     m_tr = np.array(ds['m_tr'])
     y_tr = np.array(ds['y_tr'])
