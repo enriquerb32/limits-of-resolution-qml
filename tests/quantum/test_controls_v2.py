@@ -5,7 +5,7 @@
 * The ``R_Y``-embedding head of ``LSTM+QTL`` (``AngleEmbedding(Y)`` + ``StronglyEntanglingLayers``)
   lies *exactly* in the span of the 81-function tensor basis ``prod_j {1, cos q_j, sin q_j}`` used by
   ``QTL tensor-81`` and ``Full Fourier-1``, whatever the weights; the separable basis does not span it.
-* Parameter counts of every control equal the sizes printed in the manuscript (Table 4 and Section 2).
+* Parameter counts of every control equal the sizes printed in the manuscript (Table 5 and Section 2).
 
 The checks use the model classes of ``code/`` that produced the archived results.
 """
@@ -120,7 +120,7 @@ def test_tensor1_control_uses_the_same_basis(code: SimpleNamespace) -> None:
 
 # ---------------------------------------------------------------- parameter counts against the manuscript
 def _printed_sizes() -> dict[str, int]:
-    """Map sizes printed in Table 4, e.g. ``Fourier-2 (68)`` or ``Full Fourier-1 (81 features)``."""
+    """Map sizes printed in Table 5, e.g. ``Fourier-2 (68)`` or ``Full Fourier-1 (81 features)``."""
     text = TEX.read_text(encoding="utf-8")
     table = text[text.index("\\label{tab:case}") :]
     table = table[: table.index("\\end{table")]

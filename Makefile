@@ -37,6 +37,7 @@ test:
 # Figures of the v2 manuscript: forest plot from the v2 summary, known-truth simulation (data-independent, v1 archive)
 figs:
 	$(PY) scripts/make_forest_plot.py
+	$(PY) scripts/make_resolution_plot.py
 	$(PY) scripts/make_paper_figs.py --results results_v1 --only sim
 
 # Claims of the v2 manuscript (and of the v1 manuscript, tag v1, against results_v1/)

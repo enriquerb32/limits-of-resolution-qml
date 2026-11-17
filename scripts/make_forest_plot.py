@@ -4,7 +4,7 @@ make_forest_plot.py - forest plot of every paired seed-mean comparison of the v2
 =============================================================================================================
 Reads the v2 summary (no recomputation, so the figure matches the tables exactly):
   results/local_exp42_v2_summary.json   written by code/local_experiments/exp42_v2_summary.py
-The rows are those of Tables 3, 5 and 6 of the manuscript (tab:paired_ci, tab:qnn_paired, tab:controls).
+The rows are those of Tables 3, 6 and 7 of the manuscript (tab:paired_ci, tab:qnn_paired, tab:controls).
 For each pair it draws the DeLong 95 % interval, the calendar-year block-bootstrap interval and the
 years x seeds interval, offset vertically, with the point estimate. A missing pair is an error.
 

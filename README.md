@@ -134,7 +134,7 @@ make test        # full test suite (library, quantum circuit and controls, manus
 
 How the claims of the manuscript are tied to the archives:
 
-* `tests/manuscript/test_v2_tables.py` reads the numbers **as printed** in the 13 main-text tables and the abstract of `paper/main.tex` and checks that each one is the rounding of the archived value (`results/local_exp42_v2_summary.json`, `local_exp43_v2_tables.json`, `local_exp33_seas5_orig.json`, `local_exp32_panel2_med2v2.json`, `test_meta.csv`). Editing a number in the paper without changing the archive, or the reverse, fails the suite.
+* `tests/manuscript/test_v2_tables.py` reads the numbers **as printed** in the 13 numerical main-text tables, the abstract, Section 2 and the running text of `paper/main.tex` and checks that each one is the rounding of the archived value (`results/local_exp42_v2_summary.json`, `local_exp43_v2_tables.json`, `local_exp33_seas5_orig.json`, `local_exp32_panel2_med2v2.json`, `test_meta.csv`). Editing a number in the paper without changing the archive, or the reverse, fails the suite.
 * `tests/test_reproducibility.py` regenerates `local_exp42_v2_summary.json` and `local_exp43_v2_tables.json` from the archived per-seed probabilities and requires agreement to $10^{-12}$ (about 10 minutes).
 * `tests/regression/` checks the `qml_resolution` library against those archives (its DeLong, AUC and jackknife implementations are independent of the scripts).
 * `scripts/build_traceability_v2.py` writes `audit/03_traceability_v2.csv` (47 claims of the v2 text, including Section 2 and the Supplement). `scripts/build_traceability.py` writes `audit/01_traceability_v1.csv` for the v1 manuscript against `results_v1/` (98 claims).
@@ -146,7 +146,7 @@ python code/main.py --use-checkpoints --output out         # statistics and figu
 python code/main.py --skip-qml --force-retrain             # classical baselines only
 python code/main.py --force-retrain                        # full canonical pipeline including the circuits
 python code/local_experiments/exp17_hybrids_multiseed.py --fix-et0 --p60 28.1 \
-    --models RF_2273 PureLSTM CTRL_LINEAR4D LSTM_QNN LSTM_PIQNN LBL_QNN LSTM_QTL   # core experiment (Table 6)
+    --models RF_2273 PureLSTM CTRL_LINEAR4D LSTM_QNN LSTM_PIQNN LBL_QNN LSTM_QTL   # core experiment (Table 5)
 ```
 
 Noiseless circuit simulation is CPU-bound and the 15-seed core experiment takes hours on a workstation. Retrained results can differ slightly from the archived ones (hardware, library versions), so the statistics of the paper are computed from the archived probabilities.
@@ -170,20 +170,21 @@ Commands run from the repository root. Table numbers refer to `paper/main.pdf`; 
 
 | Paper item | What it is | Archived output | Computed by (no training) | Predictions from (training) |
 |---|---|---|---|---|
-| **Table 1** | Test windows and prevalence by station | `results/test_meta.csv` | `scripts/make_partition_table.py` | `export_test_meta.py` |
+| **Table 1** | Test windows and prevalence by station | `results/test_meta.csv`, `results/panel_v2_monthly.csv` | `scripts/make_partition_table.py` | `export_test_meta.py` |
 | **Table 2** | Noise budget: SE of one AUC, seed SD, seed share | `results/local_exp43_v2_tables.json` (`noise_budget`) | `exp43_v2_tables.py results` | `exp17`, `exp41`, `exp27` |
 | **Table 3** | Paired comparisons of the classical models | `results/local_exp42_v2_summary.json` (`pairs`) | `exp42_v2_summary.py results` | `exp41_v2_classical.py` |
-| **Table 4** | 15-seed AUC of every model and control | `results/local_exp42_v2_summary.json` (`models`) | `exp42_v2_summary.py results` | `exp17`, `exp27_controls.py`, `exp30_fourier_full.py` |
-| **Tables 5, 6** | Hybrids, Fourier surrogates and frozen circuits against `LSTM+QNN` | `results/local_exp42_v2_summary.json` (`pairs`) | `exp42_v2_summary.py results` | as Table 4 |
-| **Figure 1** | Forest plot of Tables 3, 5 and 6 | `paper/figs/fig_forest.pdf` | `scripts/make_forest_plot.py` | — |
-| **Table 7** | Brier score, skill and calibration, raw and Platt | `results/local_exp43_v2_tables.json` (`brier_raw`, `recal_orig`) | `exp43_v2_tables.py results` | `exp28_labels_recalibration.py --label orig` |
-| **Table 8** | Pooled and within-station AUC | `results/local_exp43_v2_tables.json` (`within_station`) | `exp43_v2_tables.py results` | as Table 4 |
-| **Table 9** | Station × month label | `results/local_exp43_v2_tables.json` (`recal_stationmonth`) | `exp43_v2_tables.py results` | `exp28_labels_recalibration.py --label stationmonth` |
-| **Table 10** | SEAS5 as an operational reference | `results/local_exp33_seas5_orig.json` | `exp33_seas5_reference.py --label orig --step analyze` | `--step score` (members in `data/seas5/`) |
-| **Table 11** | Second panel | `results/local_exp32_panel2_med2v2.json` (`pooled`) | `exp32_second_panel.py --tag med2v2 --step analyze` | `--step etl`, `--step train` |
-| **Table 12** | Hanley–McNeil MDE by test size and prevalence | — | `qml_resolution.paired_mde_hanley_mcneil` | — |
-| **Table 13** | Empirical resolution curve | `results/local_exp43_v2_tables.json` (`resolution_curve`) | `exp43_v2_tables.py results` | as Table 4 |
-| **Supplement** | Tuning (`exp40_v2_tune.py` → `results/json/v2_tuned_params.json`), shot noise (`exp31`), circuit spectrum (`exp34`), few-cluster inference (`exp35`), cancellation (`exp37`), teacher-circuit control (`exp38`), panel-matched simulation (`exp15` → `results/json/results_exp15_panel_sim.json`), known-truth simulation figure (`scripts/make_paper_figs.py --results results_v1 --only sim`) | `results/local_exp3*.json` | see the script names | — (checked by `scripts/build_traceability_v2.py`, not by the table tests) |
+| **Figure 1** | Forest plot of Tables 3, 6 and 7 | `paper/figs/fig_forest.pdf` | `scripts/make_forest_plot.py` | — |
+| **Table 4** | Hanley–McNeil MDE by test size and prevalence | — | `qml_resolution.paired_mde_hanley_mcneil` | — |
+| **Figure 2**, **Table S10** | Empirical resolution curve | `results/local_exp43_v2_tables.json` (`resolution_curve`) | `exp43_v2_tables.py results`; figure: `scripts/make_resolution_plot.py` | as Table 5 |
+| **Table 5** | 15-seed AUC of every model and control | `results/local_exp42_v2_summary.json` (`models`) | `exp42_v2_summary.py results` | `exp17`, `exp27_controls.py`, `exp30_fourier_full.py` |
+| **Tables 6, 7** | Hybrids, Fourier surrogates and frozen circuits against `LSTM+QNN` | `results/local_exp42_v2_summary.json` (`pairs`) | `exp42_v2_summary.py results` | as Table 5 |
+| **Table 8** | Positive control: heads given the angles of a teacher circuit | `results/local_exp38_teacher_control_interface.json` | — | `exp38_teacher_control.py --mode interface --seeds 5` |
+| **Table 9** | Brier score, skill and calibration, raw and Platt | `results/local_exp43_v2_tables.json` (`brier_raw`, `recal_orig`) | `exp43_v2_tables.py results` | `exp28_labels_recalibration.py --label orig` |
+| **Table 10** | Pooled and within-station AUC | `results/local_exp43_v2_tables.json` (`within_station`) | `exp43_v2_tables.py results` | as Table 5 |
+| **Table 11** | Station × month label | `results/local_exp43_v2_tables.json` (`recal_stationmonth`) | `exp43_v2_tables.py results` | `exp28_labels_recalibration.py --label stationmonth` |
+| **Table 12** | SEAS5 as an operational reference | `results/local_exp33_seas5_orig.json` | `exp33_seas5_reference.py --label orig --step analyze` | `--step score` (members in `data/seas5/`) |
+| **Table 13** | Second panel | `results/local_exp32_panel2_med2v2.json` (`pooled`), `results/panel2/med2v2/panel_monthly.csv` | `exp32_second_panel.py --tag med2v2 --step analyze` | `--step etl`, `--step train` |
+| **Supplement** | Tuning (`exp40_v2_tune.py` → `results/json/v2_tuned_params.json`), shot noise (`exp31`), circuit spectrum (`exp34`), few-cluster inference (`exp35`), cancellation (`exp37`), teacher-circuit control (`exp38`), panel-matched simulation (`exp15` → `results/json/results_exp15_panel_sim.json`), known-truth simulation figure (`scripts/make_paper_figs.py --results results_v1 --only sim`); checks added in revision: XGBoost trees per seed (`exp44_xgb_iterations.py` → `results/json/xgb_best_iterations.json`; needs the daily data), cluster/iid by period and without 2026 (`exp45_cluster_periods.py` → `results/local_exp45_cluster_periods.json`), empirical AUC correlations and validation resolution (`exp46_auc_correlation.py` → `results/local_exp46_auc_correlation.json`) | `results/local_exp3*.json` | see the script names | — (checked by `scripts/build_traceability_v2.py`, not by the table tests) |
 
 ### v1 manuscript
 

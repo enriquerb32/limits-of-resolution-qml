@@ -9,6 +9,7 @@ handled by :func:`flip`.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +22,7 @@ from qml_resolution import paired_mde_hanley_mcneil
 
 ROOT = Path(__file__).resolve().parents[2]
 TEX = ROOT / "paper" / "main.tex"
+SUPP = ROOT / "paper" / "supp.tex"
 RES = ROOT / "results"
 
 
@@ -60,7 +62,7 @@ def flat(cells: list[str]) -> list[Printed]:
 
 
 def paired_row(pair: dict[str, Any], mde_key: str = "mde_iid", se_key: str = "se_iid") -> list[float]:
-    """Delta, SE, z, p, year-block CI, years x seeds CI, cluster/iid ratio, MDE (Tables 3, 5, 6)."""
+    """Delta, SE, z, p, year-block CI, years x seeds CI, cluster/iid ratio, MDE (Tables 3, 6, 7)."""
     gap = pair["gap"]
     return [
         gap,
@@ -108,7 +110,7 @@ def test_noise_budget() -> None:
         assert nb[m]["share_iid"] == pytest.approx(nb[m]["sd"] ** 2 / (nb[m]["sd"] ** 2 + nb[m]["se_iid"] ** 2))
 
 
-# ------------------------------------------------------------------ Tables 3, 5, 6: paired comparisons
+# ------------------------------------------------------------------ Tables 3, 6, 7: paired comparisons
 PAIRED = {
     "tab:paired_ci": {
         "RF - XGBoost": ("RF-XGB", False),
@@ -153,7 +155,7 @@ def test_paired_tables_have_no_unchecked_rows() -> None:
         assert printed == set(expected), f"{table}: unchecked rows {printed - set(expected)}"
 
 
-# ------------------------------------------------------------------ Table 4: 15-seed AUC of every model
+# ------------------------------------------------------------------ Table 5: 15-seed AUC of every model
 CASE = {
     "Month x station climatology": "CLIM",
     "Random Forest (tuned)": "RF_2273",
@@ -191,7 +193,31 @@ def test_model_auc_table() -> None:
         assert_row(flat(rows[label]), expected, label)
 
 
-# ------------------------------------------------------------------ Table 7: Brier and calibration
+# ------------------------------------------------------------------ Table 8: positive control (teacher circuit)
+TEACHER = {
+    "Full Fourier-2 (625 tensor features)": "FOURIER_FULL2",
+    "Full Fourier-1 (81 tensor features)": "FOURIER_FULL1",
+    "Trained circuit": "CIRCUIT",
+    "Fourier-4 (separable)": "FOURIER4",
+    "Fourier-2 (separable)": "FOURIER2",
+    "Linear-4D map": "LINEAR4D",
+}
+
+
+def test_teacher_table() -> None:
+    teacher = _load("local_exp38_teacher_control_interface.json")
+    rows = {k: v for k, v in table_rows(TEX, "tab:teacher_main").items() if not k.startswith("Head")}
+    assert set(rows) == {*TEACHER, "Oracle (teacher score)"}
+    assert_row(flat(rows["Oracle (teacher score)"]), [teacher["oracle_auc_test"]], "oracle")
+    for label, key in TEACHER.items():
+        m = teacher["models"][key]
+        assert len(m["auc"]) == 5
+        assert_row(flat(rows[label])[-2:], [m["mean"], m["sd"]], label)
+    # main text: "most of its signal (89 %) lies in interactions between angles"
+    assert round(100 * teacher["interaction_share"]) == 89 and "(89\\,\\%)" in TEX.read_text(encoding="utf-8")
+
+
+# ------------------------------------------------------------------ Table 9: Brier and calibration
 BRIER = {
     "Random Forest": ("RF", "RF_2273"),
     "XGBoost": ("XGB", "XGB"),
@@ -227,7 +253,7 @@ def test_brier_table() -> None:
         assert_row(flat(rows[label]), expected, label)
 
 
-# ------------------------------------------------------------------ Table 8: within-station AUC
+# ------------------------------------------------------------------ Table 10: within-station AUC
 WITHIN = {
     "Random Forest": "RF",
     "XGBoost": "XGB",
@@ -252,7 +278,7 @@ def test_within_station_table() -> None:
         assert_row(flat(rows[label]), expected, label)
 
 
-# ------------------------------------------------------------------ Table 9: station x month label
+# ------------------------------------------------------------------ Table 11: station x month label
 def test_stationmonth_table() -> None:
     rows = {_norm(k): v for k, v in table_rows(TEX, "tab:stationmonth").items()}
     rc = T43["recal_stationmonth"]
@@ -271,7 +297,7 @@ def test_stationmonth_table() -> None:
         assert_row(flat(rows[label]), expected, label)
 
 
-# ------------------------------------------------------------------ Table 10: SEAS5
+# ------------------------------------------------------------------ Table 12: SEAS5
 SEAS5_ROWS = {
     "SEAS5 - climatology": "SEAS5_QM_L1-CLIM",
     "SEAS5 (lead 2) - climatology": "SEAS5_QM_L2-CLIM",
@@ -297,7 +323,7 @@ def test_seas5_table() -> None:
         assert_row(flat(rows[label]), expected, label)
 
 
-# ------------------------------------------------------------------ Table 11: second panel
+# ------------------------------------------------------------------ Table 13: second panel
 PANEL2_ROWS = {
     "RF - XGBoost": ("RF_2273-XGB", "RF_2273", "XGB"),
     "RF - LSTM": ("RF_2273-PureLSTM", "RF_2273", "PureLSTM"),
@@ -321,7 +347,7 @@ def test_second_panel_table() -> None:
         assert_row(flat(rows[label]), expected, label)
 
 
-# ------------------------------------------------------------------ Table 12: Hanley-McNeil MDE (library)
+# ------------------------------------------------------------------ Table 4: Hanley-McNeil MDE (library)
 def test_hanley_mcneil_table() -> None:
     rows = {k: v for k, v in table_rows(TEX, "tab:hm_mde").items() if k != "N"}
     assert len(rows) == 5
@@ -331,15 +357,15 @@ def test_hanley_mcneil_table() -> None:
         assert_row(flat(cells), expected, n_str)
 
 
-# ------------------------------------------------------------------ Table 13: empirical resolution curve
+# ------------------------------------------------------------------ Figure 2 / Table S-resolution: resolution curve
 def test_resolution_curve_table() -> None:
-    rows = {k: v for k, v in table_rows(TEX, "tab:resolution").items() if k not in ("", "Years")}
+    rows = {k: v for k, v in table_rows(SUPP, "tab:resolution").items() if k not in ("", "Years")}
     curve = T43["resolution_curve"]
     assert set(rows) == set(curve)
     for years, c in curve.items():
         expected = [c["N"], c["HM"], c["single_RF_LSTM"], c["single_RF_QNN"], c["mean_RF_QNN"]]
         assert_row(flat(rows[years]), expected, f"{years} years")
-    # the full-test-set entry of the curve is the MDE of the paired comparison in Table 5
+    # the full-test-set entry of the curve is the MDE of the paired comparison in Table 6
     assert curve["19"]["mean_RF_QNN"] == pytest.approx(PAIRS["RF-LSTM_QNN"]["mde_iid"], rel=1e-6)
 
 
@@ -355,11 +381,78 @@ def test_abstract_claims() -> None:
     assert round(SEAS5["pairs"]["SEAS5_QM_L1-CLIM"]["delta"], 3) == 0.043  # "+0.043 AUC"
     assert np.mean([nb[m]["se_iid"] for m in BUDGET_COLS]) == pytest.approx(0.024, abs=5e-4)  # "about 0.024"
     abstract = TEX.read_text(encoding="utf-8").split("\\begin{abstract}")[1].split("\\end{abstract}")[0]
-    for claim in ("529 test station-months", "3--21 times", "0.022--0.032", "0.020--0.024", "$+0.043$"):
+    assert all(r > 1 for r in ratios)  # "larger than the seed variability of the classical models"
+    assert 0.025 <= max(mdes) <= 0.035  # "about 0.03 AUC"
+    for claim in ("529 test station-months", "about 0.024", "about 0.03 AUC", "4-qubit circuit"):
         assert claim in abstract, claim
+    words = re.sub(r"\$[^$]*\$", "X", abstract.split("\\bigskip")[0]).split()
+    assert len(words) <= 200, len(words)
 
 
-# ------------------------------------------------------------------ Section 2 and Table 11: the monthly panels
+# ------------------------------------------------------------------ numbers added in the response to review
+def test_xgboost_trees_in_text() -> None:
+    it = _load("json/xgb_best_iterations.json")
+    assert it["max_abs_diff_archived_probs"] == 0.0
+    trees = it["trees_used"]
+    assert (min(trees), max(trees), np.median(trees)) == (2, 121, 16)
+    assert sum(t <= 3 for t in trees) == 5
+    text = TEX.read_text(encoding="utf-8")
+    assert "2 to 121 across the 15 seeds (median 16, and 2--3 trees in five seeds)" in text
+
+
+def test_cluster_periods_in_text() -> None:
+    per = _load("local_exp45_cluster_periods.json")
+    text = TEX.read_text(encoding="utf-8")
+    lstm, qnn = per["RF-LSTM"], per["RF-QNN"]
+    assert Printed(-88, 0).matches(100 * lstm["2008-2012"]["cross_share"])
+    assert Printed(-99, 0).matches(100 * qnn["2008-2012"]["cross_share"])
+    assert Printed(-25, 0).matches(100 * lstm["2013-2026"]["cross_share"])
+    assert Printed(-3, 0).matches(100 * qnn["2013-2026"]["cross_share"])
+    assert Printed(0.65, 2).matches(lstm["2013-2026"]["ratio"]) and Printed(0.87, 2).matches(qnn["2013-2026"]["ratio"])
+    assert Printed(-0.004, 3).matches(lstm["2008-2012"]["gap"]) and Printed(-0.0005, 4).matches(qnn["2008-2012"]["gap"])
+    assert Printed(0.023, 3).matches(lstm["2013-2026"]["gap"]) and Printed(0.030, 3).matches(qnn["2013-2026"]["gap"])
+    assert Printed(0.60, 2).matches(lstm["no2026"]["ratio"]) and Printed(0.73, 2).matches(qnn["no2026"]["ratio"])
+    assert lstm["2008-2012"]["years"] == 5 and lstm["all"]["n"] - lstm["no2026"]["n"] == 9
+    for claim in (
+        "$-88$\\,\\% and $-99$\\,\\%",
+        "gaps $-0.004$ and $-0.0005$",
+        "$-25$\\,\\% and $-3$\\,\\%",
+        "ratios 0.65 and 0.87",
+        "$+0.023$ and $+0.030$",
+        "unchanged (0.60 and 0.73)",
+    ):
+        assert claim in text, claim
+
+
+def test_auc_correlations_in_text() -> None:
+    cor = _load("local_exp46_auc_correlation.json")
+    pr, val = cor["pairs"], cor["validation"]
+    assert Printed(0.78, 2).matches(pr["RF-LSTM_QNN"]["r_median"])
+    assert Printed(0.86, 2).matches(pr["RF-PureLSTM"]["r_median"])
+    assert Printed(0.91, 2).matches(pr["RF-XGB"]["r_median"])
+    assert Printed(0.045, 3).matches(pr["RF-LSTM_QNN"]["hm_mde_at_r"])
+    assert Printed(0.036, 3).matches(pr["RF-PureLSTM"]["hm_mde_at_r"])
+    curve = T43["resolution_curve"]["19"]
+    assert Printed(0.046, 3).matches(curve["single_RF_QNN"]) and Printed(0.035, 3).matches(curve["single_RF_LSTM"])
+    assert val["n"] == 516 and Printed(36.6, 1).matches(100 * val["prevalence"])
+    assert Printed(0.025, 3).matches(val["hm_se_one_auc_at_0.70"])
+    assert Printed(0.030, 3).matches(val["hm_mde_paired_rho_0.90"]) and Printed(0.048, 3).matches(
+        val["hm_mde_paired_rho_0.75"]
+    )
+    text = TEX.read_text(encoding="utf-8")
+    for claim in (
+        "0.78 for Random Forest and \\texttt{LSTM+QNN}, 0.86",
+        "0.91 for the two tree ensembles",
+        "gives 0.045 and 0.036",
+        "empirical MDEs of 0.046 and 0.035",
+        "516 validation rows (36.6\\,\\% positive)",
+        "about 0.025",
+        "about 0.030--0.048 AUC",
+    ):
+        assert claim in text, claim
+
+
+# ------------------------------------------------------------------ Section 2 and Table 13: the monthly panels
 def _panel(path: Path, meta: Path) -> dict[str, Any]:
     """Partition, P60 and test labels rebuilt from a tracked monthly panel (scripts/export_monthly_panel.py)."""
     p = pd.read_csv(path, parse_dates=["fecha"])
@@ -396,3 +489,25 @@ def test_second_panel_reproduces_partition_and_labels() -> None:
     text = TEX.read_text(encoding="utf-8")
     assert "884 station-months (34.7\\,\\% positive)" in text and "1{,}694 trai" in text
     assert Printed(34.7, 1).matches(100 * panel["prevalence"])
+
+
+# ------------------------------------------------------------------ numbers quoted in the running text
+def test_running_text_numbers() -> None:
+    text = TEX.read_text(encoding="utf-8")
+    clim_sm = T43["recal_stationmonth"]["CLIM"]["auc"]
+    assert Printed(0.479, 3).matches(clim_sm)
+    assert text.count("against 0.479 for the climatology") == 2 and "0.480 for the climatology" not in text
+    sim = _load("json/results_exp15_panel_sim.json")
+    design = sim["design"]
+    assert sum(design["year_sizes"]) == 529 and Printed(0.406, 3).matches(design["prevalence"])
+    assert "(529 rows, prevalence 0.406)" in text
+    rows = sim["rows"]
+    null = [r for r in rows if r["delta_design"] == 0]
+    alt = [r for r in rows if r["delta_design"] > 0]
+    dl = [r["rejection_delong"] for r in null]
+    bl = [r["rejection_block"] for r in null]
+    pw = [r["rejection_delong"] for r in alt] + [r["rejection_block"] for r in alt]
+    assert (min(dl), max(dl), min(bl), max(bl)) == pytest.approx((0.048, 0.058, 0.064, 0.088), abs=5e-4)
+    assert (round(100 * min(pw)), round(100 * max(pw))) == (17, 24)
+    assert "type-I errors of 0.048--0.058 for DeLong and 0.064--0.088 for the block bootstrap" in text
+    assert "17--24\\,\\% power" in text

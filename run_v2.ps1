@@ -80,10 +80,11 @@ Step "a12_within_year_rob"  "$L\exp26_within_year_robustness.py" -Soft
 Step "a14_equiv_fewcl"      "$L\exp35_equivalence_fewclusters.py" -Soft
 Step "a15_cancellation"     "$L\exp37_cancellation.py --probs results\json\results_hybrids_trainonly_fixet0_p60_28.1_probs.npz --meta results\test_meta.csv --out results\local_exp37_cancellation.json" -Soft
 Step "a16_panel_sim"        "$L\exp15_panel_matched_simulation.py --probs $CL --meta results\test_meta.csv --out results\json\results_exp15_panel_sim.json" -Soft
-Step "a18_summary"          "$L\exp42_v2_summary.py results"                                        # ~10 min; Tables 2-6
-Step "a19_tables"           "$L\exp43_v2_tables.py results"                                         # ~1 min; Tables 7-9, 13
+Step "a18_summary"          "$L\exp42_v2_summary.py results"                                        # ~10 min; Tables 3, 5-7
+Step "a19_tables"           "$L\exp43_v2_tables.py results"                                         # ~1 min; Tables 2, 9-11, S10
 Step "a20_partition"        "scripts\make_partition_table.py"                                       # Table 1
 Step "a21_forest"           "scripts\make_forest_plot.py"                                           # Figure 1
+Step "a21b_resolution"      "scripts\make_resolution_plot.py"                                       # Figure 2
 Step "a22_trace_v2"         "scripts\build_traceability_v2.py"
 Step "a23_manuscript"       "-m pytest tests\manuscript -q"                                         # paper/main.tex vs archives
 Write-Host "`nDONE. Check: git status (results\, paper\figs\, audit\) and make test" -ForegroundColor Green

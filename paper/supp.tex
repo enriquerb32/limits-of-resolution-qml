@@ -9,7 +9,6 @@
 \usepackage{geometry}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage{rotating}
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{microtype}
@@ -36,7 +35,6 @@
 \usetikzlibrary{shapes.geometric, arrows, positioning, fit, backgrounds}
 
 \usepackage{xcolor}
-\newcommand{\tbd}[1]{\textcolor{red}{[#1]}}% pending value: remove before submission
 
 % TODO toggle: \showtodotrue shows the notes, \showtodofalse hides them (submission version)
 \newif\ifshowtodo
@@ -159,7 +157,7 @@ Station & Station Indicators & \texttt{ciudad\_*} & One-hot indicators (Alicante
 \textbf{Item} & \textbf{Specification} \\
 \midrule
 Random Forest & 350 trees, maximum depth 11, minimum split 13, minimum leaf 10, $\sqrt{p}$ features (validation AUC 0.701); balanced class weights; mean imputation fitted on the training rows. \\
-XGBoost & learning rate 0.036, maximum depth 3, minimum child weight 3.01, subsample 0.99, column subsample 0.62, $\lambda=0.074$, $\gamma=2.94$; best iteration in the search 1 (validation AUC 0.723); up to 2{,}000 rounds with early stopping after 50 rounds without improvement of the validation AUC; \texttt{scale\_pos\_weight} $=n_{\text{neg}}/n_{\text{pos}}$ of the training rows. \\
+XGBoost & learning rate 0.036, maximum depth 3, minimum child weight 3.01, subsample 0.99, column subsample 0.62, $\lambda=0.074$, $\gamma=2.94$; best iteration in the search 1, that is two trees (validation AUC 0.723); in the 15 seeds of the paper early stopping keeps 2 to 121 trees, median 16 (\path{exp44_xgb_iterations.py}); up to 2{,}000 rounds with early stopping after 50 rounds without improvement of the validation AUC; \texttt{scale\_pos\_weight} $=n_{\text{neg}}/n_{\text{pos}}$ of the training rows. \\
 Standalone LSTM & 2-layer bidirectional LSTM (16 units per direction, dropout 0.3) over the 12 precipitation lags; its final states are concatenated with all 35 features, batch normalization, a 16-unit GELU layer (dropout 0.2, layer normalization) and a linear output; 10{,}103 parameters. \\
 Linear-4D control & 2-layer bidirectional LSTM (8 units per direction, dropout 0.2); projection of the LSTM state and features ($51\to4$, dropout 0.1), sigmoid scaled to $[0,\pi]$, linear $4\to4$ map (20 parameters), layer normalization, linear output; 2{,}609 parameters. \\
 LSTM+QNN & The control with the linear map replaced by the 4-qubit circuit of \Cref{fig:vqc_circuit} (re-uploaded $R_Y$ then $R_Z$ encoding, one \texttt{StronglyEntanglingLayers} block of range 1 per layer, two layers; $\langle Z_j\rangle$ readout); 2{,}613 parameters, 24 quantum. \\
@@ -392,9 +390,36 @@ $\Delta_{\text{true}}$ & \textbf{Rej. DeLong} & \textbf{Rej. block} & \textbf{Co
 \subsection{Panel-Matched Simulation}
 \label{app:panel_matched}
 
-A version of the simulation uses the year sizes, prevalence (0.406) and score correlation ($\rho=0.89$) of the panel and the AUCs of two of its models (0.680 and 0.667; \path{exp15_panel_matched_simulation.py}), with year effects $\tau\in\{0,0.1,0.2,0.3\}$ on the prevalence, shared by both scorers, and specific to each, 500 replications each. For a true difference of 0, the type-I error is 0.048--0.058 for DeLong and 0.064--0.088 for the block bootstrap; for the observed gap (population difference 0.013--0.014) the power is 0.17--0.22 for DeLong and 0.20--0.24 for the block bootstrap, and the standard errors of both procedures track the Monte Carlo standard deviation (ratios 0.99--1.07).
+A version of the simulation uses the year sizes, prevalence (0.406) and score correlation of the panel ($\rho=0.89$, the correlation of the normal scores of the two scorers, not the correlation between their AUCs assumed in \Cref{M-tab:hm_mde}) and the AUCs of two of its models (0.680 and 0.667; \path{exp15_panel_matched_simulation.py}), with year effects $\tau\in\{0,0.1,0.2,0.3\}$ on the prevalence, shared by both scorers, and specific to each, 500 replications each. For a true difference of 0, the type-I error is 0.048--0.058 for DeLong and 0.064--0.088 for the block bootstrap; for the observed gap (population difference 0.013--0.014) the power is 0.17--0.22 for DeLong and 0.20--0.24 for the block bootstrap, and the standard errors of both procedures track the Monte Carlo standard deviation (ratios 0.99--1.07).
 
 % ============================================================
+\section{Empirical Resolution Curve}
+\label{app:resolution}
+
+\path{exp43_v2_tables.py} draws, for each number of test years, 60 random subsets of whole years (all stations of a year together) and computes the 80\,\%-power DeLong MDE on the archived predictions; \Cref{tab:resolution} lists the medians plotted in \Cref{M-fig:resolution}.
+
+\begin{table}[htbp]
+\centering
+\caption{Values of \Cref{M-fig:resolution}. Empirical resolution curve: median 80\,\%-power DeLong MDE over random subsets of test years (60 subsets per size; archived predictions). Single run: seed $s$ against seed $s$, averaged over seeds. 15-seed means: paired DeLong on seed-averaged components. The last row is the full test set; HM: Hanley--McNeil single-run value at the same $N$ (prevalence 0.406, AUC 0.68, correlation 0.75).}
+\label{tab:resolution}
+{\small
+\begin{tabular}{rrcccc}
+\toprule
+& & & \multicolumn{2}{c}{\textbf{Single run}} & \textbf{15-seed means} \\
+\cmidrule(lr){4-5}\cmidrule(lr){6-6}
+\textbf{Years} & $N$ & \textbf{HM} & \textbf{RF $-$ LSTM} & \textbf{RF $-$ LSTM+QNN} & \textbf{RF $-$ LSTM+QNN} \\
+\midrule
+5 & 143 & 0.092 & 0.069 & 0.090 & 0.063 \\
+8 & 219 & 0.074 & 0.055 & 0.071 & 0.050 \\
+10 & 278 & 0.066 & 0.049 & 0.063 & 0.044 \\
+13 & 361 & 0.058 & 0.042 & 0.055 & 0.039 \\
+16 & 454 & 0.051 & 0.038 & 0.050 & 0.035 \\
+19 & 529 & 0.048 & 0.035 & 0.046 & 0.032 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
 \section{Quantum Case Study: Further Results}
 \label{app:qml}
 % ============================================================
@@ -407,7 +432,7 @@ A version of the simulation uses the year sizes, prevalence (0.406) and score co
 \subsection{Frequency Spectrum and Angles of the Trained Circuits}
 \label{app:spectrum}
 
-For each of the 15 trained circuits of \texttt{LSTM+QNN}, the exact readouts $\langle Z_j\rangle$ were evaluated on the angles produced for the training and test rows (\path{exp34_circuit_spectrum.py}, part A), and the variance of the readout was split by the per-coordinate frequency of its Fourier components: 68.2\,\%, 24.2\,\%, 6.7\,\%, 0.9\,\% of the variance lies at frequencies 1, 2, 3 and 4 (circuits with random weights: 59.6\,\%, 29.1\,\%, 9.9\,\%, 1.4\,\%). Least-squares fits on the training angles, evaluated on the test angles, give $R^2$ of 0.984 (degree-1 tensor basis, 81 functions; range 0.95--1.00), 0.987 (degree-2 tensor basis, 625 functions; 0.88--1.00), 0.850 (separable degree 2) and 0.854 (separable degree 4). Fitting the degree-1 tensor basis to circuits with random weights on the same angles gives 0.974 (0.94--1.00): the near-linearity per coordinate is a property of this encoding on the visited angles. For the median seed, the 1st, 50th and 99th percentiles of the test angles of the four qubits are 0.65, 0.37, 1.01 and 0.58; 1.72, 1.40, 1.86 and 1.45; and 2.58, 2.48, 2.62 and 2.29 rad; between 0 and 14\,\% of the test angles of a seed lie within $\pi/18$ of 0 or $\pi$.
+For each of the 15 trained circuits of \texttt{LSTM+QNN}, the exact readouts $\langle Z_j\rangle$ were evaluated on the angles produced for the training and test rows (\path{exp34_circuit_spectrum.py}, part A). For the spectrum, each angle was swept over a full period $[0,2\pi)$ with the other three at the values of a test row, so the shares below describe the function on the whole torus; the least-squares fits that follow use only the angles the model actually visits (roughly 0.4--2.6\,rad, less than half a period), on which higher frequencies are well approximated by degree-1 terms. The two statements are therefore compatible: 24\,\% of the variance at frequency 2 over the full period, and $R^2=0.984$ for the degree-1 tensor basis on the visited range. Split by the per-coordinate frequency of its Fourier components, the variance of the readout over the full period is: 68.2\,\%, 24.2\,\%, 6.7\,\%, 0.9\,\% of the variance lies at frequencies 1, 2, 3 and 4 (circuits with random weights: 59.6\,\%, 29.1\,\%, 9.9\,\%, 1.4\,\%). Least-squares fits on the training angles, evaluated on the test angles, give $R^2$ of 0.984 (degree-1 tensor basis, 81 functions; range 0.95--1.00), 0.987 (degree-2 tensor basis, 625 functions; 0.88--1.00), 0.850 (separable degree 2) and 0.854 (separable degree 4). Fitting the degree-1 tensor basis to circuits with random weights on the same angles gives 0.974 (0.94--1.00): the near-linearity per coordinate is a property of this encoding on the visited angles. For the median seed, the 1st, 50th and 99th percentiles of the test angles of the four qubits are 0.65, 0.37, 1.01 and 0.58; 1.72, 1.40, 1.86 and 1.45; and 2.58, 2.48, 2.62 and 2.29 rad; between 0 and 14\,\% of the test angles of a seed lie within $\pi/18$ of 0 or $\pi$.
 
 \subsection{Positive Control with a Planted Circuit Signal}
 \label{app:teacher}
