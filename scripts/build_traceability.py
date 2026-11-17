@@ -52,7 +52,7 @@ def load_context():
         "exp13_core": load_json("results/json/results_exp13_label_sensitivity_fixet0.json"),
         "exp16_core": load_json("results/local_exp16_block_c_fixet0.json"),
         "exp20": load_json("results/local_exp20_rf_fitting_rows.json"),
-        "exp21": load_json("results/local_exp21_brier_trainonly.json"),
+        "exp21": load_json("results/local_exp21_brier_trainonly_controls.json"),
         "exp22": load_json("results/local_exp22_same_arch_core.json"),
         "exp23": load_json("results/local_exp23_within_station_auc.json"),
         "exp24": load_json("results/local_exp24_resolution_curve.json"),
@@ -434,9 +434,9 @@ def evaluate_claims(ctx):
                 ("p", get_path(e13c, f"{s0}.pairs.{pk}.p"), ep, 0.0005)])
 
     # TR-065
-    auc_clim = get_path(clim, "climatology.auc") or 0.6796
-    st65, sv65 = check_num(auc_clim, 0.680, 0.001)
-    rows.append(("TR-065", "main.tex:390 (Climatology)", "Month x Station Climatology AUC and Brier", "AUC 0.680 (Brier 0.2224, BSS +0.082 relative to 0.2422)", "results/local_exp1_climatology.json", f"auc={auc_clim:.4f}", st65))
+    auc_clim = get_path(clim, "month_x_station_climatology.auc") or get_path(clim, "climatology.auc")
+    st65, sv65 = check_num(auc_clim, 0.681, 0.0005)
+    rows.append(("TR-065", "main.tex:390 (Climatology)", "Month x Station Climatology AUC and Brier", "AUC 0.681 (Brier 0.2220, BSS +0.083 relative to 0.2422)", "results/local_exp1_climatology.json", f"auc={auc_clim:.4f}", st65))
 
     # TR-066
     auc_pers = get_path(pers, "persistence.auc") or 0.5888
@@ -446,27 +446,28 @@ def evaluate_claims(ctx):
     # TR-067 (Table brier: 15-seed train-only Brier, no retraining)
     e21 = ctx["exp21"] or {}
     g21 = lambda m, f: get_path(e21, f"models.{m}.{f}")
+    TAB_BRIER_NON_RF = ("XGBoost", "Standalone LSTM", "Linear-4D control", "LSTM+QNN", "LbL-QNN", "LSTM+PI-QNN", "LSTM+QTL")
     strict("TR-067", "Table brier", "Climatology BS; RF and LSTM+QNN mean BS, BSS, dBS CI; ECE range of non-RF models",
-           "0.2224; RF 0.2238 / -0.006 / [-0.006,+0.009]; QNN 0.2421 / -0.088; ECE 0.120--0.137",
-           "results/local_exp21_brier_trainonly.json",
-           [("clim_bs", get_path(e21, "climatology.brier"), 0.2224, 0.00005),
+           "0.2220; RF 0.2238 / -0.008 / [-0.006,+0.010]; QNN 0.2421 / -0.090; ECE 0.125--0.137",
+           "results/local_exp21_brier_trainonly_controls.json",
+           [("clim_bs", get_path(e21, "climatology.brier"), 0.2220, 0.00005),
             ("rf_bs", g21("Random Forest", "brier_mean"), 0.2238, 0.00005),
-            ("rf_bss", g21("Random Forest", "bss_clim_mean"), -0.006, 0.0005),
+            ("rf_bss", g21("Random Forest", "bss_clim_mean"), -0.008, 0.0005),
             ("rf_ci_lo", get_path(e21, "models.Random Forest.brier_minus_clim_block_ci.0"), -0.006, 0.0005),
-            ("rf_ci_hi", get_path(e21, "models.Random Forest.brier_minus_clim_block_ci.1"), 0.009, 0.0005),
+            ("rf_ci_hi", get_path(e21, "models.Random Forest.brier_minus_clim_block_ci.1"), 0.010, 0.0005),
             ("qnn_bs", g21("LSTM+QNN", "brier_mean"), 0.2421, 0.00005),
-            ("qnn_bss", g21("LSTM+QNN", "bss_clim_mean"), -0.088, 0.0005),
-            ("ece_min", min((v["ece_mean"] for k, v in (e21.get("models") or {}).items() if k != "Random Forest"), default=None), 0.120, 0.0005),
-            ("ece_max", max((v["ece_mean"] for k, v in (e21.get("models") or {}).items() if k != "Random Forest"), default=None), 0.137, 0.0005)])
+            ("qnn_bss", g21("LSTM+QNN", "bss_clim_mean"), -0.090, 0.0005),
+            ("ece_min", min((v["ece_mean"] for k, v in (e21.get("models") or {}).items() if k in TAB_BRIER_NON_RF), default=None), 0.125, 0.0005),
+            ("ece_max", max((v["ece_mean"] for k, v in (e21.get("models") or {}).items() if k in TAB_BRIER_NON_RF), default=None), 0.137, 0.0005)])
     e23 = ctx["exp23"] or {}
     w = lambda m: get_path(e23, f"models.{m}.within_auc")
     pq = get_path(e23, "pairs.LSTM+QNN - Climatology.ci_block")
     pr = get_path(e23, "pairs.Random Forest - Climatology.ci_block")
     strict("TR-067c", "Table within / Sec. 4.4", "Within-station AUC: climatology, RF, LSTM+QNN; QNN-clim and RF-clim block CI",
-           "0.670, 0.660, 0.639; [-0.060,-0.005]; [-0.034,+0.009]", "results/local_exp23_within_station_auc.json",
-           [("clim", w("Climatology"), 0.670, 0.0005), ("rf", w("Random Forest"), 0.660, 0.0005), ("qnn", w("LSTM+QNN"), 0.639, 0.0005),
-            ("qnn_clim_lo", pq[0] if pq else None, -0.060, 0.0005), ("qnn_clim_hi", pq[1] if pq else None, -0.005, 0.0005),
-            ("rf_clim_lo", pr[0] if pr else None, -0.034, 0.0005), ("rf_clim_hi", pr[1] if pr else None, 0.009, 0.0005)])
+           "0.672, 0.660, 0.639; [-0.062,-0.007]; [-0.035,+0.007]", "results/local_exp23_within_station_auc.json",
+           [("clim", w("Climatology"), 0.672, 0.0005), ("rf", w("Random Forest"), 0.660, 0.0005), ("qnn", w("LSTM+QNN"), 0.639, 0.0005),
+            ("qnn_clim_lo", pq[0] if pq else None, -0.062, 0.0005), ("qnn_clim_hi", pq[1] if pq else None, -0.007, 0.0005),
+            ("rf_clim_lo", pr[0] if pr else None, -0.035, 0.0005), ("rf_clim_hi", pr[1] if pr else None, 0.007, 0.0005)])
     e24 = ctx["exp24"] or {}
     g24 = lambda K, f: get_path(e24, f"by_K.{K}.pairs.RF-LSTM_QNN.{f}")
     ex = [get_path(e24, f"fit.{p}.{s}.exponent") for p in ("RF-XGB", "RF-LSTM", "RF-LSTM_QNN", "CTRL_LINEAR4D-LSTM_QNN", "LSTM-LSTM_QNN")

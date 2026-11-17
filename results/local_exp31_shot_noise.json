@@ -1,0 +1,56 @@
+{
+  "n_test": 529,
+  "seeds": 15,
+  "reps": 50,
+  "agreement_with_archive": {
+    "max_abs_prob_diff": 0.5084912883424979,
+    "archived_mean_auc": 0.658699451933047,
+    "refit_mean_auc": 0.6599140868019553
+  },
+  "auc_exact_mean": 0.6599140868019553,
+  "auc_exact_sd_seeds": 0.011193569253677585,
+  "by_shots": {
+    "32": {
+      "mean_auc": 0.630906976744186,
+      "mean_auc_loss": 0.029007110057769212,
+      "max_seed_mean_loss": 0.044207080432528405,
+      "shot_sd_single_model": 0.014898091585875562,
+      "shot_sd_seed_mean": 0.0031705971600395,
+      "shots_per_test_evaluation": 16928,
+      "circuit_executions_per_test_evaluation": 529
+    },
+    "100": {
+      "mean_auc": 0.6480770947513949,
+      "mean_auc_loss": 0.011836992050560392,
+      "max_seed_mean_loss": 0.022351651607169266,
+      "shot_sd_single_model": 0.010349137512559914,
+      "shot_sd_seed_mean": 0.0024311976123161864,
+      "shots_per_test_evaluation": 52900,
+      "circuit_executions_per_test_evaluation": 529
+    },
+    "1000": {
+      "mean_auc": 0.6583591171678269,
+      "mean_auc_loss": 0.0015549696341282686,
+      "max_seed_mean_loss": 0.004106947118945257,
+      "shot_sd_single_model": 0.004364313120568822,
+      "shot_sd_seed_mean": 0.0010663725433074423,
+      "shots_per_test_evaluation": 529000,
+      "circuit_executions_per_test_evaluation": 529
+    },
+    "10000": {
+      "mean_auc": 0.659831215128623,
+      "mean_auc_loss": 8.287167333233706e-05,
+      "max_seed_mean_loss": 0.0010291808620944054,
+      "shot_sd_single_model": 0.0014179400797177568,
+      "shot_sd_seed_mean": 0.00036672080186706473,
+      "shots_per_test_evaluation": 5290000,
+      "circuit_executions_per_test_evaluation": 529
+    }
+  },
+  "training_cost_parameter_shift": {
+    "quantum_parameters": 24,
+    "encoding_gate_occurrences": 16,
+    "circuits_per_row_per_step": 81,
+    "note": "parameter shift: 1 forward circuit, 2 per circuit weight (24) and 2 per encoding-gate occurrence (4 angles x RY,RZ x 2 layers = 16; needed to backpropagate into the classical layers) = 81 circuits per row and step; per epoch multiply by 2,273 rows and by the shots per circuit"
+  }
+}

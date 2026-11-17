@@ -1,0 +1,106 @@
+{
+ "RF-QNN": {
+  "gap": 0.01965733471584452,
+  "se_iid": 0.01151236261863919,
+  "se_year": 0.008318616920678529,
+  "ratio_year": 0.7225812108463472,
+  "ratio_station_year": 0.8842451406513795,
+  "station_totals": {
+   "Alicante": 0.0076,
+   "Barcelona": -0.00071,
+   "San_Javier": -0.00577,
+   "Valencia": -0.00112
+  },
+  "within_station_term": 0.000101422487685364,
+  "cross_station_term": -3.586517323725951e-05,
+  "cross_share": -0.35362150994088776,
+  "mean_cross_corr_yearly_sums": -0.11011688108786684,
+  "ratio_year_demeaned_station": 0.6891465928546855,
+  "ratio_year_demeaned_station_month": 1.0579085767122,
+  "perm_p_lower": 0.116,
+  "ratio_year_perm_within_station_median": 0.8731746153180915,
+  "ratio_year_perm_q05_q95": [
+   0.671195866971042,
+   1.0937348931131707
+  ],
+  "ratio_demeaned_station_month_perm_median": 1.09226720879085
+ },
+ "RF-LSTM": {
+  "gap": 0.014560805806547172,
+  "se_iid": 0.011000694985736035,
+  "se_year": 0.006539268817547517,
+  "ratio_year": 0.5944414262941212,
+  "ratio_station_year": 0.7653517683022161,
+  "station_totals": {
+   "Alicante": 0.00755,
+   "Barcelona": -0.00306,
+   "San_Javier": -0.00309,
+   "Valencia": -0.00141
+  },
+  "within_station_term": 6.937809970015782e-05,
+  "cross_station_term": -2.886669654085849e-05,
+  "cross_share": -0.4160779362020033,
+  "mean_cross_corr_yearly_sums": -0.15036777213991126,
+  "ratio_year_demeaned_station": 0.6174537934824136,
+  "ratio_year_demeaned_station_month": 1.0045631093444456,
+  "perm_p_lower": 0.074,
+  "ratio_year_perm_within_station_median": 0.7513874864369894,
+  "ratio_year_perm_q05_q95": [
+   0.5756195584167724,
+   0.9423505739913326
+  ],
+  "ratio_demeaned_station_month_perm_median": 1.0319250191715303
+ },
+ "LSTM-QNN": {
+  "gap": 0.005096528909297349,
+  "se_iid": 0.005659230229681102,
+  "se_year": 0.005002166507266564,
+  "ratio_year": 0.8838952126442181,
+  "ratio_station_year": 0.9293039268691595,
+  "station_totals": {
+   "Alicante": 5e-05,
+   "Barcelona": 0.00235,
+   "San_Javier": -0.00269,
+   "Valencia": 0.00029
+  },
+  "within_station_term": 2.7070123867841843e-05,
+  "cross_station_term": -3.3653840891287467e-06,
+  "cross_share": -0.12432097117688774,
+  "mean_cross_corr_yearly_sums": -0.028826690285826854,
+  "ratio_year_demeaned_station": 0.8981875962657313,
+  "ratio_year_demeaned_station_month": 1.0970959660425046,
+  "perm_p_lower": 0.3975,
+  "ratio_year_perm_within_station_median": 0.9165110950031053,
+  "ratio_year_perm_q05_q95": [
+   0.7167867369639215,
+   1.1204977670780834
+  ],
+  "ratio_demeaned_station_month_perm_median": 1.136865780367079
+ },
+ "RF-Lin4D": {
+  "gap": 0.02304053720436483,
+  "se_iid": 0.01400567754961901,
+  "se_year": 0.010467711888890436,
+  "ratio_year": 0.7473906101154802,
+  "ratio_station_year": 0.9197876233939516,
+  "station_totals": {
+   "Alicante": 0.01155,
+   "Barcelona": -0.00557,
+   "San_Javier": -0.00542,
+   "Valencia": -0.00056
+  },
+  "within_station_term": 0.00016242143511783897,
+  "cross_station_term": -5.861544251790595e-05,
+  "cross_share": -0.36088489475160496,
+  "mean_cross_corr_yearly_sums": -0.12208046569671478,
+  "ratio_year_demeaned_station": 0.7908288052279849,
+  "ratio_year_demeaned_station_month": 1.110361944517445,
+  "perm_p_lower": 0.1405,
+  "ratio_year_perm_within_station_median": 0.8994632895641375,
+  "ratio_year_perm_q05_q95": [
+   0.6812659818097447,
+   1.1166373504134706
+  ],
+  "ratio_demeaned_station_month_perm_median": 1.1140166625246448
+ }
+}

@@ -259,6 +259,11 @@ def _flag_ACP(agg: pd.DataFrame) -> pd.DataFrame:
     return agg
 
 def construir_features(df_diario: pd.DataFrame, anomalia_fn=_anomalia_canonical, fix_et0_verano: bool = False) -> pd.DataFrame:
+    if os.environ.get('LOR_DATASET', 'v1').lower() == 'v2':   # v2: dataset_v2.py (no inner join, precipitation-only labels, observed wind in ET0)
+        from dataset_v2 import construir_features_v2
+        return construir_features_v2(df_diario, anomalia_fn)
+    if 'precip_valid' in df_diario.columns:
+        raise SystemExit('this daily file was written by etl_v2.py: set LOR_DATASET=v2')
     agg = _agregar_mensual(df_diario)
     agg = _indices_sinopticos(agg, anomalia_fn, fix_et0_verano=fix_et0_verano)
     agg = _flag_ACP(agg)
@@ -276,7 +281,11 @@ def preparar_dataset(agg: pd.DataFrame,
     train_mask = (agg.index.year <= ANIO_CORTE_TRAIN)
 
     # Thresholds
-    precip_train = agg.loc[train_mask, label_col].values
+    if 'win_ok' in agg.columns and label_col == 'precip':     # v2: the label is the precipitation-only sum
+        label_col = 'precip_label_f'
+        umbral_override = umbral_ext_override = None      # v2: P60/P90 of the v2 training labels (scripts pass 28.1)
+    lab_ok = agg['label_ok'].values.astype(bool) if 'label_ok' in agg.columns else np.ones(len(agg), bool)
+    precip_train = agg.loc[train_mask & lab_ok, label_col].values
     umbral = umbral_override if umbral_override is not None else float(np.percentile(precip_train, 60))
     umbral_x = umbral_ext_override if umbral_ext_override is not None else float(np.percentile(precip_train, 90))
 
@@ -301,7 +310,10 @@ def preparar_dataset(agg: pd.DataFrame,
         precip_raw = df_city_raw[label_col].values
         n_muestras = len(df_city_sc) - WINDOW_SIZE
 
+        win_ok = df_city_raw['win_ok'].values if 'win_ok' in df_city_raw.columns else None
         for i in range(n_muestras):
+            if win_ok is not None and not win_ok[i + WINDOW_SIZE]:
+                continue
             ventana = precip_sc[i:i + WINDOW_SIZE]
             ft = fechas_city[i + WINDOW_SIZE]
             s_sin = math.sin(2 * math.pi * ft.month / 12)
@@ -375,6 +387,7 @@ def preparar_dataset(agg: pd.DataFrame,
     )
     # row metadata of the test windows, in the SAME order as X_te / y_te (used to link predictions to monthly coverage)
     ret.meta_te = {'ciudad': ciudad_all[s2:], 'fecha': fechas_all[s2:]}
+    ret.meta_va = {'ciudad': ciudad_all[s1:s2], 'fecha': fechas_all[s1:s2]}
     return ret
 
 
