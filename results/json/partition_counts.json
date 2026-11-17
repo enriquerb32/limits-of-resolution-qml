@@ -1,0 +1,36 @@
+{
+  "Alicante": {
+    "test": 220,
+    "test_pos": 60,
+    "test_rate": 0.2727,
+    "last_test_year": 2026
+  },
+  "Barcelona": {
+    "test": 221,
+    "test_pos": 113,
+    "test_rate": 0.5113,
+    "last_test_year": 2026
+  },
+  "San Javier": {
+    "test": 37,
+    "test_pos": 14,
+    "test_rate": 0.3784,
+    "last_test_year": 2011
+  },
+  "Valencia": {
+    "test": 51,
+    "test_pos": 28,
+    "test_rate": 0.549,
+    "last_test_year": 2012
+  },
+  "Total": {
+    "val": 516,
+    "val_pos": 189,
+    "test": 529,
+    "test_pos": 215,
+    "test_rate": 0.4064,
+    "test_years": 19,
+    "first_test_year": 2008,
+    "last_test_year": 2026
+  }
+}

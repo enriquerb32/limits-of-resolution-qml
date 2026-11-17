@@ -53,12 +53,15 @@ Thumbs.db
 # Large checkpoints (if hosted on Zenodo instead of Git LFS)
 # checkpoints/*.pt
 
-# Local helper scripts
+# Local helper scripts (the v2 pipeline entry point is tracked)
 *.ps1
+!/run_v2.ps1
 
 # Raw Daily Weather Data (not redistributed; only aggregated monthly panel is redistributed)
 datos_limpios_multiestacion.csv
 **/datos_limpios_multiestacion.csv
+# daily records of the second panel (written by exp32_second_panel.py --step etl); its monthly panel is tracked
+results/panel2/*/datos.csv
 precip_raw.csv
 **/precip_raw.csv
 month_rows.csv

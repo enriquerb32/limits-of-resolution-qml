@@ -1,4 +1,4 @@
-"""End-to-end check that the exp10 command line reproduces the archived classical table."""
+"""End-to-end check that the exp10 command line reproduces the archived classical table of v1 (results_v1/)."""
 
 import json
 import os
@@ -17,11 +17,13 @@ def test_exp10_reproduces_archived_table(tmp_path):
         sys.executable,
         os.path.join(ROOT, "code", "local_experiments", "exp10_paired_ci.py"),
         "--probs",
-        os.path.join(ROOT, "results", "json", "results_rerun_train_only_canonical_probs.npz"),
+        os.path.join(ROOT, "results_v1", "json", "results_rerun_train_only_canonical_probs.npz"),
         "--prefix",
         "train_only",
         "--extra",
-        os.path.join(ROOT, "results", "json", "results_qml_core_trainonly_probs.npz"),
+        os.path.join(ROOT, "results_v1", "json", "results_qml_core_trainonly_probs.npz"),
+        "--years",
+        os.path.join(ROOT, "results_v1", "years_te.npy"),
         "--B",
         "50",
         "--out",
@@ -30,7 +32,7 @@ def test_exp10_reproduces_archived_table(tmp_path):
     res = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT)
     assert res.returncode == 0, res.stderr
     new = json.loads(out.read_text())["pairs"]
-    with open(os.path.join(ROOT, "results", "json", "results_exp10_paired_ci.json"), encoding="utf-8") as fh:
+    with open(os.path.join(ROOT, "results_v1", "json", "results_exp10_paired_ci.json"), encoding="utf-8") as fh:
         ref = json.load(fh)["pairs"]
     assert sorted(new) == sorted(ref)
     for k in ref:

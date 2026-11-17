@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 """
-make_forest_plot.py - forest plot of every paired seed-mean comparison of the paper, three intervals per row
-==========================================================================================================
-Reads the exp10 outputs (no recomputation, so the figure matches the tables exactly):
-  results/json/results_exp10_paired_ci_fixet0.json   classical pairs + LSTM+QNN pairs   (Tables 4 and 7)
-  results/json/results_exp10_hybrids_fixet0.json     further hybrids                     (Table 8)
-  results/json/results_exp10_controls.json           corrected LSTM+QTL and controls     (Tables 8 and 9; optional)
+make_forest_plot.py - forest plot of every paired seed-mean comparison of the v2 paper, three intervals per row
+=============================================================================================================
+Reads the v2 summary (no recomputation, so the figure matches the tables exactly):
+  results/local_exp42_v2_summary.json   written by code/local_experiments/exp42_v2_summary.py
+The rows are those of Tables 3, 5 and 6 of the manuscript (tab:paired_ci, tab:qnn_paired, tab:controls).
 For each pair it draws the DeLong 95 % interval, the calendar-year block-bootstrap interval and the
-years x seeds interval, offset vertically, with the point estimate. Pairs whose JSON is missing are skipped.
+years x seeds interval, offset vertically, with the point estimate. A missing pair is an error.
 
 Usage (from the repository root):
-  python scripts/make_forest_plot.py                      # -> figs/fig_forest.pdf and figs/fig_forest.png
-  python scripts/make_forest_plot.py --out figs/fig_forest
+  python scripts/make_forest_plot.py                      # -> paper/figs/fig_forest.pdf and .png
+  python scripts/make_forest_plot.py --out paper/figs/fig_forest
 """
 import argparse
 import json
@@ -22,27 +21,30 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-J = lambda f: os.path.join(ROOT, 'results', 'json', f)  # noqa: E731
+SUMMARY = os.path.join(ROOT, 'results', 'local_exp42_v2_summary.json')
+MINUS = '−'
 
-# (group, label, file, key in 'pairs'); the label states the sign convention A - B
+# (group, label A - B, key in exp42 'pairs', flipped): flipped means the archive stores B - A
 ROWS = [
-    ('Classical models', 'RF − XGBoost', 'results_exp10_paired_ci_fixet0.json', 'RF-XGB'),
-    ('Classical models', 'RF − LSTM', 'results_exp10_paired_ci_fixet0.json', 'RF-LSTM'),
-    ('Classical models', 'XGBoost − LSTM', 'results_exp10_paired_ci_fixet0.json', 'XGB-LSTM'),
-    ('Random Forest vs hybrids', 'RF − LSTM+QNN', 'results_exp10_paired_ci_fixet0.json', 'RF_2273-LSTM_QNN'),
-    ('Random Forest vs hybrids', 'RF − LSTM+QTL', 'results_exp10_controls.json', 'RF_2273-QTL_FIXED'),
-    ('Hybrids vs LSTM', 'LSTM − LSTM+QNN', 'results_exp10_paired_ci_fixet0.json', 'PureLSTM-LSTM_QNN'),
-    ('Hybrids vs LSTM', 'Extractor − LSTM+QTL', 'results_exp10_controls.json', 'QTL_EXTRACTOR27-QTL_FIXED'),
-    ('Circuit vs controls', 'Linear-4D − LSTM+QNN', 'results_exp10_paired_ci_fixet0.json', 'CTRL_LINEAR4D-LSTM_QNN'),
-    ('Circuit vs controls', 'Fourier-1 − LSTM+QNN', 'results_exp10_controls.json', 'FOURIER1-LSTM_QNN'),
-    ('Circuit vs controls', 'Fourier-2 − LSTM+QNN', 'results_exp10_controls.json', 'FOURIER2-LSTM_QNN'),
-    ('Circuit vs controls', 'Fourier-3 − LSTM+QNN', 'results_exp10_fourier_sep34.json', 'FOURIER3-LSTM_QNN'),
-    ('Circuit vs controls', 'Fourier-4 − LSTM+QNN', 'results_exp10_fourier_sep34.json', 'FOURIER4-LSTM_QNN'),
-    ('Circuit vs controls', 'Full Fourier-1 − LSTM+QNN', 'results_exp10_fourier_full.json', 'FOURIER_FULL1-LSTM_QNN'),
-    ('Circuit vs controls', 'Full Fourier-2 − LSTM+QNN', 'results_exp10_fourier_full.json', 'FOURIER_FULL2-LSTM_QNN'),
-    ('Circuit vs controls', 'QTL-classical − LSTM+QTL', 'results_exp10_controls.json', 'QTL_CLASSICAL-QTL_FIXED'),
-    ('Circuit vs controls', 'Frozen random − LSTM+QNN', 'results_exp10_controls.json', 'FROZEN_RANDOM-LSTM_QNN'),
-    ('Circuit vs controls', 'Frozen zero-angle − LSTM+QNN', 'results_exp10_controls.json', 'FROZEN_IDENTITY-LSTM_QNN'),
+    ('Classical models', 'RF - XGBoost', 'RF-XGB', False),
+    ('Classical models', 'RF - LSTM', 'RF-PureLSTM', False),
+    ('Classical models', 'XGBoost - LSTM', 'XGB-PureLSTM', False),
+    ('Random Forest vs hybrids', 'RF - LSTM+QNN', 'RF-LSTM_QNN', False),
+    ('Random Forest vs hybrids', 'RF - LSTM+QTL', 'RF-LSTM_QTL', False),
+    ('Hybrids vs LSTM', 'LSTM - LSTM+QNN', 'PureLSTM-LSTM_QNN', False),
+    ('Hybrids vs LSTM', 'LSTM+QTL - its extractor', 'LSTM_QTL-PureLSTM', False),
+    ('Circuit vs controls', 'Linear-4D - LSTM+QNN', 'LSTM_QNN-CTRL_LINEAR4D', True),
+    ('Circuit vs controls', 'Fourier-1 - LSTM+QNN', 'FOURIER1-LSTM_QNN', False),
+    ('Circuit vs controls', 'Fourier-2 - LSTM+QNN', 'FOURIER2-LSTM_QNN', False),
+    ('Circuit vs controls', 'Fourier-3 - LSTM+QNN', 'FOURIER3-LSTM_QNN', False),
+    ('Circuit vs controls', 'Fourier-4 - LSTM+QNN', 'FOURIER4-LSTM_QNN', False),
+    ('Circuit vs controls', 'Full Fourier-1 - LSTM+QNN', 'FOURIER_FULL1-LSTM_QNN', False),
+    ('Circuit vs controls', 'Full Fourier-2 - LSTM+QNN', 'FOURIER_FULL2-LSTM_QNN', False),
+    ('Circuit vs controls', 'Full Fourier-2 - Fourier-2', 'FOURIER_FULL2-FOURIER2', False),
+    ('Circuit vs controls', 'LSTM+QTL - QTL-classical', 'LSTM_QTL-QTL_CLASSICAL', False),
+    ('Circuit vs controls', 'LSTM+QTL - QTL tensor-81', 'LSTM_QTL-QTL_TENSOR1', False),
+    ('Circuit vs controls', 'Frozen random - LSTM+QNN', 'FROZEN_RANDOM-LSTM_QNN', False),
+    ('Circuit vs controls', 'Frozen zero-angle - LSTM+QNN', 'FROZEN_IDENTITY-LSTM_QNN', False),
 ]
 # validated categorical slots 1-3 (dataviz reference palette, light mode); aqua is below 3:1 contrast,
 # so every procedure also has its own marker shape and the legend is always shown
@@ -52,35 +54,29 @@ PROC = [('DeLong (iid)', 'ci_delong', '#2a78d6', 'o'),
 INK, MUTED, GRID = '#0b0b0b', '#52514e', '#e4e3df'
 
 
-def load(f, cache={}):
-    if f not in cache:
-        p = J(f)
-        cache[f] = json.load(open(p, encoding='utf-8')) if os.path.exists(p) else None
-    return cache[f]
-
-
-def ci(entry, key):
-    if key in entry and entry[key] is not None:
-        return entry[key]
-    if key == 'ci_delong':                                    # older outputs: rebuild from the SE
-        return [entry['delta'] - 1.959964 * entry['se_delong'], entry['delta'] + 1.959964 * entry['se_delong']]
-    return None
+def entry(pairs, key, flipped):
+    """Point estimate and the three intervals of one row, in the A - B orientation of its label."""
+    if key not in pairs:
+        raise KeyError(f'{key} not in {SUMMARY}; rerun exp42_v2_summary.py')
+    e = pairs[key]
+    out = {'delta': e['gap']}
+    for _, k, _, _ in PROC:
+        out[k] = list(e[k])
+    if flipped:
+        out = {k: ([-v[1], -v[0]] if isinstance(v, list) else -v) for k, v in out.items()}
+    return out
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--out', default=os.path.join(ROOT, 'figs', 'fig_forest'))
+    ap.add_argument('--out', default=os.path.join(ROOT, 'paper', 'figs', 'fig_forest'))
     a = ap.parse_args()
-    rows, missing = [], []
-    for g, lab, f, k in ROWS:
-        d = load(f)
-        e = (d or {}).get('pairs', {}).get(k)
-        (rows if e else missing).append((g, lab, e) if e else f'{lab} ({f})')
-    if missing:
-        print('skipped (output not found):', '; '.join(missing))
+    with open(SUMMARY, encoding='utf-8') as fh:
+        pairs = json.load(fh)['pairs']
+    rows = [(g, lab.replace(' - ', f' {MINUS} '), entry(pairs, k, fl)) for g, lab, k, fl in ROWS]
 
     plt.rcParams.update({'font.size': 8.5, 'font.family': 'DejaVu Sans', 'axes.edgecolor': MUTED,
-                         'axes.labelcolor': INK, 'xtick.color': MUTED, 'ytick.color': INK})
+                         'axes.labelcolor': INK, 'xtick.color': MUTED, 'ytick.color': INK, 'pdf.fonttype': 42})
     groups = []
     for g, _, _ in rows:
         if g not in groups:
@@ -100,17 +96,12 @@ def main():
     fig, ax = plt.subplots(figsize=(6.8, 0.27 * (len(rows) + 2 * len(groups)) + 1.2))
     ax.axvline(0, color=MUTED, lw=1.0, zorder=1)
     for yy, e in pos:
-        for j, (name, key, col, mk) in enumerate(PROC):
-            c = ci(e, key)
-            if c is None:
-                continue
+        for j, (_, key, col, mk) in enumerate(PROC):
             off = (1 - j) * 0.22
-            ax.plot(c, [yy + off] * 2, color=col, lw=2.0, solid_capstyle='round', zorder=2)
+            ax.plot(e[key], [yy + off] * 2, color=col, lw=2.0, solid_capstyle='round', zorder=2)
             ax.plot(e['delta'], yy + off, marker=mk, ms=4.5, color=col, mec='#fcfcfb', mew=0.8, zorder=3)
-    all_ticks = ticks + [yy for yy, _ in heads]
-    all_labels = labels + [g for _, g in heads]
-    ax.set_yticks(all_ticks)
-    ax.set_yticklabels(all_labels)
+    ax.set_yticks(ticks + [yy for yy, _ in heads])
+    ax.set_yticklabels(labels + [g for _, g in heads])
     for t in ax.get_yticklabels()[len(ticks):]:
         t.set_fontweight('bold')
     ax.tick_params(axis='y', length=0)
@@ -118,14 +109,14 @@ def main():
     ax.grid(axis='x', color=GRID, lw=0.6, zorder=0)
     for s in ('top', 'right', 'left'):
         ax.spines[s].set_visible(False)
-    ax.set_xlabel('Difference of 15-seed mean test AUC (A − B), 95 % intervals')
+    ax.set_xlabel(f'Difference of 15-seed mean test AUC (A {MINUS} B), 95 % intervals')
     handles = [plt.Line2D([], [], color=c, lw=2, marker=m, ms=4.5, mec='#fcfcfb') for _, _, c, m in PROC]
     ax.legend(handles, [p[0] for p in PROC], loc='lower center', bbox_to_anchor=(0.5, 1.0), ncol=3, frameon=False,
               fontsize=8, handlelength=2.2)
     fig.tight_layout()
-    os.makedirs(os.path.dirname(a.out), exist_ok=True)
-    for ext in ('pdf', 'png'):
-        fig.savefig(f'{a.out}.{ext}', dpi=200, bbox_inches='tight')
+    os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
+    fig.savefig(f'{a.out}.pdf', bbox_inches='tight', metadata={'CreationDate': None, 'ModDate': None})
+    fig.savefig(f'{a.out}.png', dpi=200, bbox_inches='tight', metadata={'Software': None})
     print(f'wrote {a.out}.pdf/.png with {len(rows)} pairs')
 
 

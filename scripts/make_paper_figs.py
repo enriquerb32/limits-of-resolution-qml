@@ -1,5 +1,9 @@
 """
-scripts/make_paper_figs.py - Generate all paper figures from saved results JSONs.
+scripts/make_paper_figs.py - Generate the figures of the v1 manuscript from saved results JSONs.
+
+The v2 manuscript uses only fig_sim (the known-truth simulation, which does not depend on the data and is
+archived in results_v1/json/sim*.json) and fig_forest (scripts/make_forest_plot.py):
+  python scripts/make_paper_figs.py --results results_v1 --only sim
 
 Produces:
   paper/figs/fig_paired_ci.pdf (.png)      <- results/json/results_exp10_paired_ci.json
@@ -198,6 +202,8 @@ def main():
     parser = argparse.ArgumentParser(description="Generate paper figures from saved results.")
     parser.add_argument("--results", default=os.path.join(ROOT, "results"), help="Results directory")
     parser.add_argument("--out", default=os.path.join(ROOT, "paper", "figs"), help="Output directory for figures")
+    parser.add_argument("--only", nargs="+", choices=["paired_ci", "sim", "noise_budget", "positive_control"],
+                        help="Generate only these figures (default: all four v1 figures)")
     args = parser.parse_args()
     
     global OUT_FIGS, RES_JSON, RES_LOCAL
@@ -206,10 +212,10 @@ def main():
     RES_JSON = os.path.join(RES_LOCAL, "json") if os.path.exists(os.path.join(RES_LOCAL, "json")) else RES_LOCAL
     os.makedirs(OUT_FIGS, exist_ok=True)
     
-    plot_paired_ci()
-    plot_sim()
-    plot_noise_budget()
-    plot_positive_control()
+    figures = {"paired_ci": plot_paired_ci, "sim": plot_sim, "noise_budget": plot_noise_budget,
+               "positive_control": plot_positive_control}
+    for name in args.only or figures:
+        figures[name]()
     print(f"all figures successfully generated in {OUT_FIGS} from {RES_LOCAL}")
 
 if __name__ == "__main__":
