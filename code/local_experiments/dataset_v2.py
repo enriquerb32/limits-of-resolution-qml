@@ -26,6 +26,9 @@ import pandas as pd
 V2 = os.environ.get('LOR_DATASET', 'v1').lower() == 'v2'
 MAX_MISSING = int(os.environ.get('V2_MAX_MISSING', 3))
 INTERP_MONTHS = int(os.environ.get('V2_INTERP_MONTHS', 2))
+# V2_CAUSAL=1: every predictor of the window for target month t uses data up to the end of t-1 only (checked by
+# exp47_truncation_audit.py). Default 0 reproduces the archived v2 results, whose imputation looks ahead (see S1.1).
+CAUSAL = os.environ.get('V2_CAUSAL', '0') == '1'
 MIN_DAYS = 10
 U2_FACTOR = 4.87 / math.log(67.8 * 10 - 5.42)          # 0.748
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -78,8 +81,11 @@ def agregar_mensual_v2(df):
     agg['precip_ok'] = agg['dias'] >= MIN_DAYS
     agg['precip'] = np.where(agg['precip_ok'], agg['precip_sum'] / agg['dias'].clip(lower=1) * nd, np.nan)
     for c in BASE:                                  # short covariate gaps only, per station, no extrapolation
-        agg[c] = agg.groupby('ciudad')[c].transform(
-            lambda s: s.interpolate(method='time', limit=INTERP_MONTHS, limit_area='inside'))
+        if CAUSAL:   # last observation carried forward for at most INTERP_MONTHS months: uses months <= t only
+            agg[c] = agg.groupby('ciudad')[c].transform(lambda s: s.ffill(limit=INTERP_MONTHS))
+        else:        # archived behaviour: two-sided, so a gap at t-1 is filled with the value of t (or t+1)
+            agg[c] = agg.groupby('ciudad')[c].transform(
+                lambda s: s.interpolate(method='time', limit=INTERP_MONTHS, limit_area='inside'))
     agg['feat_ok'] = agg[BASE].notna().all(1)
     agg['win_ok'] = False
     col = agg.columns.get_loc('win_ok')
@@ -118,9 +124,22 @@ def construir_features_v2(df_diario, anomalia_fn, fix_et0_verano=True):
     ref = base.index.year - (base.index.month < 9).astype(int)
     out['et0_verano'] = [tot.get((c, y), np.nan) for c, y in zip(base['ciudad'], ref)]
     col = out.columns.get_loc('et0_verano')
+    tr = base.index.year <= 1996
     for _, pos in out.groupby('ciudad').indices.items():
-        out.iloc[pos, col] = out['et0_verano'].iloc[pos].interpolate(method='time').ffill().bfill().values
+        s = out['et0_verano'].iloc[pos]
+        if CAUSAL:   # last complete summer; before the first one, the station's training median
+            med = s[tr[pos]].median()
+            out.iloc[pos, col] = s.ffill().fillna(med if np.isfinite(med) else s.median()).values
+        else:        # archived behaviour: interpolates towards the NEXT complete summer and back-fills
+            out.iloc[pos, col] = s.interpolate(method='time').ffill().bfill().values
     out['et0_verano_prev'] = out['et0_verano']
+    if CAUSAL:       # _indices_sinopticos fills a missing et0 lag with the full-record mean: use training months only
+        e = base['et0_sum']; city = base['ciudad']
+        mu_tr = e[tr].groupby(city[tr]).mean()
+        lag1 = e.groupby(city).shift(1)
+        out['et0_lag1m'] = lag1.fillna(city.map(mu_tr)).fillna(0.0).values
+        out['et0_lag3m'] = e.groupby(city).transform(lambda x: x.rolling(3, min_periods=1).sum()).fillna(0.0).values
+        out['fao_evapo_deficit'] = (out['et0_lag1m'] - base['precip'].groupby(city).shift(1)).fillna(0.0).values
     out['potencial_convectivo'] = out['et0_verano_prev'] * base['dp_std'].values
     out = tds._flag_ACP(out)
     for c in keep.columns:

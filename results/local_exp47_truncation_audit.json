@@ -1,0 +1,152 @@
+{
+  "truncation_archived": {
+    "test_rows_full": 529,
+    "test_rows_cut": 529,
+    "eligible_full_only": 0,
+    "eligible_cut_only": 0,
+    "rows_with_changed_inputs": 0,
+    "rows_unchanged": 529,
+    "changed_by_feature": {},
+    "changed_by_station": {}
+  },
+  "truncation_causal": {
+    "test_rows_full": 533,
+    "test_rows_cut": 533,
+    "eligible_full_only": 0,
+    "eligible_cut_only": 0,
+    "rows_with_changed_inputs": 0,
+    "rows_unchanged": 533,
+    "changed_by_feature": {},
+    "changed_by_station": {}
+  },
+  "labels": {
+    "test_missing_days_hist": {
+      "0": 529
+    },
+    "test_rows_incomplete": 0,
+    "test_negatives_incomplete": 0,
+    "test_positives_incomplete": 0,
+    "auc_all_vs_complete_rows": {
+      "RF_2273": {
+        "all": 0.6783567866488915,
+        "complete": 0.6783567866488915
+      },
+      "PureLSTM": {
+        "all": 0.6637959808423444,
+        "complete": 0.6637959808423444
+      },
+      "CTRL_LINEAR4D": {
+        "all": 0.6553162494445267,
+        "complete": 0.6553162494445267
+      },
+      "LSTM_QNN": {
+        "all": 0.658699451933047,
+        "complete": 0.658699451933047
+      },
+      "LSTM_PIQNN": {
+        "all": 0.6539367007356935,
+        "complete": 0.6539367007356935
+      },
+      "QTL_EXTRACTOR": {
+        "all": 0.6637959808423444,
+        "complete": 0.6637959808423444
+      },
+      "LSTM_QTL": {
+        "all": 0.6475761615563126,
+        "complete": 0.6475761615563126
+      }
+    },
+    "p60_month_set": {
+      "definition": "all labelled training months (<=1996, at most 3 missing days) of the four stations, not only window targets",
+      "n_months": 2847,
+      "by_station": {
+        "Alicante": 699,
+        "Barcelona": 809,
+        "San_Javier": 629,
+        "Valencia": 710
+      },
+      "p60": 29.900000000000002,
+      "n_months_complete": 2847,
+      "p60_complete_only": 29.900000000000002
+    }
+  },
+  "refit_trees": {
+    "n_test_archived": 529,
+    "n_train_archived": 2332,
+    "n_test_causal": 533,
+    "n_train_causal": 2332,
+    "n_common": 529,
+    "RF": {
+      "auc_archived_all": 0.6783567866488915,
+      "auc_causal_all": 0.6786832331952789,
+      "auc_archived_common": 0.6783567866488915,
+      "auc_causal_common": 0.6796859724485261,
+      "delta_archived_minus_causal": -0.0013291857996345913,
+      "ci95_year_block": [
+        -0.0032502000383937404,
+        0.0002281336265358091
+      ]
+    },
+    "XGB": {
+      "auc_archived_all": 0.6683597491729621,
+      "auc_causal_all": 0.6698472651616793,
+      "auc_archived_common": 0.6683597491729621,
+      "auc_causal_common": 0.6706976744186047,
+      "delta_archived_minus_causal": -0.0023379252456425803,
+      "ci95_year_block": [
+        -0.008673722590022134,
+        0.004381479944520061
+      ]
+    }
+  },
+  "refit_neural": {
+    "PureLSTM": {
+      "auc_archived_common": 0.6637959808423444,
+      "auc_causal_common": 0.6634059151730608,
+      "auc_causal_all": 0.6618153182056816,
+      "delta_archived_minus_causal": 0.000390065669283568,
+      "ci95_year_block": [
+        -0.006022485848344468,
+        0.006246866569855239
+      ]
+    },
+    "LSTM_QNN": {
+      "auc_archived_common": 0.658699451933047,
+      "auc_causal_common": 0.6579222831185504,
+      "auc_causal_all": 0.6567131385016235,
+      "delta_archived_minus_causal": 0.0007771688144966316,
+      "ci95_year_block": [
+        -0.006221684008973167,
+        0.006310263061459509
+      ]
+    }
+  },
+  "interpolation_reach": {
+    "archived": {
+      "filled_station_months": 54,
+      "windows_with_filled_last_month": {
+        "train": 24,
+        "val": 2,
+        "test": 0
+      }
+    },
+    "causal": {
+      "filled_station_months": 59,
+      "windows_with_filled_last_month": {
+        "train": 24,
+        "test": 4,
+        "val": 2
+      }
+    },
+    "labelled_months": {
+      "train": 2847,
+      "test": 882,
+      "val": 528
+    },
+    "labelled_months_with_missing_days": {
+      "test": 1,
+      "train": 0,
+      "val": 0
+    }
+  }
+}
