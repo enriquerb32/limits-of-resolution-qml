@@ -1,0 +1,33 @@
+External benchmark - design and predictions recorded BEFORE any model is fitted (2026-11-18)
+==========================================================================================
+Purpose (review of 2026-11-18, addition 1): a benchmark with real signal and a test set large enough to give a
+reference estimate, in order to ask which decisions the protocol would have taken with small clustered test sets.
+
+Data: California Housing (scikit-learn fetch_california_housing; 20,640 block groups, 8 features).
+Target: median house value above the median of the training rows (binary).
+Clusters: spatial cells of 0.25 deg latitude x 0.25 deg longitude (518 cells; checked before this file: only
+  the number of cells and rows per cell, no outcome).
+Split by cell (seed 2026): 50 % of cells train, 15 % validation, 35 % test. No cell is in two partitions.
+Models (seeds 0-4; LR is deterministic and enters as one seed repeated):
+  LR   logistic regression on standardized features (C = 1)
+  RF   random forest, 300 trees, min_samples_leaf 5
+  XGB  XGBoost hist, depth 6, learning rate 0.05, up to 2000 rounds, early stopping on the validation AUC
+  MLP  sklearn MLPClassifier (64, 32), early stopping, standardized features
+Contrasts (fixed): C1 RF - LR, C2 XGB - RF, C3 MLP - RF.
+Smallest difference of interest (margin): 0.01 AUC.
+Primary procedure: CR2 with Bell-McCaffrey degrees of freedom, clusters = cells, on 5-seed means; 95 %.
+Reference population: test cells with 10-60 rows. Reference estimate: the contrast on all of them, with its CR2
+  interval. (The contrast on all test cells is also reported.)
+Small tests: 1,000 draws of 19 cells without replacement from the reference population (about 500 rows, like the
+  first panel of the paper). In each draw: is the contrast resolved by CR2 / by DeLong, with which sign; does the
+  CR2 interval cover the reference estimate.
+
+Predictions:
+P1  C1 (RF - LR) is resolved in the reference test, with a difference above the margin.
+P2  In the small tests, CR2 resolves C1 in at least 80 % of draws, and a resolution with the wrong sign occurs in
+    at most 2.5 % of draws for every contrast.
+P3  The coverage of the reference estimate by the small-test CR2 interval is 0.93-0.97 for every contrast.
+P4  For contrasts whose reference difference is within the margin, the small-test resolution rate of CR2 is at most
+    10 %; DeLong resolves at least as often as CR2 for every contrast (it ignores the spatial dependence).
+P5  The protocol MDE predicted from the reference test by N^-1/2 scaling is within a factor 0.7-1.4 of the
+    standard deviation-based MDE (2.80 x SD of the small-test estimates) for each contrast.
