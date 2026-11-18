@@ -31,6 +31,12 @@ def viid(d):
 G = np.unique(yr)
 def vcl(d):
     s = np.array([d[yr == g].sum() for g in G]); return len(G)/(len(G)-1)*(s**2).sum()
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'src'))
+from qml_resolution import bell_mccaffrey_df  # noqa: E402
+from scipy.stats import t as student_t  # noqa: E402
+n_g = np.array([(yr == g).sum() for g in G], float); DF_BM = bell_mccaffrey_df(n_g)
+def vcr2(d):   # primary procedure (CR2, Bell-McCaffrey df); see exp48_primary_calibration.py
+    s = np.array([d[yr == g].sum() for g in G]); return ((s / np.sqrt(1 - n_g / len(yr)))**2).sum()
 def auc_seedmean(p, idx):
     yy = y[idx]; out = []
     for s in p:
@@ -45,8 +51,14 @@ pairs = [('RF','XGB'),('RF','PureLSTM'),('XGB','PureLSTM'),('RF','LSTM_QNN'),('R
          ('PureLSTM','LSTM_QNN'),('LSTM_QNN','CTRL_LINEAR4D'),('LSTM_QNN','LSTM_PIQNN'),('LSTM_QTL','QTL_CLASSICAL'),('LSTM_QTL','QTL_TENSOR1'),
          ('LSTM_QTL','LSTM_QNN'),('RF','LSTM_QTL'),('LSTM_QTL','PureLSTM'),('FOURIER_FULL2','FOURIER2'),('LSTM_PIQNN','LSTM_QNN')] + [(f, 'LSTM_QNN') for f in ['FOURIER1','FOURIER2','FOURIER3','FOURIER4','FOURIER_FULL1','FOURIER_FULL2','FROZEN_RANDOM','FROZEN_IDENTITY']] \
         + [(m, 'CLIM') for m in ['RF','XGB','PureLSTM','LSTM_QNN','CTRL_LINEAR4D','FOURIER_FULL1']]
+# Seeds are resampled jointly only when seed s of both models shares a fitted component: LSTM+QTL, QTL-classical and
+# QTL tensor-81 are heads on the frozen PureLSTM of the same seed (PureLSTM_probs == QTL_EXTRACTOR_probs). Elsewhere a
+# common seed number does not pair two runs, and the seeds are drawn independently. (Until 2026-11-18 every pair with
+# 15 seeds on both sides was drawn jointly, while the text said independently.)
+SHARED = {'LSTM_QTL', 'QTL_CLASSICAL', 'QTL_TENSOR1', 'PureLSTM'}
 out = {}
 for a, b in pairs:
+    joint = a in SHARED and b in SHARED
     d = C[a][1] - C[b][1]; gap = C[a][0].mean() - C[b][0].mean()
     si, sc = viid(d)**.5, vcl(d)**.5
     # block bootstrap over years (seed means), and years x seeds
@@ -55,14 +67,19 @@ for a, b in pairs:
     for k, idx in enumerate(boot_years[:2000]):
         ga, gb = auc_seedmean(pa, idx), auc_seedmean(pb, idx)
         bb.append(ga.mean() - gb.mean())
-        sa = rng.integers(0, len(ga), len(ga)); sb = sa if len(gb) == len(ga) else rng.integers(0, len(gb), len(gb))
+        sa = rng.integers(0, len(ga), len(ga)); sb = sa if joint else rng.integers(0, len(gb), len(gb))
         tw.append(ga[sa].mean() - gb[sb].mean())
     sd_seed = np.std(C[a][0] - C[b][0], ddof=1) if len(C[a][0]) == len(C[b][0]) and len(C[a][0]) > 1 else float('nan')
     out[f'{a}-{b}'] = dict(gap=float(gap), se_iid=float(si), p_delong=float(2*norm.sf(abs(gap)/si)),
                            ci_delong=[float(gap-1.96*si), float(gap+1.96*si)], se_year=float(sc), ratio_year_iid=float(sc/si),
                            ci_block=np.quantile(bb, [.025, .975]).tolist(), ci_two_way=np.quantile(tw, [.025, .975]).tolist(),
                            mde_iid=float(2.80*si), mde_year=float(2.80*sc), seed_sd_gap=float(sd_seed),
-                           seed_share=float(sd_seed**2/15/(si**2)) if sd_seed == sd_seed else None)
+                           seed_share=float(sd_seed**2/15/(si**2)) if sd_seed == sd_seed else None,
+                           seeds_resampled='joint' if joint else 'independent',
+                           se_cr2=float(vcr2(d)**.5), df_bm=float(DF_BM),
+                           ci_cr2=[float(gap - student_t.ppf(.975, DF_BM)*vcr2(d)**.5), float(gap + student_t.ppf(.975, DF_BM)*vcr2(d)**.5)],
+                           p_cr2=float(2*student_t.sf(abs(gap)/vcr2(d)**.5, DF_BM)),
+                           mde_cr2=float((student_t.ppf(.975, DF_BM) + student_t.ppf(.80, DF_BM))*vcr2(d)**.5))
 summary = dict(n_test=int(len(y)), prevalence=float(y.mean()), n_years=int(len(G)),
                rows_by_station=meta.ciudad.value_counts().to_dict(), models=models, pairs=out)
 json.dump(summary, open(R + '/local_exp42_v2_summary.json', 'w'), indent=1)

@@ -35,9 +35,12 @@ from qml_resolution.power import (
     seed_share,
 )
 from qml_resolution.resampling import (
+    ClusterRobustResult,
     JackknifeResult,
+    bell_mccaffrey_df,
     cluster_bootstrap_aucs,
     cluster_bootstrap_delta,
+    cluster_robust_delta,
     jackknife_delta,
     percentile_ci,
 )
@@ -45,12 +48,15 @@ from qml_resolution.resampling import (
 __version__ = "1.1.0"
 
 __all__ = [
+    "ClusterRobustResult",
     "DeLongComponents",
     "JackknifeResult",
     "PairedTest",
     "__version__",
+    "bell_mccaffrey_df",
     "cluster_bootstrap_aucs",
     "cluster_bootstrap_delta",
+    "cluster_robust_delta",
     "delong_components",
     "delong_covariance",
     "hanley_mcneil_se",

@@ -6,12 +6,35 @@ import numpy as np
 import pytest
 
 from qml_resolution import (
+    bell_mccaffrey_df,
     cluster_bootstrap_aucs,
     cluster_bootstrap_delta,
+    cluster_robust_delta,
     jackknife_delta,
+    paired_delong,
     percentile_ci,
     rank_auc,
 )
+
+
+def test_bell_mccaffrey_df_equal_and_unequal_clusters() -> None:
+    assert bell_mccaffrey_df(np.full(19, 28)) == pytest.approx(18.0)
+    assert bell_mccaffrey_df([48] * 5 + [24] * 14) < 18.0
+    with pytest.raises(ValueError):
+        bell_mccaffrey_df([10])
+
+
+def test_cluster_robust_delta_matches_delong_and_orders_cr1_cr2(clustered: tuple[np.ndarray, ...]) -> None:
+    y, a, b, g = clustered
+    cr = cluster_robust_delta(y, a, b, g)
+    dl = paired_delong(y, a, b)
+    assert cr.delta == pytest.approx(dl.delta)
+    assert cr.se_iid == pytest.approx(dl.se, rel=1e-6)
+    assert cr.se_cr2 > 0 and cr.se_cr1 > 0
+    lo, hi = cr.ci()
+    assert lo < cr.delta < hi
+    assert 0.0 <= cr.p_value <= 1.0
+    assert cr.df == pytest.approx(bell_mccaffrey_df(np.bincount(g)))
 
 
 @pytest.fixture
@@ -49,6 +72,23 @@ def test_two_way_bootstrap_adds_seed_variance(clustered: tuple[np.ndarray, ...])
     one_way = cluster_bootstrap_delta(y, a, b, g, n_boot=400, random_state=1)
     two_way = cluster_bootstrap_delta(y, a, b, g, n_boot=400, random_state=1, resample_seeds=True)
     assert two_way.std() > one_way.std()
+
+
+def test_shared_seeds_resamples_the_common_component_once() -> None:
+    # B = A + a small seed-independent shift: the seed effect is shared, so drawing the same seeds for both
+    # cancels it and the joint interval is narrower than the one with independent seed draws.
+    rng = np.random.default_rng(3)
+    n, s = 400, 10
+    y = rng.integers(0, 2, n)
+    g = np.repeat(np.arange(20), n // 20)
+    seed_effect = rng.normal(scale=1.0, size=(s, n))
+    a = y + seed_effect
+    b = a + 0.05 * rng.normal(size=n)
+    indep = cluster_bootstrap_delta(y, a, b, g, n_boot=300, random_state=0, resample_seeds=True)
+    joint = cluster_bootstrap_delta(y, a, b, g, n_boot=300, random_state=0, resample_seeds=True, shared_seeds=True)
+    assert joint.std() < 0.5 * indep.std()
+    with pytest.raises(ValueError, match="same number of seeds"):
+        cluster_bootstrap_delta(y, a, b[:5], g, resample_seeds=True, shared_seeds=True)
 
 
 def test_bootstrap_aucs_shape_and_single_class_discard() -> None:
