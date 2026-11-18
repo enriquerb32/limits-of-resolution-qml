@@ -177,6 +177,8 @@ Station & Station Indicators & \texttt{ciudad\_*} & One-hot indicators (Alicante
 \subsection{Specification of the Experiments}
 \label{app:architectures}
 
+\Cref{tab:core_spec} specifies every model of the 15-seed experiments: architecture, optimizer, training budget and number of trainable parameters. All models are fitted on the same rows, with the seeds set immediately before each model is built.
+
 \begin{table}[htbp]
 \centering
 \caption{Specification of the 15-seed experiments. All models use the same 2{,}332 training windows (1938--1996), 516 validation windows (1997--2007) and 529 test windows (2008--2026), seeds 0--14 (\texttt{torch.manual\_seed}, \texttt{numpy.random.seed}, \texttt{random\_state}); the seed index is nominal across frameworks.}
@@ -232,6 +234,8 @@ Neural training & AdamW (learning rate $5\times10^{-3}$, weight decay $10^{-4}$)
 Both tree ensembles were tuned by the same declared search (\path{exp40_v2_tune.py}): Optuna, TPE sampler with seed 0, 50 trials each, objective the validation AUC of a model fitted on the training rows with model seed 0. Random Forest: 100--500 trees (step 50), depth 3--16, minimum split 2--20, minimum leaf 1--10, $\sqrt{p}$, $\log_2 p$ or half of the features. XGBoost: learning rate 0.01--0.3 (log), depth 2--8, minimum child weight 1--20 (log), subsample and column subsample 0.5--1, $\lambda$ $10^{-3}$--10 (log), $\gamma$ 0--5, early stopping on the validation AUC. The validation partition is used both for early stopping and for the search; the test partition is not touched. With the selected configurations (\Cref{tab:core_spec}) the 15-seed test AUCs are 0.6784 (SD 0.0011) for Random Forest and 0.6684 (0.0081) for XGBoost, against 0.6773 (0.0037; 300 trees of depth 8) and 0.6531 (0.0054; 500 trees of depth 4, learning rate 0.05, no early stopping) for the untuned configurations of the earlier version; the differences, $+0.001$ (DeLong $p=0.69$) and $+0.015$ ($p=0.27$), are not resolved. In the search the validation AUC of XGBoost peaked after very few boosting rounds. The neural models were not tuned automatically; their configuration is that of the earlier version.
 
 \subsection{Software Environment}
+
+Every result of the paper was produced in one pinned environment (\Cref{tab:software_env}); the archived predictions of an earlier environment are not mixed with these.
 
 \begin{table}[htbp]
 \centering
@@ -304,7 +308,7 @@ RF $-$ Linear-4D & $+0.0230$ & 0.75 & $-36$\,\% & $-0.12$ & 0.90 [0.68, 1.12] & 
 \end{tabular}}}
 \end{table}
 
-\subsection{Few-Cluster Corrections and Descriptive Bounds}
+\subsection{Calibration of the Primary Procedure and Few-Cluster Checks}
 \label{app:fewclusters}
 
 \textbf{Calibration of the primary procedure} (\path{exp48_primary_calibration.py}, 600 replications per cell, Monte Carlo standard error of a coverage of 0.95 about 0.009). Rows are the 529 station-months of the test set with their stations and years, or variants with 10 or 38 years of the same station patterns and with two or four stations in every year. Two binormal scorers ($\rho=0.85$, AUC 0.66 and $0.66+\Delta$, $\Delta\in\{0,0.02\}$) receive year effects on the prevalence logit and on a shared score shift ($\tau=0.3$), scorer-specific year shifts ($\tau_m=0.15$), scorer-specific year$\times$station effects with opposite loadings at Alicante/San Javier and Barcelona/Valencia ($\tau_c=0.25$), a prevalence dipole between the two pairs of stations combined with a scorer that uses the station base rate, and AR(1) dependence between consecutive years (coefficient 0.5). The truth is the difference for new independent years, analytic where no scorer uses the base rate (\Cref{M-app:noise_budget}) and computed on 300 independent copies of the design otherwise. \Cref{tab:primary_cal} summarizes the coverage of the 95\,\% intervals.

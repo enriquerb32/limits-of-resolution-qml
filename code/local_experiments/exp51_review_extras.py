@@ -98,6 +98,29 @@ def influential_years():
     return out
 
 
+def serial_dependence():
+    """Lag-1 autocorrelation of the yearly influence sums S_u of the paired difference, and a Ljung-Box test (lags 1-3):
+    is the panel in the serially correlated regime under which no calendar-year cluster procedure is calibrated?"""
+    from scipy.stats import chi2
+    from qml_resolution import delong_components
+    h = np.load(os.path.join(J, 'results_core_hybrids_controls_fixet0_p60_28.1_probs.npz'))
+    c = np.load(os.path.join(J, 'results_rerun_train_only_canonical_probs.npz'))
+    P = {k[:-6]: h[k] for k in h.files if k.endswith('_probs')}
+    P.update(RF=c['train_only_RF_probs'], XGB=c['train_only_XGB_probs'], LSTM_QTL=h['QTL_FIXED_probs'])
+    y = h['y_te'].astype(bool); years = np.unique(YEARS); out = {}
+    for a, b in [('RF', 'XGB'), ('RF', 'PureLSTM'), ('RF', 'LSTM_QNN'), ('RF', 'LSTM_QTL'),
+                 ('FROZEN_RANDOM', 'LSTM_QNN'), ('FROZEN_IDENTITY', 'LSTM_QNN'), ('LSTM_QNN', 'CTRL_LINEAR4D')]:
+        ca, cb = delong_components(y, P[a]).seed_mean(), delong_components(y, P[b]).seed_mean()
+        d = float(ca.auc[0] - cb.auc[0]); psi = np.empty(y.size)
+        psi[y] = (ca.v10[0] - cb.v10[0] - d) / y.sum(); psi[~y] = (ca.v01[0] - cb.v01[0] - d) / (~y).sum()
+        S = np.array([psi[YEARS == u].sum() for u in years]); S = S - S.mean(); n = S.size
+        acf = [float((S[k:] * S[:-k]).sum() / (S ** 2).sum()) for k in (1, 2, 3)]
+        q = float(n * (n + 2) * sum(r ** 2 / (n - k) for k, r in zip((1, 2, 3), acf)))
+        out[f'{a}-{b}'] = dict(acf=acf, ljung_box_q=q, ljung_box_p=float(chi2.sf(q, 3)),
+                               white_noise_band_lag1=float(1.96 / np.sqrt(n)))
+    return out
+
+
 def panel2():
     """Primary procedure for the contrasts of Table 13 (second panel, 884 test rows, 19 years)."""
     d = os.path.join(R, 'panel2', 'med2v2')
@@ -116,6 +139,7 @@ def panel2():
 def main():
     json.dump(panel2(), open(os.path.join(R, 'local_panel2_cr2.json'), 'w'), indent=2)
     json.dump(influential_years(), open(os.path.join(R, 'local_cr2_leave_one_year.json'), 'w'), indent=2)
+    json.dump(serial_dependence(), open(os.path.join(R, 'local_serial_dependence.json'), 'w'), indent=2)
     path = os.path.join(R, 'local_exp47_truncation_audit.json')
     res = json.load(open(path)); res['refit_neural'] = causal_neural(); json.dump(res, open(path, 'w'), indent=2)
     json.dump(seas5(), open(os.path.join(R, 'local_seas5_cr2.json'), 'w'), indent=2)
