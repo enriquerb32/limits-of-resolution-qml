@@ -28,6 +28,7 @@ qml = pytest.importorskip("pennylane")
 
 ROOT = Path(__file__).resolve().parents[2]
 TEX = ROOT / "paper" / "main.tex"
+SUPP = ROOT / "paper" / "supp.tex"
 N_Q = 4
 
 
@@ -119,10 +120,10 @@ def test_tensor1_control_uses_the_same_basis(code: SimpleNamespace) -> None:
 
 
 # ---------------------------------------------------------------- parameter counts against the manuscript
-def _printed_sizes() -> dict[str, int]:
-    """Map sizes printed in Table 5, e.g. ``Fourier-2 (68)`` or ``Full Fourier-1 (81 features)``."""
-    text = TEX.read_text(encoding="utf-8")
-    table = text[text.index("\\label{tab:case}") :]
+def _printed_sizes(path: Path, label: str) -> dict[str, int]:
+    """Map sizes printed in a model table, e.g. ``Fourier-2 (68)`` or ``Full Fourier-1 (81 features)``."""
+    text = path.read_text(encoding="utf-8")
+    table = text[text.index(f"\\label{{{label}}}") :]
     table = table[: table.index("\\end{table")]
     return {
         m[0].strip(): int(m[1]) for m in re.findall(r"^\s*([A-Za-z0-9\- ]+?) \((\d+)(?: features)?\) &", table, re.M)
@@ -130,7 +131,10 @@ def _printed_sizes() -> dict[str, int]:
 
 
 def test_control_sizes_match_table(code: SimpleNamespace) -> None:
-    sizes = _printed_sizes()
+    # every control is in the complete table of the supplement; the main-text Table 5 shows a subset
+    sizes = _printed_sizes(SUPP, "tab:case_all")
+    main = _printed_sizes(TEX, "tab:case")
+    assert main and all(sizes[k] == v for k, v in main.items()), main
     lin = code.core.LinearControl4D(in_dim=35)
     backbone = n_trainable(lin) - 20
     assert n_trainable(lin) == 2609  # Section 2: "2,609 parameters against 2,613"
