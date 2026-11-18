@@ -47,8 +47,20 @@ def test_no_unprotected_path_in_captions() -> None:
     """\\path is fragile: inside a \\caption it breaks the build unless protected (it did once)."""
     import re
 
+    def captions(text: str) -> list[str]:
+        out, i = [], 0
+        while (i := text.find("\\caption{", i)) != -1:
+            j, depth = i + len("\\caption{"), 1
+            while depth:
+                depth += {"{": 1, "}": -1}.get(text[j], 0) if text[j - 1] != "\\" else 0
+                j += 1
+            out.append(text[i + len("\\caption{"):j - 1]); i = j
+        return out
+
     for name, text in (("main", MAIN_TEXT), ("supp", SUPP_TEXT)):
-        for cap in re.findall(r"\\caption\{(.*?)\}\n\\label", text, flags=re.S):
+        caps = captions(text)
+        assert len(caps) >= 10, name
+        for cap in caps:
             assert not re.search(r"(?<!\\protect)\\path\{", cap), f"{name}: unprotected \\path in caption: {cap[:80]}"
 
 
