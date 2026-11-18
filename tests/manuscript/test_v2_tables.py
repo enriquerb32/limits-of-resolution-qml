@@ -532,7 +532,8 @@ def test_running_text_numbers() -> None:
     sim = _load("json/results_exp15_panel_sim.json")
     design = sim["design"]
     assert sum(design["year_sizes"]) == 529 and Printed(0.406, 3).matches(design["prevalence"])
-    assert "(529 rows, prevalence 0.406)" in text
+    supp_text = SUPP.read_text(encoding="utf-8")   # the earlier DeLong-vs-block simulation is in the supplement
+    assert "(529 rows, prevalence 0.406)" in supp_text
     rows = sim["rows"]
     null = [r for r in rows if r["delta_design"] == 0]
     alt = [r for r in rows if r["delta_design"] > 0]
@@ -541,5 +542,5 @@ def test_running_text_numbers() -> None:
     pw = [r["rejection_delong"] for r in alt] + [r["rejection_block"] for r in alt]
     assert (min(dl), max(dl), min(bl), max(bl)) == pytest.approx((0.048, 0.058, 0.064, 0.088), abs=5e-4)
     assert (round(100 * min(pw)), round(100 * max(pw))) == (17, 24)
-    assert "type-I errors of 0.048--0.058 for DeLong and 0.064--0.088 for the block bootstrap" in text
-    assert "17--24\\,\\% power" in text
+    assert "type-I errors of 0.048--0.058 for DeLong and 0.064--0.088 for the block bootstrap" in supp_text
+    assert "17--24\\,\\% power" in supp_text

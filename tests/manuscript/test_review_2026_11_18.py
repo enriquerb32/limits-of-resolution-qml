@@ -358,4 +358,4 @@ def test_analytic_auc() -> None:
     assert got == {"B": 0.0290, "C": 0.0280, "D": 0.0280, "E": 0.0238}
     for k in "BCDE":
         assert abs(got[k] - a[k]["reported_mc"]) < 0.001
-    in_text(MAIN_TEXT, "0.0290 (B), 0.0280 (C and D) and 0.0238 (E)")
+    in_text(SUPP_TEXT, "0.0290 (B), 0.0280 (C and D) and 0.0238 (E)")
