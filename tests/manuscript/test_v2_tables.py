@@ -221,8 +221,9 @@ TEACHER = {
 
 
 def test_teacher_table() -> None:
+    """Single-teacher control (moved to the supplement; the main-text Table 8 is the repeated control)."""
     teacher = _load("local_exp38_teacher_control_interface.json")
-    rows = {k: v for k, v in table_rows(TEX, "tab:teacher_main").items() if not k.startswith("Head")}
+    rows = {k: v for k, v in table_rows(SUPP, "tab:teacher_single").items() if not k.startswith("Head")}
     assert set(rows) == {*TEACHER, "Oracle (teacher score)"}
     assert_row(flat(rows["Oracle (teacher score)"]), [teacher["oracle_auc_test"]], "oracle")
     for label, key in TEACHER.items():

@@ -301,6 +301,30 @@ def test_teacher_grid() -> None:
         assert (round(min(vals), 2), round(max(vals), 2)) == (lo, hi), head
     in_text(MAIN_TEXT, "above the Linear-4D map in 6 of the 10 configurations", "(which is above it in 2)",
             "below the 81-function tensor surrogate in all 10")
+    # main-text Table 8: one row per distinct configuration, AUCs and markers from the archive
+    rows = table_rows(TEX, "tab:teacher_main")
+    uniq = {}
+    for r in g["configs"].values():
+        uniq.setdefault((r["teacher"], r["target"], r["draw"]), r)
+    body = [k for k in rows if k.startswith(("Teacher", "Null"))]
+    assert len(body) == 12
+    heads = ("LINEAR4D", "FOURIER2", "FOURIER_FULL1")
+    printed_cells = [rows[k] for k in body]
+    expected_cells = []
+    for r in sorted([r for r in uniq.values() if r["teacher"] is not None], key=lambda r: (r["teacher"], r["target"], r["draw"])) \
+            + sorted([r for r in uniq.values() if r["teacher"] is None], key=lambda r: r["draw"]):
+        expected_cells.append(r)
+    assert len(expected_cells) == len(printed_cells) == 12
+    marks_up = marks_down = 0
+    for cells, r in zip(printed_cells, expected_cells, strict=True):
+        nums = [n for c in cells for n in numbers(c)]
+        expected = ([r["oracle_auc_test"]] if r["teacher"] is not None else []) + [r["auc"]["CIRCUIT"]] + [r["auc"][h] for h in heads]
+        assert len(nums) == len(expected) and all(p.matches(x) for p, x in zip(nums, expected, strict=True)), cells
+        for c, h in zip(cells[-3:], heads, strict=True):
+            lo, hi = r["contrasts"][f"CIRCUIT-{h}"]["ci_cr2_bm"]
+            assert ("downarrow" in c) == (lo > 0) and ("uparrow" in c and "downarrow" not in c) == (hi < 0), (c, h)
+            marks_down += lo > 0; marks_up += hi < 0
+    assert (marks_down, marks_up) == (6, 12)
     in_text(SUPP_TEXT, "0.83, 0.68, 0.57 and 0.80", "0.54 to 0.75 for the circuit, 0.56 to 0.76 for Fourier-2")
 
 
