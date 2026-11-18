@@ -74,9 +74,9 @@
 
 \subsection{Monthly Panel and Labels}
 
-The daily files of each station (precipitation; maximum and minimum pressure; maximum and minimum temperature; sunshine duration; mean wind speed and maximum gust) are read separately and placed on a full daily calendar from the first to the last date found in any of them (\path{code/etl_v2.py}). Precipitation is taken from its own file only: a trace (``Ip'') counts as 0\,mm, and an empty or unparseable entry is missing. Covariates stay missing where they are missing; no value is carried forward or backward. \Cref{tab:etl} lists the spans and the shares of missing days.
+The daily files of each station (precipitation; maximum and minimum pressure; maximum and minimum temperature; sunshine duration; mean wind speed and maximum gust) are read separately and placed on a full daily calendar from the first to the last date found in any of them (\path{code/etl_v2.py}). Precipitation is taken from its own file only: a trace (``Ip'') counts as 0\,mm, and an empty or unparseable entry is missing. At the daily level, covariates stay missing where they are missing; no value is carried forward or backward. \Cref{tab:etl} lists the spans and the shares of missing days.
 
-Monthly aggregation (\path{code/local_experiments/dataset_v2.py}) produces, per station and calendar month: the \emph{label total}, the sum of daily precipitation, defined when at most 3 days of the month are missing; the \emph{precipitation lag}, the sum over observed days rescaled to the month length, defined with at least 10 observed days; and the covariates, means over observed days (sunshine and ET$_0$ sums as means times the month length), defined with at least 10 observed days, with gaps of at most two months interpolated within the station. ET$_0$ follows FAO-56 Penman--Monteith with $u_2=0.748\,u_{10}$ from the observed mean wind (FAO-56 eq.~47 for a 10\,m anemometer). Every calendar month is kept, and a window with target month $t$ is used only if $t$ has a label total, month $t-1$ has all covariates and the 12 lags $t-12,\dots,t-1$ are defined. Training-partition medians replace undefined cells before the min--max scalers are fitted, so that rows that never enter a window do not stretch the scales. Thresholds ($P_{60}=29.9$\,mm, $P_{90}$) are percentiles of the labelled training months.
+Monthly aggregation (\path{code/local_experiments/dataset_v2.py}) produces, per station and calendar month: the \emph{label total}, the sum of daily precipitation, defined when at most 3 days of the month are missing; the \emph{precipitation lag}, the sum over observed days rescaled to the month length, defined with at least 10 observed days; and the covariates, means over observed days (sunshine and ET$_0$ sums as means times the month length), defined with at least 10 observed days, with at most two consecutive missing months interpolated linearly within the station (in a longer gap, its first two months; \Cref{sec:lookahead}). ET$_0$ follows FAO-56 Penman--Monteith with $u_2=0.748\,u_{10}$ from the observed mean wind (FAO-56 eq.~47 for a 10\,m anemometer). Every calendar month is kept, and a window with target month $t$ is used only if $t$ has a label total, month $t-1$ has all covariates and the 12 lags $t-12,\dots,t-1$ are defined. Training-partition medians replace undefined cells before the min--max scalers are fitted, so that rows that never enter a window do not stretch the scales. Thresholds ($P_{60}=29.9$\,mm, $P_{90}$) are percentiles of all 2{,}847 labelled training months of the four stations (Alicante 699, Barcelona 809, San Javier 629, Valencia 710), not only of the months that are window targets.
 
 \begin{table}[htbp]
 \centering
@@ -94,6 +94,34 @@ San Javier & 1944-08-01 & 2026-05-31 & 0.0 & 25.5 & 2.0 & 9.0 & 12.7 \\
 \bottomrule
 \end{tabular}}
 \end{table}
+
+\subsection{Lookahead Audit}
+\label{sec:lookahead}
+
+A forecast for month $t$ is issued at the end of month $t-1$, so its inputs may use only data up to that date. Three steps of the monthly pipeline used for the results of the paper do not satisfy this. (i) The interpolation of missing monthly covariates is two-sided: a missing $t-1$ is filled from $t-2$ and $t$, and the first two months of a longer gap from the month after the gap, up to 18 months later. (ii) The antecedent-summer evapotranspiration (\texttt{et0\_verano\_prev}) of a summer with an incomplete June--August record is interpolated towards the next complete summer and back-filled. (iii) A missing one-month evapotranspiration lag is replaced by the station mean over the full record, test years included. The chronological split does not prevent any of these.
+
+\textbf{Truncation test} (\path{exp47_truncation_audit.py}). For each test target month $t$ the monthly panel was rebuilt from the daily file cut at the end of $t-1$, with the transformations fitted on the training partition (anomaly statistics, medians, scalers and $P_{60}$, all from 1938--1996 and therefore unaffected by the cut); the label of $t$ is the outcome and comes from the full record. For all 529 test windows the 35 inputs and the eligibility of the window are identical to those of the full pipeline, and no window becomes eligible only after the cut. The reason is that the gaps that the interpolation fills lie before the test period or at stations whose records stop: 54 station-months receive an interpolated covariate; 26 of them are the last antecedent month of an eligible window (24 training, 2 validation windows) and none of a test window. The incomplete summers after 2011 (San Javier) and 2012 (Valencia) have no later complete summer to interpolate from. The daily file does not record when each value became available, so this is a retrospective check of lookahead in the processing, not a reconstruction of what could have been issued in real time.
+
+\textbf{Causal pipeline.} With \texttt{V2\_CAUSAL=1}, a missing covariate is carried forward from the last observed month for at most two months, \texttt{et0\_verano\_prev} is the last complete summer (before the first one, the station's training median), and a missing evapotranspiration lag takes the station's training mean. The same truncation test gives no change for any test window. The causal panel has 533 test windows instead of 529, because carrying forward also fills the last months before the covariate records of Valencia and San Javier stop. \Cref{tab:lookahead} compares models retrained on the two panels on the 529 common test windows: the differences are an order of magnitude below the standard error of one AUC (0.024) and below every minimum detectable difference between complete models.
+
+\begin{table}[htbp]
+\centering
+\caption{Test AUC (15-seed mean) of models retrained on the archived and on the causal panel, on the 529 common test windows. Interval: calendar-year block bootstrap ($B=2{,}000$) of the archived $-$ causal difference.}
+\label{tab:lookahead}
+{\small
+\begin{tabular}{lcccc}
+\toprule
+Model & Archived & Causal & Archived $-$ causal & 95\,\% interval \\
+\midrule
+Random Forest & 0.6784 & 0.6797 & $-0.0013$ & $[-0.003,+0.000]$ \\
+XGBoost & 0.6684 & 0.6707 & $-0.0023$ & $[-0.009,+0.004]$ \\
+LSTM & 0.6638 & 0.6634 & $+0.0004$ & $[-0.006,+0.006]$ \\
+LSTM+QNN & 0.6587 & 0.6579 & $+0.0008$ & $[-0.006,+0.006]$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\textbf{Label completeness.} The label rule admits up to 3 missing days, and with missing days the observed total is a lower bound of the true one, so that a fixed threshold can only produce false negatives. In this panel all 529 test targets, all 528 labelled validation months and all 2{,}847 labelled training months that define $P_{60}$ have complete records; one labelled month of the test period has missing days but is not a window target. A sensitivity analysis restricted to complete months therefore reproduces the reported AUCs and $P_{60}$ exactly.
 
 \subsection{Engineered Features}
 \label{sec:glossary}
@@ -277,7 +305,33 @@ RF $-$ Linear-4D & $+0.0230$ & 0.75 & $-36$\,\% & $-0.12$ & 0.90 [0.68, 1.12] & 
 \subsection{Few-Cluster Corrections and Descriptive Bounds}
 \label{app:fewclusters}
 
-With 19 clusters, the CR1 estimator can be biased downward. \Cref{tab:fewclusters} adds the Bell--McCaffrey CR2 estimator with a $t_{18}$ reference \citep{bell2002} and a studentized wild cluster bootstrap with Webb six-point weights ($B=9{,}999$; \citealp{webb2023}). The last column is the smallest margin $m$ such that the 90\,\% CR2 interval lies within $[-m,m]$, a descriptive bound since no margin was fixed in advance \citep{schuirmann1987,lakens2017}.
+\textbf{Calibration of the primary procedure} (\path{exp48_primary_calibration.py}, 600 replications per cell, Monte Carlo standard error of a coverage of 0.95 about 0.009). Rows are the 529 station-months of the test set with their stations and years, or variants with 10 or 38 years of the same station patterns and with two or four stations in every year. Two binormal scorers ($\rho=0.85$, AUC 0.66 and $0.66+\Delta$, $\Delta\in\{0,0.02\}$) receive year effects on the prevalence logit and on a shared score shift ($\tau=0.3$), scorer-specific year shifts ($\tau_m=0.15$), scorer-specific year$\times$station effects with opposite loadings at Alicante/San Javier and Barcelona/Valencia ($\tau_c=0.25$), a prevalence dipole between the two pairs of stations combined with a scorer that uses the station base rate, and AR(1) dependence between consecutive years (coefficient 0.5). The truth is the difference for new independent years, analytic where no scorer uses the base rate (\Cref{M-app:noise_budget}) and computed on 300 independent copies of the design otherwise. \Cref{tab:primary_cal} summarizes the coverage of the 95\,\% intervals.
+
+\begin{table}[htbp]
+\centering
+\caption{Coverage of 95\,\% intervals for the difference for new years (minimum--maximum over the cells of each group; 600 replications per cell). CR2-BM: CR2 with Bell--McCaffrey degrees of freedom (the primary procedure); CR1: $t_{K-1}$; jackknife: delete-one-year, $t_{K-1}$; wild: studentized wild cluster bootstrap, Webb weights; block: percentile year-block bootstrap.}
+\label{tab:primary_cal}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Cells & DeLong & Block & CR1 & CR2-BM & Jackknife & Wild \\
+\midrule
+19 years, independent (10 cells) & 0.845--0.960 & 0.885--0.930 & 0.937--0.953 & 0.940--0.955 & 0.940--0.955 & 0.935--0.952 \\
+10 years (4 cells) & 0.897--0.947 & 0.873--0.908 & 0.927--0.962 & 0.935--0.967 & 0.932--0.963 & 0.923--0.958 \\
+38 years (4 cells) & 0.888--0.942 & 0.913--0.942 & 0.935--0.948 & 0.935--0.952 & 0.935--0.952 & 0.933--0.950 \\
+2 or 4 stations every year (8 cells) & 0.867--0.945 & 0.905--0.940 & 0.935--0.975 & 0.935--0.975 & 0.935--0.977 & 0.933--0.975 \\
+AR(1) years, scorer-specific effects (2 cells) & 0.932--0.932 & 0.907--0.923 & 0.937--0.938 & 0.937--0.942 & 0.938--0.943 & 0.937--0.937 \\
+AR(1) years with year$\times$station effects (2 cells) & 0.822--0.848 & 0.843--0.872 & 0.880--0.907 & 0.883--0.908 & 0.883--0.910 & 0.872--0.902 \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+Under every mechanism with independent years CR2 with Bell--McCaffrey degrees of freedom covers at 0.935--0.975, and with 10 years it is the best or joint best; the jackknife is nearly identical, CR1 and the wild bootstrap slightly less conservative with few years. DeLong undercovers whenever there are year$\times$station effects or a dipole (down to 0.845), and the percentile block bootstrap undercovers almost everywhere (0.873--0.942). Serial correlation of the year effects alone costs little (CR2 0.937--0.942), but combined with year$\times$station effects no procedure based on calendar-year clusters is calibrated (0.872--0.910). The simulated cluster/iid ratio of CR1 rarely falls as low as observed for Random Forest against the neural models: the share of replications with a ratio $\le0.59$ is at most 0.012 in every cell with 19 years, and with a ratio $\le0.72$ at most 0.058.
+
+\textbf{Clusters of consecutive years.} With CR2 on clusters of two consecutive years (10 clusters, $\nu=7.5$), the coverage under serially correlated scorer-specific effects rises from 0.937 to 0.953, but with year$\times$station effects it only moves from 0.908 to 0.915, and the power at a difference of 0.02 with independent years falls from 0.28 to 0.22 (\path{local_exp48_primary_calibration_2yr.json}). On the panel (\path{local_cr2_block_sensitivity.json}), the differences that the primary procedure resolves for Random Forest against the LSTM and \texttt{LSTM+QNN} ($p=0.041$ and 0.031) are not resolved with two-year clusters ($p=0.061$ and 0.051) or three-year clusters ($p=0.13$ for both); Random Forest against \texttt{LSTM+QTL} holds with two-year clusters ($p=0.027$) but not three ($p=0.064$); the effect of freezing the circuit holds with every block length ($p\le0.018$).
+
+With 19 clusters, the CR1 estimator can be biased downward. \Cref{tab:fewclusters} adds the Bell--McCaffrey CR2 estimator with a $t_{18}$ reference (the primary procedure of the main text uses the Bell--McCaffrey degrees of freedom, $\nu=15.9$) \citep{bell2002} and a studentized wild cluster bootstrap with Webb six-point weights ($B=9{,}999$; \citealp{webb2023}). The last column is the smallest margin $m$ such that the 90\,\% CR2 interval lies within $[-m,m]$, a descriptive bound since no margin was fixed in advance \citep{schuirmann1987,lakens2017}.
 
 \begin{table}[htbp]
 \centering
@@ -437,7 +491,9 @@ For each of the 15 trained circuits of \texttt{LSTM+QNN}, the exact readouts $\l
 \subsection{Positive Control with a Planted Circuit Signal}
 \label{app:teacher}
 
-\path{exp38_teacher_control.py} keeps the real inputs, splits and scalers. Teacher angles are $q^\ast=\pi\,\sigma(1.5\,ZP)$, with $Z$ the inputs standardized with training statistics and $P$ a fixed $35\times4$ Gaussian projection; the teacher score is $s=w^\top\langle Z\rangle(q^\ast;W^\ast)$ for the circuit of \texttt{LSTM+QNN} with fixed random weights $W^\ast$ and readout $w$. Among 20 candidate teachers, number 12 was kept because the largest share of its score variance (89\,\%) lies outside a separable degree-4 Fourier basis. Labels are $y=\mathbb 1[s+e>$ training 60th percentile$]$ with Gaussian noise $e$ whose scale (0.82 times the training SD of $s$) gives an oracle AUC of 0.846 on the test rows (test prevalence 0.389). In the \emph{interface} mode every head receives $q^\ast$ directly and consists of its map, LayerNorm and a linear output; in the \emph{end-to-end} mode the complete models of the paper are trained on the raw inputs and must also learn the projection. Five seeds per model, same training loop.
+\path{exp38_teacher_control.py} keeps the real inputs, splits and scalers. Teacher angles are $q^\ast=\pi\,\sigma(1.5\,ZP)$, with $Z$ the inputs standardized with training statistics and $P$ a fixed $35\times4$ Gaussian projection; the teacher score is $s=w^\top\langle Z\rangle(q^\ast;W^\ast)$ for the circuit of \texttt{LSTM+QNN} with fixed random weights $W^\ast$ and readout $w$. Among 20 candidate teachers, number 12 was kept because the largest share of its score variance (89\,\%) lies outside a separable degree-4 Fourier basis. Labels are $y=\mathbb 1[s+e>$ training 60th percentile$]$ with Gaussian noise $e$ whose scale (0.82 times the training SD of $s$) gives an oracle AUC of 0.846 on the test rows (test prevalence 0.389). In the \emph{interface} mode every head receives $q^\ast$ directly and consists of its map, LayerNorm and a linear output; in the \emph{end-to-end} mode the complete models of the paper are trained on the raw inputs and must also learn the projection. Five seeds per model, same training loop. The teacher score of this control has no LayerNorm, whereas every student head standardizes its four readouts before the linear output, so teacher and student are not of exactly the same form.
+
+\textbf{Repeated control} (\path{exp50_teacher_grid.py}, interface mode). The teacher score is $s=w^\top\mathrm{LN}(\langle Z\rangle(q^\ast;W^\ast))$, with the same LayerNorm (without affine parameters) as the students; with this score candidate 0 has the largest non-separable share (0.83) and is the selected teacher. Configurations: candidates 0--3 (non-separable shares 0.83, 0.68, 0.57 and 0.80), none of them selected for its result, at oracle test AUCs of 0.70 and 0.85, and a second noise draw for candidate 0 (10 configurations); and two null configurations in which the labels are thresholded noise. Heads: trained circuit, Linear-4D, separable Fourier-2 and the 81-function tensor basis, 5 seeds each. For each contrast the paired difference of 5-seed mean AUCs is tested with CR2 and Bell--McCaffrey degrees of freedom over calendar years. The trained circuit is above Linear-4D in 6 of 10 configurations (never below), never above Fourier-2 (below it in 2), and below the tensor basis in all 10; under the two nulls no contrast excludes zero. Mean AUCs range from 0.54 to 0.75 for the circuit, 0.56 to 0.76 for Fourier-2 and 0.60 to 0.79 for the tensor basis (\path{local_exp50_teacher_grid.json}).
 
 \begin{table}[htbp]
 \centering

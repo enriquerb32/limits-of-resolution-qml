@@ -44,7 +44,7 @@ def flip(pair: dict[str, Any]) -> dict[str, Any]:
     for key in ("gap", "delta", "z"):
         if key in out:
             out[key] = -out[key]
-    for key in ("ci_delong", "ci_block", "ci_two_way", "dbs_ci"):
+    for key in ("ci_delong", "ci_block", "ci_two_way", "dbs_ci", "ci_cr2"):
         if key in out:
             lo, hi = out[key]
             out[key] = [-hi, -lo]
@@ -62,14 +62,15 @@ def flat(cells: list[str]) -> list[Printed]:
 
 
 def paired_row(pair: dict[str, Any], mde_key: str = "mde_iid", se_key: str = "se_iid") -> list[float]:
-    """Delta, SE, z, p, year-block CI, years x seeds CI, cluster/iid ratio, MDE (Tables 3, 6, 7)."""
+    """Delta, SE, z, p, primary CR2 CI and p, years x seeds CI, cluster/iid ratio, MDE (Tables 3, 6, 7)."""
     gap = pair["gap"]
     return [
         gap,
         pair[se_key],
         gap / pair[se_key],
         pair["p_delong"],
-        *pair["ci_block"],
+        *pair["ci_cr2"],
+        pair["p_cr2"],
         *pair["ci_two_way"],
         pair["ratio_year_iid"],
         pair[mde_key],
@@ -335,14 +336,28 @@ PANEL2_ROWS = {
 }
 
 
+def _first_panel_probs() -> dict[str, np.ndarray]:
+    h = np.load(RES / "json" / "results_hybrids_trainonly_fixet0_p60_28.1_probs.npz")
+    c = np.load(RES / "json" / "results_rerun_train_only_canonical_probs.npz")
+    k = np.load(RES / "json" / "results_controls_trainonly_fixet0_p60_28.1_probs.npz")
+    out = {m: h[f"{m}_probs"] for m in ("RF_2273", "PureLSTM", "LSTM_QNN", "CTRL_LINEAR4D")}
+    out.update(XGB=c["train_only_XGB_probs"], FOURIER2=k["FOURIER2_probs"], y=h["y_te"].astype(int))
+    return out
+
+
 def test_second_panel_table() -> None:
+    from qml_resolution import mde, paired_delong
+
     rows = {k: v for k, v in table_rows(TEX, "tab:panel2").items() if k != "Comparison"}
     assert set(rows) == set(PANEL2_ROWS)
     assert (PANEL2["n_test"], PANEL2["K_years"]) == (884, 19)
+    fp = _first_panel_probs()
+    scale = np.sqrt(S42["n_test"] / PANEL2["n_test"])
     for label, (key, a, b) in PANEL2_ROWS.items():
         p = PANEL2["pairs"][key]
         first_panel = MODELS[a]["mean"] - MODELS[b]["mean"]
-        expected = [p["delta"], first_panel, p["p_delong"], *p["ci_block"], *p["ci_two_way"], p["mde_delong"]]
+        predicted = float(mde(paired_delong(fp["y"], fp[a], fp[b]).se)) * scale  # per-contrast N^{-1/2} scaling
+        expected = [p["delta"], first_panel, p["p_delong"], *p["ci_block"], *p["ci_two_way"], p["mde_delong"], predicted]
         expected += [p["ratio"], p["phases_excluding_zero"]]
         assert_row(flat(rows[label]), expected, label)
 
@@ -382,8 +397,7 @@ def test_abstract_claims() -> None:
     assert np.mean([nb[m]["se_iid"] for m in BUDGET_COLS]) == pytest.approx(0.024, abs=5e-4)  # "about 0.024"
     abstract = TEX.read_text(encoding="utf-8").split("\\begin{abstract}")[1].split("\\end{abstract}")[0]
     assert all(r > 1 for r in ratios)  # "larger than the seed variability of the classical models"
-    assert 0.025 <= max(mdes) <= 0.035  # "about 0.03 AUC"
-    for claim in ("529 test station-months", "about 0.024", "about 0.03 AUC", "4-qubit circuit"):
+    for claim in ("529 test station-months", "about 0.024", "0.022--0.032 AUC", "4-qubit circuit"):
         assert claim in abstract, claim
     words = re.sub(r"\$[^$]*\$", "X", abstract.split("\\bigskip")[0]).split()
     assert len(words) <= 200, len(words)

@@ -1,0 +1,229 @@
+"""Numbers added in the revision after the review of 2026-11-18 must follow from the archived results.
+
+Covers the lookahead audit (S1), the calibration of the primary procedure (exp48), the sensitivity to clusters of
+consecutive years, the primary procedure for the SEAS5 contrasts, and the three checks of exp49.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+import pytest
+from _latex import Printed, numbers, table_rows
+
+ROOT = Path(__file__).resolve().parents[2]
+TEX = ROOT / "paper" / "main.tex"
+SUPP = ROOT / "paper" / "supp.tex"
+RES = ROOT / "results"
+MAIN_TEXT = TEX.read_text(encoding="utf-8")
+SUPP_TEXT = SUPP.read_text(encoding="utf-8")
+
+
+def _load(name: str) -> Any:
+    return json.loads((RES / name).read_text(encoding="utf-8"))
+
+
+A47 = _load("local_exp47_truncation_audit.json")
+C48 = _load("local_exp48_primary_calibration.json")
+C48_2 = _load("local_exp48_primary_calibration_2yr.json")
+M49 = _load("local_exp49_review_minor.json")
+BLK = _load("local_cr2_block_sensitivity.json")
+S5 = _load("local_seas5_cr2.json")
+S42 = _load("local_exp42_v2_summary.json")
+
+
+def p(value: float, digits: int) -> Printed:
+    return Printed(round(value, digits), digits)
+
+
+def in_text(text: str, *claims: str) -> None:
+    for c in claims:
+        assert c in text, c
+
+
+# ------------------------------------------------------------------ lookahead audit
+def test_truncation_test_and_reach() -> None:
+    arc, cau = A47["truncation_archived"], A47["truncation_causal"]
+    assert arc["test_rows_full"] == arc["rows_unchanged"] == 529
+    assert arc["eligible_full_only"] == arc["eligible_cut_only"] == arc["rows_with_changed_inputs"] == 0
+    assert cau["test_rows_full"] == cau["rows_unchanged"] == 533 and cau["rows_with_changed_inputs"] == 0
+    reach = A47["interpolation_reach"]["archived"]
+    assert reach["filled_station_months"] == 54
+    assert reach["windows_with_filled_last_month"] == {"train": 24, "val": 2, "test": 0}
+    in_text(SUPP_TEXT, "54 station-months", "24 training, 2 validation windows", "533 test windows instead of 529")
+    in_text(MAIN_TEXT, "24 training and 2 validation windows", "all 529 test windows have the same inputs")
+
+
+def test_label_completeness_and_p60_set() -> None:
+    lab = A47["labels"]
+    assert lab["test_rows_incomplete"] == 0
+    p60 = lab["p60_month_set"]
+    assert p60["n_months"] == p60["n_months_complete"] == 2847
+    assert p60["by_station"] == {"Alicante": 699, "Barcelona": 809, "San_Javier": 629, "Valencia": 710}
+    assert round(p60["p60"], 1) == round(p60["p60_complete_only"], 1) == 29.9
+    reach = A47["interpolation_reach"]
+    assert reach["labelled_months"]["val"] == 528
+    assert {k: v for k, v in reach["labelled_months_with_missing_days"].items() if v} == {"test": 1}
+    in_text(SUPP_TEXT, "2{,}847 labelled training months", "Alicante 699, Barcelona 809, San Javier 629, Valencia 710",
+            "all 528 labelled validation months")
+
+
+def test_lookahead_table() -> None:
+    rows = {k: v for k, v in table_rows(SUPP, "tab:lookahead").items() if k != "Model"}
+    src = {"Random Forest": A47["refit_trees"]["RF"], "XGBoost": A47["refit_trees"]["XGB"],
+           "LSTM": A47["refit_neural"]["PureLSTM"], "LSTM+QNN": A47["refit_neural"]["LSTM_QNN"]}
+    assert set(rows) == set(src)
+    for name, r in src.items():
+        expected = [r["auc_archived_common"], r["auc_causal_common"], r["delta_archived_minus_causal"], *r["ci95_year_block"]]
+        printed = [n for c in rows[name] for n in numbers(c)]
+        assert len(printed) == len(expected), name
+        for i, (pr, e) in enumerate(zip(printed, expected, strict=True)):
+            assert pr.matches(e), f"{name} {i}: printed {pr.value}, archive {e:.5f}"
+    assert max(abs(r["delta_archived_minus_causal"]) for r in src.values()) < 0.0025   # "at most 0.002"
+
+
+# ------------------------------------------------------------------ primary procedure
+def _groups() -> dict[str, list[dict[str, Any]]]:
+    sc = {s["name"]: s for s in C48["scenarios"]}
+    rows = C48["rows"]
+    return {
+        "19 years, independent": [r for r in rows if r["mask"] == "real" and sc[r["scenario"]]["phi"] == 0],
+        "10 years": [r for r in rows if r["mask"] == "K10"],
+        "38 years": [r for r in rows if r["mask"] == "K38"],
+        "2 or 4 stations every year": [r for r in rows if r["mask"] in ("m2", "m4")],
+        "AR(1) years, scorer-specific effects": [r for r in rows if r["scenario"] == "specific_ar1"],
+        "AR(1) years with year$\\times$station effects": [r for r in rows if r["scenario"] == "station_year_specific_ar1"],
+    }
+
+
+def test_primary_calibration_table() -> None:
+    rows = table_rows(SUPP, "tab:primary_cal")
+    methods = ["delong", "block_pct", "cr1_t", "cr2_bm", "jackknife_t", "wild_webb"]
+    for name, cells in _groups().items():
+        key = f"{name.replace('$', '')} ({len(cells)} cells)"            # the row label states the number of cells
+        assert key in rows, (key, list(rows))
+        printed = [n for c in rows[key] for n in numbers(c)]
+        expected = [v for m in methods for v in (min(r["coverage"][m] for r in cells), max(r["coverage"][m] for r in cells))]
+        for i, (pr, e) in enumerate(zip([abs(x.value) for x in printed], expected, strict=True)):
+            assert round(e, 3) == pytest.approx(pr, abs=5e-4), f"{name} {i}: printed {pr}, archive {e:.4f}"
+
+
+def test_primary_calibration_claims() -> None:
+    sc = {s["name"]: s for s in C48["scenarios"]}
+    indep = [r for r in C48["rows"] if sc[r["scenario"]]["phi"] == 0]
+    cr2 = [r["coverage"]["cr2_bm"] for r in indep]
+    assert (round(min(cr2), 3), round(max(cr2), 3)) == (0.935, 0.975)
+    assert round(min(r["coverage"]["delong"] for r in indep), 2) == 0.85 or round(min(r["coverage"]["delong"] for r in indep), 3) == 0.845
+    null_rej = [r["rejection"]["block_pct"] for r in C48["rows"] if r["delta"] == 0 and r["delta_true_mcse"] == 0]
+    assert (round(100 * min(null_rej)), round(100 * max(null_rej))) == (6, 13)     # "6--13 %"
+    in_text(MAIN_TEXT, "rejects a null difference in 6--13\\,\\% of replications")
+    k19 = [r for r in C48["rows"] if r["mask"] in ("real", "m2", "m4")]
+    assert round(max(r["p_ratio_le_0_59"] for r in k19), 3) == 0.012
+    assert round(max(r["p_ratio_le_0_72"] for r in k19), 3) == 0.058
+    df = {round(r["mean_df_bm"], 1) for r in C48["rows"] if r["mask"] == "real"}
+    assert df == {15.9}
+    in_text(MAIN_TEXT, "covers at 0.935--0.975", "$\\nu=15.9$", "more than 1.2\\,\\%")
+
+
+def test_two_year_clusters() -> None:
+    def cov(rows: list[dict[str, Any]], scen: str, d: float) -> float:
+        return next(r for r in rows if r["scenario"] == scen and r["delta"] == d and r["mask"] == "real")["coverage"]["cr2_bm"]
+
+    assert round(cov(C48["rows"], "specific_ar1", 0.0), 3) == 0.937 and round(cov(C48_2["rows"], "specific_ar1", 0.0), 3) == 0.953
+    assert round(cov(C48["rows"], "station_year_specific_ar1", 0.0), 3) == 0.908
+    assert round(cov(C48_2["rows"], "station_year_specific_ar1", 0.0), 3) == 0.915
+    pw1 = next(r for r in C48["rows"] if r["scenario"] == "iid" and r["delta"] == 0.02)["rejection"]["cr2_bm"]
+    pw2 = next(r for r in C48_2["rows"] if r["scenario"] == "iid" and r["delta"] == 0.02)["rejection"]["cr2_bm"]
+    assert (round(pw1, 2), round(pw2, 2)) == (0.28, 0.22)
+    pv = {k: {b: round(v[b]["p"], 3) for b in v} for k, v in BLK.items()}
+    assert (pv["RF-PureLSTM"]["2yr"], pv["RF-LSTM_QNN"]["2yr"]) == (0.061, 0.051)
+    assert pv["RF-LSTM_QTL"]["2yr"] == 0.027 and pv["RF-LSTM_QTL"]["3yr"] == 0.064
+    assert max(max(v.values()) for k, v in pv.items() if k.startswith("FROZEN")) <= 0.018
+    in_text(SUPP_TEXT, "($p=0.061$ and 0.051)", "($p=0.027$)", "($p=0.064$)", "($p\\le0.018$)")
+
+
+def test_primary_verdicts_in_text() -> None:
+    pr = S42["pairs"]
+    assert round(pr["RF-PureLSTM"]["p_cr2"], 3) == 0.041 and round(pr["RF-LSTM_QNN"]["p_cr2"], 3) == 0.031
+    assert round(pr["RF-LSTM_QTL"]["p_cr2"], 3) == 0.008
+    assert all(pr[k]["p_cr2"] > 0.05 / 3 for k in ("RF-XGB", "RF-PureLSTM", "XGB-PureLSTM"))       # none passes Holm
+    assert all(pr[k]["p_cr2"] > 0.05 / 3 for k in ("RF-LSTM_QNN", "LSTM_QNN-CTRL_LINEAR4D", "PureLSTM-LSTM_QNN"))
+    assert {round(pr[k]["p_cr2"], 3) for k in ("FROZEN_RANDOM-LSTM_QNN", "FROZEN_IDENTITY-LSTM_QNN")} == {0.014, 0.010}
+    in_text(MAIN_TEXT, "$p=0.041$, above the Holm threshold", "(CR2 $p=0.031$)", "resolved by CR2 ($p=0.008$)", "$p=0.010$--0.014")
+
+
+def test_seas5_primary() -> None:
+    s = {k: (round(v["ci_cr2"][0], 3), round(v["ci_cr2"][1], 3), round(v["p_cr2"], 3)) for k, v in S5.items()}
+    assert s["orig:SEAS5_QM_L1-CLIM"] == (-0.008, 0.095, 0.093)
+    assert s["orig:RF_2273-SEAS5_QM_L1"] == (-0.102, 0.002, 0.056)
+    assert s["orig:LSTM_QNN-SEAS5_QM_L1"][2] == 0.014
+    assert s["stationmonth:SEAS5_QM_L1-CLIM"][:2] == (0.081, 0.237)
+    in_text(MAIN_TEXT, "CR2 $[-0.008,+0.095]$, $p=0.093$", "CR2 $[-0.102,+0.002]$, $p=0.056$", "CR2 $[+0.081,+0.237]$")
+
+
+def test_panel2_primary() -> None:
+    p2 = _load("local_panel2_cr2.json")
+    panel2 = _load("local_exp32_panel2_med2v2.json")["pooled"]["pairs"]
+    assert len(p2) == 7
+    assert set(p2) <= set(panel2)
+    for k, v in p2.items():
+        assert v["delta"] == pytest.approx(panel2[k]["delta"], abs=1e-9), k
+    assert round(min(v["p_cr2"] for v in p2.values()), 3) == 0.107
+    assert all(not (v["ci_cr2"][0] > 0 or v["ci_cr2"][1] < 0) for v in p2.values())
+    assert {round(v["df"], 1) for v in p2.values()} == {17.7}
+    in_text(MAIN_TEXT, "$\\nu=17.7$", "is resolved ($p\\ge0.107$")
+
+
+# ------------------------------------------------------------------ exp50: repeated positive control
+def test_teacher_grid() -> None:
+    g = _load("local_exp50_teacher_grid.json")
+    assert g["n_distinct"]["signal"] == 10 and g["n_distinct"]["null"] == 2 and g["selected_teacher"] == 0
+    d = g["detection"]
+    assert (d["LINEAR4D"]["circuit_above"], d["LINEAR4D"]["control_above"]) == (6, 0)
+    assert (d["FOURIER2"]["circuit_above"], d["FOURIER2"]["control_above"]) == (0, 2)
+    assert (d["FOURIER_FULL1"]["circuit_above"], d["FOURIER_FULL1"]["control_above"]) == (0, 10)
+    assert all(v["null_detected"] == 0 for v in d.values())
+    shares = [round(g["interaction_share"][str(c)], 2) for c in range(4)]
+    assert shares == [0.83, 0.68, 0.57, 0.80]
+    sig = [r for r in g["configs"].values() if r["teacher"] is not None]
+    for head, (lo, hi) in {"CIRCUIT": (0.54, 0.75), "FOURIER2": (0.56, 0.76), "FOURIER_FULL1": (0.60, 0.79)}.items():
+        vals = [r["auc"][head] for r in sig]
+        assert (round(min(vals), 2), round(max(vals), 2)) == (lo, hi), head
+    in_text(MAIN_TEXT, "above the Linear-4D map in 6 of the 10 configurations", "(which is above it in 2)",
+            "below the 81-function tensor surrogate in all 10")
+    in_text(SUPP_TEXT, "0.83, 0.68, 0.57 and 0.80", "0.54 to 0.75 for the circuit, 0.56 to 0.76 for Fourier-2")
+
+
+# ------------------------------------------------------------------ exp49
+def test_within_cell_auc() -> None:
+    w = M49["within_cell"]
+    vals = [w[m]["within_cell_auc"] for m in ("RF_2273", "XGB", "PureLSTM", "CTRL_LINEAR4D", "LSTM_QNN")]
+    assert (round(min(vals), 3), round(max(vals), 3)) == (0.449, 0.495)
+    assert w["CLIM"]["within_cell_auc"] == pytest.approx(0.5) and round(w["CLIM"]["pooled_auc"], 3) == 0.685
+    inc = [m for m in ("RF_2273", "XGB", "PureLSTM", "CTRL_LINEAR4D") if w[m]["ci_block"][0] <= 0.5 <= w[m]["ci_block"][1]]
+    assert len(inc) == 4 and w["LSTM_QNN"]["ci_block"][1] < 0.5
+    assert [round(x, 3) for x in w["LSTM_QNN"]["ci_block"]] == [0.423, 0.497]
+    in_text(MAIN_TEXT, "Every model scores 0.449--0.495", "$[0.423,0.497]$")
+
+
+def test_seas5_increment() -> None:
+    s = M49["seas5_increment"]
+    models = ("RF_2273", "XGB", "PureLSTM", "CTRL_LINEAR4D", "LSTM_QNN")
+    for lead, (lo, hi) in (("L2", (-0.008, -0.001)), ("L1", (-0.003, 0.001))):
+        d = [s[lead][m]["delta_auc"] for m in models]
+        assert (round(min(d), 3), round(max(d), 3)) == (lo, hi), lead
+        assert all(s[lead][m]["ci_block_auc"][0] <= 0 <= s[lead][m]["ci_block_auc"][1] for m in models)
+        assert all(s[lead][m]["delta_brier"] > -0.001 for m in models)
+    assert min(s[lead][m]["p_delong"] for lead in ("L1", "L2") for m in models) >= 0.31
+    in_text(MAIN_TEXT, "by $-0.008$ to $-0.001$ at lead 2", "by $-0.003$ to $+0.001$ at lead 1", "DeLong $p\\ge0.31$")
+
+
+def test_analytic_auc() -> None:
+    a = M49["analytic_auc"]
+    got = {k: round(a[k]["by_design_delta"]["0.03"]["delta"], 4) for k in "BCDE"}
+    assert got == {"B": 0.0290, "C": 0.0280, "D": 0.0280, "E": 0.0238}
+    for k in "BCDE":
+        assert abs(got[k] - a[k]["reported_mc"]) < 0.001
+    in_text(MAIN_TEXT, "0.0290 (B), 0.0280 (C and D) and 0.0238 (E)")

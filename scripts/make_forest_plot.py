@@ -5,8 +5,8 @@ make_forest_plot.py - forest plot of every paired seed-mean comparison of the v2
 Reads the v2 summary (no recomputation, so the figure matches the tables exactly):
   results/local_exp42_v2_summary.json   written by code/local_experiments/exp42_v2_summary.py
 The rows are those of Tables 3, 6 and 7 of the manuscript (tab:paired_ci, tab:qnn_paired, tab:controls).
-For each pair it draws the DeLong 95 % interval, the calendar-year block-bootstrap interval and the
-years x seeds interval, offset vertically, with the point estimate. A missing pair is an error.
+For each pair it draws the primary 95 % interval (CR2 with Bell-McCaffrey degrees of freedom, calendar-year
+clusters), the DeLong interval and the years x seeds interval, offset vertically, with the point estimate. A missing pair is an error.
 
 Usage (from the repository root):
   python scripts/make_forest_plot.py                      # -> paper/figs/fig_forest.pdf and .png
@@ -48,8 +48,8 @@ ROWS = [
 ]
 # validated categorical slots 1-3 (dataviz reference palette, light mode); aqua is below 3:1 contrast,
 # so every procedure also has its own marker shape and the legend is always shown
-PROC = [('DeLong (iid)', 'ci_delong', '#2a78d6', 'o'),
-        ('Year-block bootstrap', 'ci_block', '#eb6834', 's'),
+PROC = [('CR2, Bell–McCaffrey df (primary)', 'ci_cr2', '#eb6834', 's'),
+        ('DeLong (independence)', 'ci_delong', '#2a78d6', 'o'),
         ('Years × seeds bootstrap', 'ci_two_way', '#1baf7a', '^')]
 INK, MUTED, GRID = '#0b0b0b', '#52514e', '#e4e3df'
 
