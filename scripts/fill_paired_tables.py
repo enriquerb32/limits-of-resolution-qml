@@ -26,7 +26,7 @@ def s(x, d):
 def row_cells(p):
     return (f"${s(p['gap'], 4)}$ & {p['se_iid']:.4f} & ${p['gap'] / p['se_iid']:.2f}$ ({p['p_delong']:.3f}) & "
             f"$[{s(p['ci_cr2'][0], 3)},{s(p['ci_cr2'][1], 3)}]$ ({p['p_cr2']:.3f}) & "
-            f"$[{s(p['ci_two_way'][0], 3)},{s(p['ci_two_way'][1], 3)}]$ & {p['ratio_year_iid']:.2f} & {p['mde_iid']:.3f} \\\\")
+            f"$[{s(p['ci_two_way'][0], 3)},{s(p['ci_two_way'][1], 3)}]$ & {p['ratio_year_iid']:.2f} & {p['mde_cr2']:.3f} ({p['mde_iid']:.3f}) \\\\")
 
 
 def main():
@@ -40,6 +40,7 @@ def main():
             tl = re.escape(label.replace(" - ", " $-$ "))
             body, n = re.subn(rf"^({tl}) & .*\\\\$", lambda m, p=p: f"{m.group(1)} & {row_cells(p)}", body, flags=re.M)
             assert n == 1, (table, label, n)
+        body = body.replace("& Cluster/iid & MDE \\\\", "& Cluster/iid & MDE CR2 (DeLong) \\\\")
         supp = supp[:start] + body + supp[end:]
     SUPP.write_text(supp, encoding="utf-8")
     tex = TEX.read_text(encoding="utf-8")
@@ -52,6 +53,7 @@ def main():
             body, n = re.subn(rf"^({tl}) & .*\\\\$", lambda m: f"{m.group(1)} & {row_cells(p)}", body, flags=re.M)
             assert n == 1, (table, label, n)
         body = body.replace("Year-block 95\\,\\% CI", "CR2 95\\,\\% CI ($p$)")
+        body = body.replace("& Cluster/iid & MDE \\\\", "& Cluster/iid & MDE CR2 (DeLong) \\\\")
         tex = tex[:start] + body + tex[end:]
     # Table 13 (second panel): the fifth cell becomes the primary CR2 interval with its p-value
     p2 = json.loads((ROOT / "results" / "local_panel2_cr2.json").read_text(encoding="utf-8"))

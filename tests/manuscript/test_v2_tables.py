@@ -73,6 +73,7 @@ def paired_row(pair: dict[str, Any], mde_key: str = "mde_iid", se_key: str = "se
         pair["p_cr2"],
         *pair["ci_two_way"],
         pair["ratio_year_iid"],
+        pair["mde_cr2"],
         pair[mde_key],
     ]
 

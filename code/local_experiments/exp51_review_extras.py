@@ -121,6 +121,59 @@ def serial_dependence():
     return out
 
 
+def primary_mde():
+    """MDE of the procedure that takes the decision: (t_{1-a/2,nu} + t_{0.80,nu}) * SE_CR2, treating SE_CR2 as known;
+    and, for the two Holm families, the MDE at the first Holm step (alpha/3), the threshold a difference must pass when
+    it is the smallest p-value of its family."""
+    from scipy.stats import t as student_t
+    S = json.load(open(os.path.join(R, 'local_exp42_v2_summary.json')))['pairs']
+    fam = {'classical': ['RF-XGB', 'RF-PureLSTM', 'XGB-PureLSTM'],
+           'hybrid': ['RF-LSTM_QNN', 'LSTM_QNN-CTRL_LINEAR4D', 'PureLSTM-LSTM_QNN']}
+    out = {}
+    for k, v in S.items():
+        if not v.get('se_cr2'):
+            continue
+        df = v['df_bm']; se = v['se_cr2']
+        row = dict(mde_cr2=float((student_t.ppf(0.975, df) + student_t.ppf(0.80, df)) * se), mde_delong=v['mde_iid'],
+                   se_cr2=se, df=df)
+        if any(k in f for f in fam.values()):
+            row['mde_cr2_holm_first_step'] = float((student_t.ppf(1 - 0.05 / 6, df) + student_t.ppf(0.80, df)) * se)
+        out[k] = row
+    return dict(assumptions='80 % power, two-sided alpha 0.05, CR2 standard error treated as known, t with Bell-McCaffrey df; '
+                            'Holm first step: alpha/3 within a family of three', families=fam, pairs=out)
+
+
+def stationmonth_primary():
+    """Primary procedure for the station x month label contrasts of Section 4.6 (previously DeLong only)."""
+    z = np.load(os.path.join(J, 'results_exp28_stationmonth_probs.npz')); y = z['y_te'].astype(int)
+    P = {k[:-6]: z[k] for k in z.files if k.endswith('_probs')}; P['CLIM'] = z['clim_te'][None]
+    out = {}
+    for a, b in [('RF_2273', 'LSTM_QNN'), ('CTRL_LINEAR4D', 'LSTM_QNN'), ('RF_2273', 'XGB'), ('PureLSTM', 'LSTM_QNN')] + \
+                [(m, 'CLIM') for m in ('RF_2273', 'XGB', 'PureLSTM', 'CTRL_LINEAR4D', 'LSTM_QNN')]:
+        r = cluster_robust_delta(y, P[a], P[b], YEARS); lo, hi = r.ci()
+        out[f'{a}-{b}'] = dict(delta=r.delta, ci_cr2=[lo, hi], p_cr2=r.p_value)
+    return out
+
+
+def two_station_subset():
+    """Sensitivity to the changing station mix: the key contrasts on Alicante and Barcelona only (both cover 2008-2026)."""
+    h = np.load(os.path.join(J, 'results_core_hybrids_controls_fixet0_p60_28.1_probs.npz'))
+    c = np.load(os.path.join(J, 'results_rerun_train_only_canonical_probs.npz'))
+    P = {k[:-6]: h[k] for k in h.files if k.endswith('_probs')}
+    P.update(RF=c['train_only_RF_probs'], XGB=c['train_only_XGB_probs'], LSTM_QTL=h['QTL_FIXED_probs'])
+    y = h['y_te'].astype(int)
+    keep = META.ciudad.isin(['Alicante', 'Barcelona']).values
+    out = dict(rows=int(keep.sum()), share=float(keep.mean()), years=int(np.unique(YEARS[keep]).size), pairs={})
+    for a, b in [('RF', 'XGB'), ('RF', 'PureLSTM'), ('RF', 'LSTM_QNN'), ('RF', 'LSTM_QTL'), ('PureLSTM', 'LSTM_QNN'),
+                 ('LSTM_QNN', 'CTRL_LINEAR4D'), ('FROZEN_RANDOM', 'LSTM_QNN'), ('FROZEN_IDENTITY', 'LSTM_QNN')]:
+        full = cluster_robust_delta(y, P[a], P[b], YEARS)
+        r = cluster_robust_delta(y[keep], P[a][:, keep], P[b][:, keep], YEARS[keep]); lo, hi = r.ci()
+        flo, fhi = full.ci()
+        out['pairs'][f'{a}-{b}'] = dict(delta=r.delta, ci_cr2=[lo, hi], p_cr2=r.p_value, resolved=bool(lo > 0 or hi < 0),
+                                        delta_all=full.delta, resolved_all=bool(flo > 0 or fhi < 0))
+    return out
+
+
 def panel2():
     """Primary procedure for the contrasts of Table 13 (second panel, 884 test rows, 19 years)."""
     d = os.path.join(R, 'panel2', 'med2v2')
@@ -140,6 +193,9 @@ def main():
     json.dump(panel2(), open(os.path.join(R, 'local_panel2_cr2.json'), 'w'), indent=2)
     json.dump(influential_years(), open(os.path.join(R, 'local_cr2_leave_one_year.json'), 'w'), indent=2)
     json.dump(serial_dependence(), open(os.path.join(R, 'local_serial_dependence.json'), 'w'), indent=2)
+    json.dump(primary_mde(), open(os.path.join(R, 'local_primary_mde.json'), 'w'), indent=2)
+    json.dump(stationmonth_primary(), open(os.path.join(R, 'local_stationmonth_cr2.json'), 'w'), indent=2)
+    json.dump(two_station_subset(), open(os.path.join(R, 'local_two_station_subset.json'), 'w'), indent=2)
     path = os.path.join(R, 'local_exp47_truncation_audit.json')
     res = json.load(open(path)); res['refit_neural'] = causal_neural(); json.dump(res, open(path, 'w'), indent=2)
     json.dump(seas5(), open(os.path.join(R, 'local_seas5_cr2.json'), 'w'), indent=2)

@@ -165,6 +165,36 @@ def test_two_year_clusters() -> None:
     in_text(SUPP_TEXT, "($p=0.061$ and 0.051)", "($p=0.027$)", "($p=0.064$)", "($p\\le0.018$)")
 
 
+def test_primary_mde_and_scope() -> None:
+    m = _load("local_primary_mde.json")["pairs"]
+    r3 = lambda ks, f: (round(min(m[k][f] for k in ks), 3), round(max(m[k][f] for k in ks), 3))  # noqa: E731
+    classical = ["RF-XGB", "RF-PureLSTM", "XGB-PureLSTM"]
+    complete = classical + ["RF-LSTM_QNN"]
+    interface = ["LSTM_QNN-CTRL_LINEAR4D", "PureLSTM-LSTM_QNN", "LSTM_QTL-PureLSTM", "LSTM_QTL-QTL_CLASSICAL", "LSTM_QTL-QTL_TENSOR1"]
+    assert r3(classical, "mde_cr2") == (0.018, 0.024) and r3(complete, "mde_cr2") == (0.018, 0.025)
+    assert r3(classical, "mde_cr2_holm_first_step") == (0.021, 0.029)
+    assert r3(interface, "mde_cr2") == (0.012, 0.019) and r3(interface, "mde_delong") == (0.011, 0.016)
+    assert round(m["RF-LSTM_QNN"]["mde_cr2"], 3) == 0.025
+    for k, v in S42["pairs"].items():                         # tables use the exp42 value; both computations agree
+        if k in m:
+            assert v["mde_cr2"] == pytest.approx(m[k]["mde_cr2"], rel=1e-9), k
+    in_text(MAIN_TEXT, "is 0.018--0.025 AUC (0.022--0.032 AUC under independence)",
+            "0.018--0.024 AUC for the classical models (0.022--0.031 under independence, and 0.021--0.029 at the first Holm step)",
+            "the MDEs of these comparisons are 0.012--0.019 (0.011--0.016 under independence)")
+    sm = _load("local_stationmonth_cr2.json")
+    between = [v["p_cr2"] for k, v in sm.items() if not k.endswith("CLIM")]
+    clim = [v["p_cr2"] for k, v in sm.items() if k.endswith("CLIM")]
+    assert round(min(between), 2) == 0.72 and round(min(clim), 2) == 0.14
+    in_text(MAIN_TEXT, "(CR2 $p\\ge0.72$ between models and $p\\ge0.14$ against the climatology")
+    two = _load("local_two_station_subset.json")
+    assert two["rows"] == 441 and two["years"] == 19
+    assert all(v["resolved"] == v["resolved_all"] for v in two["pairs"].values())
+    p = two["pairs"]
+    assert (round(p["RF-PureLSTM"]["delta"], 3), round(p["RF-LSTM_QNN"]["delta"], 3)) == (0.019, 0.027)
+    assert (round(p["RF-PureLSTM"]["p_cr2"], 3), round(p["RF-LSTM_QNN"]["p_cr2"], 3)) == (0.026, 0.014)
+    in_text(MAIN_TEXT, "on Alicante and Barcelona alone, present in every test year (441 rows)", "(CR2 $p=0.026$ and 0.014)")
+
+
 def test_leave_one_year() -> None:
     lo = _load("local_cr2_leave_one_year.json")
     assert len(lo["RF-PureLSTM"]["years_that_flip_verdict"]) == 9
