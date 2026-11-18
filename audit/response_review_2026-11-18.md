@@ -157,4 +157,4 @@ La verdad es analítica o se calcula con 300 copias independientes del diseño.
 ## Lo que sigue abierto
 
 - Evaluación prospectiva del benchmark externo y una población de referencia mayor, con un diseño nuevo que habría que registrar antes de analizar.
-- La suite completa de tests no ha terminado en esta máquina: la paró el sistema por falta de memoria al 71 %, sin fallos hasta ese punto. Los tests de manuscrito (56) y de unidad (63) pasan.
+- Suite completa ejecutada por partes, en modo de bajo consumo: manuscrito 56, unidad 63, cuánticos 17, regresión 66 (4 omitidos), QKSVM 2, exp10 1 y reproducibilidad 6; todos pasan. El único fallo, un test cuántico que leía los tamaños de los controles de la Tabla 5 del principal, se debía al traslado editorial y está corregido.
