@@ -436,7 +436,7 @@ def test_xgboost_trees_in_text() -> None:
 
 def test_cluster_periods_in_text() -> None:
     per = _load("local_exp45_cluster_periods.json")
-    text = TEX.read_text(encoding="utf-8")
+    text = SUPP.read_text(encoding="utf-8")   # period details are in the supplement
     lstm, qnn = per["RF-LSTM"], per["RF-QNN"]
     assert Printed(-88, 0).matches(100 * lstm["2008-2012"]["cross_share"])
     assert Printed(-99, 0).matches(100 * qnn["2008-2012"]["cross_share"])
