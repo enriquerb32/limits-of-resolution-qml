@@ -430,7 +430,8 @@ def test_xgboost_trees_in_text() -> None:
     assert (min(trees), max(trees), np.median(trees)) == (2, 121, 16)
     assert sum(t <= 3 for t in trees) == 5
     text = TEX.read_text(encoding="utf-8")
-    assert "2 to 121 across the 15 seeds (median 16, and 2--3 trees in five seeds)" in text
+    assert "only 2 to 121 trees in XGBoost across the 15 seeds" in text
+    assert "median 16 trees after early stopping, 2--3 in five seeds" in SUPP.read_text(encoding="utf-8")
 
 
 def test_cluster_periods_in_text() -> None:
