@@ -182,3 +182,24 @@ La verdad es analítica o se calcula con 300 copias independientes del diseño.
   - Künsch citado en §3.2;
   - limitación añadida: datosclima.es no contrastado con AEMET OpenData;
   - el DOI de Zenodo sigue pendiente: requiere publicar el release.
+
+## Cuarta tanda
+
+- **Figura nueva (Figura 1, §3):** un diagrama, para lectores sin formación estadística, del recorrido de una comparación:
+  - qué se compara;
+  - las tres fuentes de incertidumbre: muestra de test, semilla y diseño;
+  - el intervalo principal CR2, con DeLong como referencia;
+  - Holm, la regla de decisión y las comprobaciones de robustez.
+- **"Signo erróneo":** se mantiene como resultado verificable dentro del experimento (15,8 % de los tests pequeños excluyen el cero en la dirección opuesta a la referencia fija de 39 celdas), con la salvedad explícita de que el signo de esa referencia no está determinado. La cobertura se presenta como relativa a un conjunto *fijo y finito* de celdas, no como cobertura para celdas nuevas. Resumen y conclusiones hablan de "a fixed reference difference".
+- **El MDE corresponde al procedimiento que decide:**
+  - CR2, (t₀,₉₇₅,ν + t₀,₈₀,ν)·SE_CR2, con el SE tratado como conocido: 0,018–0,025 entre modelos completos y 0,012–0,019 en la interfaz;
+  - DeLong entre paréntesis como referencia iid (0,022–0,032 y 0,011–0,016);
+  - MDE al nivel del primer paso de Holm (α/3): 0,021–0,029;
+  - Tablas 3, 6 y 7 con la columna "MDE CR2 (DeLong)";
+  - §4.4 ya no afirma potencia 0,8 sin el supuesto.
+- **Climatología y SEAS5:**
+  - la etiqueta estación×mes recibe CR2 (p ≥ 0,72 entre modelos y p ≥ 0,14 frente a la climatología);
+  - los intervalos del Brier se marcan como exploratorios (percentiles);
+  - los MDE de los blends de SEAS5 se identifican como de DeLong y exploratorios.
+- **Calibración acotada:** CR2 se presenta como "elegido entre los calibrados con años independientes; no calibrado con correlación serial + efectos año×estación ni para el patrón de cancelación del panel" en las contribuciones y en las conclusiones.
+- **"Años nuevos" definido:** el estimando usa la mezcla histórica de estación-meses elegibles (la composición de los años de test). **Sensibilidad:** solo Alicante y Barcelona (441 filas, los 19 años): ningún veredicto cambia, y las ventajas de RF crecen (+0,019 y +0,027; CR2 p = 0,026 y 0,014).

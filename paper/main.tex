@@ -30,6 +30,12 @@
 \emergencystretch=2em
 
 \usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,calc}
+\definecolor{primaryblue}{HTML}{2A78D6}
+\definecolor{inkgray}{HTML}{52514E}
+\definecolor{paleblue}{HTML}{EAF2FC}
+\definecolor{palegray}{HTML}{F2F1EE}
 
 % TODO toggle: \showtodotrue shows the notes, \showtodofalse hides them (submission version)
 \newif\ifshowtodo
@@ -154,6 +160,48 @@ Valencia    & 8416 (13\,m) & 51  & 2012 & 54.9\% (28 / 51) \\
 \section{Statistical Framework}
 \label{sec:framework}
 % ============================================================
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  font=\small, node distance=4mm and 3mm,
+  box/.style={draw=inkgray, rounded corners=2pt, align=center, inner sep=4pt, text width=#1, fill=white, execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}},
+  box/.default=4.2cm,
+  prim/.style={box=#1, draw=primaryblue, line width=1.1pt, fill=paleblue},
+  prim/.default=4.2cm,
+  refb/.style={box=#1, draw=inkgray!60, dashed, fill=palegray},
+  refb/.default=4.2cm,
+  wide/.style={box=13.6cm, fill=white},
+  arr/.style={-{Stealth[length=2.2mm]}, draw=inkgray, line width=0.6pt},
+  q/.style={font=\small\itshape, text=inkgray, align=center, text width=4.2cm}]
+\node[wide] (data) {\textbf{Input:} test predictions of two models on the same 529 station-months, for each of 15 training seeds};
+\node[wide, below=of data] (est) {\textbf{1. What is compared?} The difference between the two models' AUC, averaged over seeds, on the same test months.\\
+The question it answers: would the difference persist in \emph{new years} at the same stations?};
+\node[q, below=6mm of est, xshift=-4.7cm] (qa) {Which months happened to be in the test set?};
+\node[q, below=6mm of est] (qb) {Which training run (seed) was used?};
+\node[q, below=6mm of est, xshift=4.7cm] (qc) {Could the design have seen a difference at all?};
+\node[prim, below=2mm of qa] (cr2) {\textbf{Primary interval: CR2}\\ treats the months of one year as a block (19 blocks); chosen because it kept 95\,\% coverage in simulations of this design (\Cref{fig:calibration})};
+\node[refb, below=of cr2] (dl) {\textbf{Reference: DeLong}\\ assumes every month is independent; shown for comparison, not used to decide};
+\node[box, below=2mm of qb] (tw) {\textbf{Years$\times$seeds bootstrap}\\ resamples years and seeds together, adding the variation between training runs};
+\node[box, below=2mm of qc] (mde) {\textbf{Minimum detectable}\\\textbf{difference}\\ the smallest true difference found 80\,\% of the time; a property of the design, not a threshold for results};
+\node[wide, anchor=north, yshift=-6mm] (holm) at (dl.south -| tw.south) {\textbf{2. Many comparisons at once.} In the two main families of three comparisons, the CR2 $p$-values are corrected (Holm), so that a family does not produce chance findings};
+\node[prim=13.6cm, below=of holm] (dec) {\textbf{3. Decision.} A difference is \emph{resolved} if its CR2 interval excludes zero (and, in the main families, it passes Holm). Otherwise it is \emph{not resolved}: the data cannot tell the models apart, which does not mean they are equal};
+\node[refb=13.6cm, below=of dec] (rob) {\textbf{4. Is the decision robust?} Blocks of two or three consecutive years $\cdot$ leaving out one year at a time $\cdot$ only the two stations present every year $\cdot$ serial correlation between years $\cdot$ other cluster procedures (CR1, jackknife, wild bootstrap)};
+\draw[arr] (data) -- (est);
+\draw[arr] (est.south) -- ++(0,-2mm) -| (qa.north);
+\draw[arr] (est.south) -- (qb.north);
+\draw[arr] (est.south) -- ++(0,-2mm) -| (qc.north);
+\draw[arr] (cr2.west) -- ++(-2.5mm,0) |- (holm.west);
+\draw[arr] (tw.south) -- (holm.north);
+\draw[arr] (holm) -- (dec);
+\draw[arr] (dec) -- (rob);
+\draw[arr, dashed, draw=inkgray!60] (cr2) -- (dl);
+\end{tikzpicture}
+\caption{How a comparison between two models is decided in this paper, for readers without a statistical background. Each column answers one question about uncertainty: the test sample (left), the training seed (middle) and the design (right). Only the primary interval (solid blue frame), corrected for multiple comparisons where the comparison is part of a main family, decides whether a difference is resolved; DeLong and the other procedures (grey) are shown as references and robustness checks.}
+\label{fig:inference_map}
+\end{figure}
+
+The inferential choices of this section are summarized in \Cref{fig:inference_map}.
 
 \subsection{Estimands and Inference}
 \label{sec:estimand}
