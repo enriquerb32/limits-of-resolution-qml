@@ -95,3 +95,6 @@ checkpoints/exp31*/
 *.aux
 *.log
 *.out
+
+# external benchmark data (scikit-learn cache; downloaded by exp53_external_benchmark.py, not redistributed)
+data/external/

@@ -666,6 +666,32 @@ Fourier-2 & 0.520 (0.019) & Fourier-2 $-$ LSTM+QNN & $+0.0050$ & 0.584 & $[-0.01
 \end{table}
 
 % ============================================================
+\section{External Benchmark}
+\label{app:external}
+
+\textbf{Design} (recorded before any fit, \path{audit/prediction_external.txt}; \path{exp53_external_benchmark.py}). California Housing (scikit-learn), 20{,}640 block groups and 8 features; target: median house value above the training median (1.608, in units of \$100{,}000). Clusters: cells of $0.25^\circ$ latitude by $0.25^\circ$ longitude (518 cells, from 1 to 1{,}494 rows); split by cell with seed 2026 into 259 training (7{,}669 rows), 77 validation (2{,}689) and 182 test cells (10{,}282). Models, 5 seeds: logistic regression on standardized features ($C=1$; deterministic), Random Forest (300 trees, minimum leaf 5), XGBoost (depth 6, learning rate 0.05, early stopping on the validation AUC) and a multilayer perceptron $(64,32)$ with early stopping. Primary procedure: CR2 with Bell--McCaffrey degrees of freedom over cells, on 5-seed means. Reference population: the 39 test cells with 10--60 rows (1{,}170 rows); small tests: 1{,}000 draws of 19 of them without replacement (423--735 rows, median 570).
+
+\begin{table}[htbp]
+\centering
+\caption{External benchmark. Reference: the contrast on the 39 reference cells with its CR2 interval; all test cells in the last column. Small tests: share of the 1{,}000 draws in which the 95\,\% interval excludes zero (resolved), excludes zero with the sign opposite to the reference (wrong sign), and covers the reference difference.}
+\label{tab:external}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lccccccccc@{}}
+\toprule
+& \multicolumn{2}{c}{Reference (39 cells)} & \multicolumn{2}{c}{Resolved} & \multicolumn{2}{c}{Wrong sign} & \multicolumn{2}{c}{Coverage} & All test cells \\
+Contrast & $\hat\Delta$ & CR2 95\,\% CI & CR2 & DeLong & CR2 & DeLong & CR2 & DeLong & $\hat\Delta$ [CR2 CI] \\
+\midrule
+RF $-$ LR & $+0.024$ & $[-0.022,+0.071]$ & 0.036 & 0.609 & 0.000 & 0.040 & 0.978 & 0.628 & $+0.017$ $[-0.016,+0.049]$ \\
+XGB $-$ RF & $+0.028$ & $[+0.000,+0.055]$ & 0.105 & 0.870 & 0.000 & 0.000 & 0.941 & 0.618 & $-0.002$ $[-0.015,+0.011]$ \\
+MLP $-$ RF & $+0.007$ & $[-0.036,+0.050]$ & 0.002 & 0.476 & 0.000 & 0.158 & 0.998 & 0.547 & $-0.007$ $[-0.023,+0.009]$ \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\textbf{Recorded predictions.} P1 (Random Forest against logistic regression resolved in the reference, above the margin) failed: the difference is $+0.024$, but the 39 reference cells give a CR2 interval of $[-0.022,+0.071]$; the reference population was too small for the spatial dependence, a design error that the analysis keeps rather than corrects after the fact. P2 (power of CR2 for that contrast at least 0.80 and wrong signs at most 2.5\,\%) failed on power (0.036) and held on wrong signs (none). P3 (CR2 coverage 0.93--0.97) failed: coverage is 0.941--0.998, conservative. P4 held: the contrast within the margin is resolved by CR2 in 0.2\,\% of draws, and DeLong resolves every contrast more often than CR2. P5 held at the edge: the MDE predicted from the reference by $N^{-1/2}$ scaling is 1.37--1.40 times the empirical one ($2.80\times$ the standard deviation of the small-test estimates); a factor close to $1/\sqrt{1-19/39}=1.40$ is expected because the small tests draw half of a finite set of 39 cells, so the agreement says less about the scaling than the number suggests. The two reference populations also disagree: XGBoost is above Random Forest on the reference cells ($+0.028$) and not on all test cells ($-0.002$), a reminder that the reference is itself one clustered sample. Not done: a prospective evaluation, which needs data that do not exist yet.
+
+% ============================================================
 \section{Changes from the Earlier Version of the Analysis}
 \label{app:v1}
 % ============================================================

@@ -214,6 +214,35 @@ def test_panel2_primary() -> None:
     in_text(MAIN_TEXT, "$\\nu=17.7$", "is resolved ($p\\ge0.107$")
 
 
+# ------------------------------------------------------------------ exp53: external benchmark
+def test_external_benchmark() -> None:
+    e = _load("local_exp53_external_benchmark.json")
+    assert e["n"] == {"train": 7669, "val": 2689, "test": 10282} and e["cells"] == {"train": 259, "val": 77, "test": 182}
+    assert e["reference_population"] == {"cells": 39, "rows": 1170}
+    assert e["predictions"] == {"P1": False, "P2": False, "P3": False, "P4": True, "P5": True}
+    auc = [round(e["auc_all_test"][m], 3) for m in ("LR", "RF", "XGB", "MLP")]
+    assert auc == [0.905, 0.921, 0.919, 0.914]
+    rows = table_rows(SUPP, "tab:external")
+    labels = {"RF - LR": "RF-LR", "XGB - RF": "XGB-RF", "MLP - RF": "MLP-RF"}
+    for lab, key in labels.items():
+        r, s, a = e["contrasts_reference"][key], e["small_tests"]["by_contrast"][key], e["contrasts_all_test"][key]
+        expected = [r["delta"], *r["ci_cr2"], s["resolved_cr2"], s["resolved_delong"], s["wrong_sign_cr2"],
+                    s["wrong_sign_delong"], s["coverage_cr2"], s["coverage_delong"], a["delta"], *a["ci_cr2"]]
+        printed = [n for c in rows[lab] for n in numbers(c)]
+        assert len(printed) == len(expected), lab
+        for i, (pr, ex) in enumerate(zip(printed, expected, strict=True)):
+            assert pr.matches(ex), f"{lab} {i}: printed {pr.value}, archive {ex:.4f}"
+    ratios = [v["se_cr2"] / v["se_delong"] for v in e["contrasts_all_test"].values()]
+    assert (round(min(ratios), 1), round(max(ratios), 1)) == (4.4, 6.6)
+    sm = e["small_tests"]
+    assert sm["draws"] == 1000 and sm["rows_median"] == 570 and sm["rows_range"] == [423, 735]
+    p5 = [v["mde_predicted"] / v["mde_empirical"] for v in sm["by_contrast"].values()]
+    assert (round(min(p5), 2), round(max(p5), 2)) == (1.37, 1.40)
+    in_text(MAIN_TEXT, "4.4--6.6 times the DeLong one", "61, 87 and 48\\,\\% of draws", "only 55--63\\,\\%",
+            "16\\,\\% of draws", "CR2 covers in 94--99.8\\,\\%", "resolves in 0.2--10.5\\,\\%", "$\\nu=13.5$")
+    in_text(SUPP_TEXT, "1.37--1.40 times the empirical one")
+
+
 # ------------------------------------------------------------------ exp50: repeated positive control
 def test_teacher_grid() -> None:
     g = _load("local_exp50_teacher_grid.json")
