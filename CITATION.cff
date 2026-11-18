@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this benchmark, code, or data in your research, please cite it as below."
-title: "Limits of Resolution in Small Machine-Learning Benchmarks: A Noise Budget with a Quantum Case Study"
+title: "Limits of Resolution in Small Machine-Learning Benchmarks: Calibrated Inference for Clustered Test Sets, with a Quantum Case Study"
 authors:
   - family-names: "Real"
     given-names: "Enrique"

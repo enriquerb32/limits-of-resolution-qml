@@ -1,8 +1,8 @@
 {
-  "title": "Limits of Resolution in Quantum Machine Learning: A Statistical Noise Budget for Small Benchmarks",
+  "title": "Limits of Resolution in Small Machine-Learning Benchmarks: Calibrated Inference for Clustered Test Sets, with a Quantum Case Study",
   "upload_type": "publication",
   "publication_type": "preprint",
-  "description": "Code, spatiotemporal panel data checkpoints, and statistical evaluation scripts accompanying the paper 'Limits of Resolution in Quantum Machine Learning: A Statistical Noise Budget for Small Benchmarks'. The repository provides complete reproducibility artifacts for decomposing AUC comparisons into test-set sampling error (DeLong and calendar-year block bootstrap) versus parameter optimization-seed variance on a multi-decadal Western Mediterranean precipitation panel (1938-2026).",
+  "description": "Code, spatiotemporal panel data checkpoints, and statistical evaluation scripts accompanying the paper 'Limits of Resolution in Small Machine-Learning Benchmarks: Calibrated Inference for Clustered Test Sets, with a Quantum Case Study'. The repository provides complete reproducibility artifacts for decomposing AUC comparisons into test-set sampling error (DeLong and calendar-year block bootstrap) versus parameter optimization-seed variance on a multi-decadal Western Mediterranean precipitation panel (1938-2026).",
   "creators": [
     {
       "name": "Real, Enrique",

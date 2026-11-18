@@ -158,3 +158,27 @@ La verdad es analítica o se calcula con 300 copias independientes del diseño.
 
 - Evaluación prospectiva del benchmark externo y una población de referencia mayor, con un diseño nuevo que habría que registrar antes de analizar.
 - Suite completa ejecutada por partes, en modo de bajo consumo: manuscrito 56, unidad 63, cuánticos 17, regresión 66 (4 omitidos), QKSVM 2, exp10 1 y reproducibilidad 6; todos pasan. El único fallo, un test cuántico que leía los tamaños de los controles de la Tabla 5 del principal, se debía al traslado editorial y está corregido.
+
+## Tercera tanda (revisión de coherencia)
+
+- **"Signo erróneo" sustituido por cobertura** en el resumen, §4.9 y las conclusiones. El signo de la referencia no está determinado: XGB − RF y MLP − RF cambian de signo entre las 39 celdas de referencia y las 182 de test.
+- **Corrección por población finita:** se añade un análisis posterior, declarado como tal, con la referencia sobre las 182 celdas y tests de 19 de ellas (factor 0,95). DeLong cubre en el 41–45 % de los casos y CR2 en el 96–98 %. La sobrecobertura de P3 era sobre todo un artefacto de muestrear 19 de 39 celdas.
+- **Contribución 2:** CR2 se presenta como elegido *entre* los procedimientos calibrados (CR1, jackknife, wild y CR2), por ser analítico y determinista. Los veredictos RF − LSTM y RF − LSTM+QNN se etiquetan como "outside its calibrated range" en §4.1 y §4.4.
+- **Correlación serial medida:** autocorrelación de orden 1 de las sumas anuales entre −0,49 y +0,25 (banda ±0,45; el único valor fuera es negativo) y Ljung-Box (retardos 1–3) con p > 0,10. No hay indicios del régimen AR(1), aunque con 19 años solo se detectaría una correlación fuerte.
+- **Tabla 8** sustituida por la cuadrícula (10 configuraciones + 2 nulos); el teacher único pasa a la Tabla S. Se corrigen también etiquetas de fila duplicadas.
+- **Simulaciones intercambiadas:** la calibración que elige el método principal es ahora §4.2, con una figura nueva. La simulación antigua (DeLong frente a bloques) y su mecanismo, incluida la AUC analítica, pasan al suplemento.
+- **Restos de versiones anteriores corregidos:**
+  - "four ways" pasa a "five ways";
+  - "Standard small-sample corrections…" pasa a "CR1, jackknife y wild dan el mismo veredicto" (verificado: p = 0,022–0,041);
+  - la columna de fases de la Tabla 13 se aclara como CR1 con t₁₈ y se cita la ν de Bell–McCaffrey del primario;
+  - S3.3 se renombra;
+  - S2.1 y S2.3 reciben texto de entrada.
+- **Nombres de scripts** de la prosa del principal pasados a notas al pie; los documentos registrados (`audit/prediction_*.txt`) siguen en el texto.
+- **Pipeline causal:** §2.1 justifica explícitamente por qué los resultados siguen usando el archivado. Rehacer todo con el causal (unas 15 h) queda como opción.
+- **Predicción del panel 2:** la Contribución 3 se matiza. La banda registrada se escaló desde la v1 con correlaciones supuestas; las predicciones por contraste son posteriores.
+- **Título, Tabla 14 y palabras clave alineados:** "…Calibrated Inference for Clustered Test Sets, with a Quantum Case Study", también en el suplemento, `CITATION.cff`, `.zenodo.json` y el README.
+- **Menores:**
+  - orden Fellner/Field corregido (Copernicus ya estaba bien ordenado);
+  - Künsch citado en §3.2;
+  - limitación añadida: datosclima.es no contrastado con AEMET OpenData;
+  - el DOI de Zenodo sigue pendiente: requiere publicar el release.

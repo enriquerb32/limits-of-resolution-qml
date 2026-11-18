@@ -1,6 +1,6 @@
 # Limits of Resolution in Small Machine-Learning Benchmarks
 
-Code, data and reproducibility package for **"Limits of Resolution in Small Machine-Learning Benchmarks: A Noise Budget with a Quantum Case Study"** (Enrique Real, ORCID [0009-0006-3862-9797](https://orcid.org/0009-0006-3862-9797)).
+Code, data and reproducibility package for **"Limits of Resolution in Small Machine-Learning Benchmarks: Calibrated Inference for Clustered Test Sets, with a Quantum Case Study"** (Enrique Real, ORCID [0009-0006-3862-9797](https://orcid.org/0009-0006-3862-9797)).
 
 [![CI](https://github.com/enriquerb32/limits-of-resolution-qml/actions/workflows/ci.yml/badge.svg)](https://github.com/enriquerb32/limits-of-resolution-qml/actions/workflows/ci.yml)
 [![Reproducibility](https://github.com/enriquerb32/limits-of-resolution-qml/actions/workflows/reproducibility.yml/badge.svg)](https://github.com/enriquerb32/limits-of-resolution-qml/actions/workflows/reproducibility.yml)
