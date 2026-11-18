@@ -256,10 +256,14 @@ def test_external_benchmark() -> None:
     assert auc == [0.905, 0.921, 0.919, 0.914]
     rows = table_rows(SUPP, "tab:external")
     labels = {"RF - LR": "RF-LR", "XGB - RF": "XGB-RF", "MLP - RF": "MLP-RF"}
+    ph = e["posthoc_all_cells"]
+    assert ph["cells"] == 182 and round(ph["finite_population_factor"], 2) == 0.95
     for lab, key in labels.items():
         r, s, a = e["contrasts_reference"][key], e["small_tests"]["by_contrast"][key], e["contrasts_all_test"][key]
-        expected = [r["delta"], *r["ci_cr2"], s["resolved_cr2"], s["resolved_delong"], s["wrong_sign_cr2"],
-                    s["wrong_sign_delong"], s["coverage_cr2"], s["coverage_delong"], a["delta"], *a["ci_cr2"]]
+        p = ph["by_contrast"][key]
+        assert p["reference"]["delta"] == pytest.approx(a["delta"], abs=1e-12)
+        expected = [r["delta"], *r["ci_cr2"], s["resolved_cr2"], s["resolved_delong"], s["coverage_cr2"],
+                    s["coverage_delong"], a["delta"], *a["ci_cr2"], p["coverage_cr2"], p["coverage_delong"]]
         printed = [n for c in rows[lab] for n in numbers(c)]
         assert len(printed) == len(expected), lab
         for i, (pr, ex) in enumerate(zip(printed, expected, strict=True)):
@@ -270,8 +274,13 @@ def test_external_benchmark() -> None:
     assert sm["draws"] == 1000 and sm["rows_median"] == 570 and sm["rows_range"] == [423, 735]
     p5 = [v["mde_predicted"] / v["mde_empirical"] for v in sm["by_contrast"].values()]
     assert (round(min(p5), 2), round(max(p5), 2)) == (1.37, 1.40)
-    in_text(MAIN_TEXT, "4.4--6.6 times the DeLong one", "61, 87 and 48\\,\\% of draws", "only 55--63\\,\\%",
-            "16\\,\\% of draws", "CR2 covers in 94--99.8\\,\\%", "resolves in 0.2--10.5\\,\\%", "$\\nu=13.5$")
+    cov_ph = {k: (v["coverage_cr2"], v["coverage_delong"]) for k, v in ph["by_contrast"].items()}
+    assert (round(100 * min(c[1] for c in cov_ph.values())), round(100 * max(c[1] for c in cov_ph.values()))) == (41, 45)
+    assert (round(100 * min(c[0] for c in cov_ph.values())), round(100 * max(c[0] for c in cov_ph.values()))) == (96, 98)
+    in_text(MAIN_TEXT, "4.4--6.6 times the DeLong one", "61, 87 and 48\\,\\%", "only 55--63\\,\\% of draws",
+            "CR2 covers in 94--99.8\\,\\%", "resolves in 0.2--10.5\\,\\%", "$\\nu=13.5$",
+            "DeLong covers in 41--45\\,\\%, CR2 in 96--98\\,\\%", "in only 41--63\\,\\% of draws")
+    assert "wrong sign in 16" not in MAIN_TEXT
     in_text(SUPP_TEXT, "1.37--1.40 times the empirical one")
 
 

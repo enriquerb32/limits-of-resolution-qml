@@ -196,5 +196,89 @@
     "P3": false,
     "P4": true,
     "P5": true
+  },
+  "posthoc_all_cells": {
+    "note": "post hoc: reference = all test cells; 19 of 182 cells per small test",
+    "finite_population_factor": 0.9463637755136212,
+    "cells": 182,
+    "rows_median": 887.5,
+    "rows_range": [
+      62,
+      4067
+    ],
+    "by_contrast": {
+      "RF-LR": {
+        "reference": {
+          "delta": 0.016709373067907318,
+          "ci_cr2": [
+            -0.015543154736452403,
+            0.04896190087226704
+          ],
+          "p_cr2": 0.28431302881742776,
+          "df": 13.512755524953533,
+          "se_cr2": 0.014986782064503443,
+          "se_delong": 0.002272048072338941,
+          "ci_delong": [
+            0.012256240674979338,
+            0.0211625054608353
+          ],
+          "resolved_cr2": false,
+          "resolved_delong": true,
+          "mde_cr2": 0.04196298978060964
+        },
+        "resolved_cr2": 0.015,
+        "resolved_delong": 0.547,
+        "coverage_cr2": 0.96,
+        "coverage_delong": 0.408
+      },
+      "XGB-RF": {
+        "reference": {
+          "delta": -0.002188561341896267,
+          "ci_cr2": [
+            -0.015194172985168517,
+            0.010817050301375983
+          ],
+          "p_cr2": 0.7228439265947828,
+          "df": 13.512755524953533,
+          "se_cr2": 0.006043317550041535,
+          "se_delong": 0.0013751947040471259,
+          "ci_delong": [
+            -0.004883893433558852,
+            0.0005067707497663182
+          ],
+          "resolved_cr2": false,
+          "resolved_delong": false,
+          "mde_cr2": 0.016921289140116296
+        },
+        "resolved_cr2": 0.018,
+        "resolved_delong": 0.529,
+        "coverage_cr2": 0.976,
+        "coverage_delong": 0.431
+      },
+      "MLP-RF": {
+        "reference": {
+          "delta": -0.0071198605290978545,
+          "ci_cr2": [
+            -0.02306894645871908,
+            0.008829225400523371
+          ],
+          "p_cr2": 0.35357587408032215,
+          "df": 13.512755524953533,
+          "se_cr2": 0.007411061743909617,
+          "se_delong": 0.0016836471946684109,
+          "ci_delong": [
+            -0.010419748393319838,
+            -0.003819972664875872
+          ],
+          "resolved_cr2": false,
+          "resolved_delong": true,
+          "mde_cr2": 0.020750972882946927
+        },
+        "resolved_cr2": 0.013,
+        "resolved_delong": 0.492,
+        "coverage_cr2": 0.978,
+        "coverage_delong": 0.452
+      }
+    }
   }
 }

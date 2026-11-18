@@ -74,7 +74,45 @@ def contrast(y, P, cl, a, b):
                 mde_cr2=float(2.80 * cr.se_cr2))
 
 
+def posthoc_all_cells(draws=DRAWS):
+    """POST HOC (not in the recorded design): reference on all 182 test cells and small tests of 19 cells drawn from
+    all of them, so that the sampling fraction is about 10 % (finite-population factor 0.95) instead of 19/39; uses the
+    archived predictions only."""
+    z = np.load(NPZ, allow_pickle=True)                     # our own archive: cell labels are stored as objects
+    yt, ct = z['y_te'].astype(int), z['cell_te'].astype(str)
+    P = {k[:-6]: z[k] for k in z.files if k.endswith('_probs')}
+    cells = np.unique(ct)
+    ref = {f'{a}-{b}': contrast(yt, P, ct, a, b) for a, b in CONTRASTS}
+    rng = np.random.default_rng(530)
+    small = {k: [] for k in ref}; n_rows = []
+    while len(n_rows) < draws:
+        m = np.isin(ct, rng.choice(cells, K_SMALL, replace=False))
+        if yt[m].min() == yt[m].max():
+            continue
+        n_rows.append(int(m.sum()))
+        for a, b in CONTRASTS:
+            small[f'{a}-{b}'].append(contrast(yt[m], {k: v[:, m] for k, v in P.items()}, ct[m], a, b))
+    out = dict(note='post hoc: reference = all test cells; 19 of 182 cells per small test',
+               finite_population_factor=float(np.sqrt(1 - K_SMALL / len(cells))), cells=int(len(cells)),
+               rows_median=float(np.median(n_rows)), rows_range=[int(min(n_rows)), int(max(n_rows))], by_contrast={})
+    for key, rows in small.items():
+        rd = ref[key]['delta']
+        out['by_contrast'][key] = dict(
+            reference=ref[key], resolved_cr2=float(np.mean([r['resolved_cr2'] for r in rows])),
+            resolved_delong=float(np.mean([r['resolved_delong'] for r in rows])),
+            coverage_cr2=float(np.mean([r['ci_cr2'][0] <= rd <= r['ci_cr2'][1] for r in rows])),
+            coverage_delong=float(np.mean([r['ci_delong'][0] <= rd <= r['ci_delong'][1] for r in rows])))
+    return out
+
+
 def main():
+    if '--posthoc' in sys.argv:
+        res = json.load(open(OUT)); res['posthoc_all_cells'] = posthoc_all_cells()
+        json.dump(res, open(OUT, 'w'), indent=2)
+        print(json.dumps({k: v for k, v in res['posthoc_all_cells'].items() if k != 'by_contrast'}, indent=1))
+        for k, v in res['posthoc_all_cells']['by_contrast'].items():
+            print(k, {a: round(b, 3) for a, b in v.items() if a != 'reference'}, 'ref d', round(v['reference']['delta'], 4))
+        return
     X, y, cell, split, thr = data()
     te = split == 'test'
     P = fit_all(X, y, split)
