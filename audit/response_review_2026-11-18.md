@@ -203,3 +203,29 @@ La verdad es analítica o se calcula con 300 copias independientes del diseño.
   - los MDE de los blends de SEAS5 se identifican como de DeLong y exploratorios.
 - **Calibración acotada:** CR2 se presenta como "elegido entre los calibrados con años independientes; no calibrado con correlación serial + efectos año×estación ni para el patrón de cancelación del panel" en las contribuciones y en las conclusiones.
 - **"Años nuevos" definido:** el estimando usa la mezcla histórica de estación-meses elegibles (la composición de los años de test). **Sensibilidad:** solo Alicante y Barcelona (441 filas, los 19 años): ningún veredicto cambia, y las ventajas de RF crecen (+0,019 y +0,027; CR2 p = 0,026 y 0,014).
+
+## Quinta tanda: extensión y figuras
+
+- **Texto principal: de 36 a 29 páginas** (unas 23 de cuerpo) y unas 5.000 palabras menos. Las secciones reescritas para ir al grano son:
+  - la introducción, con el objetivo, por qué importa, el caso de estudio, trabajo relacionado, alcance y contribuciones;
+  - §2.1 datos, ahora con cuatro párrafos breves;
+  - §2.2 modelos, en torno a un esquema;
+  - §3 marco estadístico, en torno al diagrama de inferencia;
+  - §4.1, §4.3 y §4.4;
+  - §4.5–4.7, fundidas en "References: Climatology, Base Rates and SEAS5";
+  - §4.8 y §4.9;
+  - la discusión, que pasa de cinco subsecciones a tres más el protocolo;
+  - limitaciones y conclusiones.
+- **Figuras nuevas en el principal:**
+  - el diseño del estudio, con las ventanas elegibles por estación, año y partición, que explica el 83 % de dos estaciones;
+  - el esquema del modelo híbrido con la pieza intercambiable y la pregunta que responde cada control (inspirado en la Fig. 4 de da Silva et al.).
+- **Al suplemento:**
+  - las tablas de AUC dentro de estación y de la etiqueta estación×mes;
+  - el detalle de la cancelación por periodos;
+  - los detalles del circuito y de la invariancia del LayerNorm;
+  - el detalle del ajuste de los árboles.
+- **Coherencia:**
+  - frente a la climatología, la AUC se juzga con CR2 (ninguna diferencia resuelta, p ≥ 0,06);
+  - el contraejemplo del MDE usa el MDE del procedimiento que decide (RF − LSTM, +0,015 frente a 0,020);
+  - se eliminan dos referencias que habían quedado sin citar.
+- **Suplemento:** de 21 a 20 páginas. La simulación antigua no repite la descripción de los escenarios, y se recupera la definición de las "fases".

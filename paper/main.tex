@@ -156,7 +156,7 @@ Valencia    & 8416 (13\,m) & 51  & 2012 & 54.9\% (28 / 51) \\
 \begin{tikzpicture}[font=\small, node distance=3mm and 4mm,
   blk/.style={draw=inkgray, rounded corners=2pt, align=center, inner sep=3pt, fill=white, minimum height=9mm},
   qb/.style={blk, draw=primaryblue, line width=1.1pt, fill=paleblue},
-  ctl/.style={draw=inkgray!70, rounded corners=2pt, align=left, inner sep=3pt, fill=palegray, font=\footnotesize, text width=3.55cm},
+  ctl/.style={draw=inkgray!70, rounded corners=2pt, align=left, inner sep=3pt, fill=palegray, font=\footnotesize, text width=3.55cm, execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}},
   arr/.style={-{Stealth[length=2mm]}, draw=inkgray, line width=0.6pt}]
 \node[blk, text width=2.0cm] (in) {12 monthly\\precipitation lags\\+ 23 features};
 \node[blk, right=of in, text width=2.1cm] (lstm) {LSTM\\(bidirectional)};
@@ -224,7 +224,6 @@ The question it answers: would the difference persist in \emph{new years} at the
 \label{fig:inference_map}
 \end{figure}
 
-The inferential choices of this section are summarized in \Cref{fig:inference_map}.
 
 \subsection{Estimand}
 \label{sec:estimand}
