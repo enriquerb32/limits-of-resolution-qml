@@ -565,7 +565,7 @@ Sample sizes should be planned for a smallest difference of interest fixed in ad
 
 \begin{table}[htbp]
 \centering
-\caption{Reporting protocol for small QML benchmarks.}
+\caption{Reporting protocol for small QML benchmarks. The inferential items 1--4 are implemented in \path{qml_resolution.report}: given archived test predictions per seed, labels and cluster labels, it returns for each declared pair the paired difference with the primary CR2 interval, DeLong, the clusters$\times$seeds interval (seeds drawn jointly only for declared shared components), the cluster/iid ratio, both MDEs, Holm-adjusted primary $p$-values within a declared family, and a power curve under stated assumptions (\texttt{python -m qml\_resolution.report}).}
 \label{tab:protocol}
 {\small
 \begin{tabularx}{\textwidth}{cX}

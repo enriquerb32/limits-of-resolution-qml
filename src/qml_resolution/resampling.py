@@ -171,7 +171,9 @@ class ClusterRobustResult:
         return float(2.0 * student_t.sf(abs(self.delta) / self.se_cr2, self.df))
 
 
-def cluster_robust_delta(y: ArrayLike, scores_a: ArrayLike, scores_b: ArrayLike, clusters: ArrayLike) -> ClusterRobustResult:
+def cluster_robust_delta(
+    y: ArrayLike, scores_a: ArrayLike, scores_b: ArrayLike, clusters: ArrayLike
+) -> ClusterRobustResult:
     """CR1 and CR2 (Bell-McCaffrey) inference for the difference of seed-mean AUCs, ``A - B``."""
     from qml_resolution.auc import delong_components
 
@@ -189,7 +191,8 @@ def cluster_robust_delta(y: ArrayLike, scores_a: ArrayLike, scores_b: ArrayLike,
     s = np.bincount(inv, weights=psi)
     n_g = np.bincount(inv).astype(np.float64)
     k = s.size
-    se_iid = float(np.sqrt((psi[labels] ** 2).sum() * n_pos / (n_pos - 1) + (psi[~labels] ** 2).sum() * n_neg / (n_neg - 1)))
+    var_iid = (psi[labels] ** 2).sum() * n_pos / (n_pos - 1) + (psi[~labels] ** 2).sum() * n_neg / (n_neg - 1)
+    se_iid = float(np.sqrt(var_iid))
     se_cr1 = float(np.sqrt(k / (k - 1) * (s ** 2).sum()))
     se_cr2 = float(np.sqrt(((s / np.sqrt(1.0 - n_g / labels.size)) ** 2).sum()))
     return ClusterRobustResult(delta=delta, se_iid=se_iid, se_cr1=se_cr1, se_cr2=se_cr2, df=bell_mccaffrey_df(n_g))
