@@ -214,6 +214,38 @@ def test_panel2_primary() -> None:
     in_text(MAIN_TEXT, "$\\nu=17.7$", "is resolved ($p\\ge0.107$")
 
 
+# ------------------------------------------------------------------ exp52: emulation and common angles
+def test_emulation_and_common_angles() -> None:
+    import numpy as np
+
+    r = _load("local_exp52_emulation_substitution.json")
+    e, s = r["E"], r["S"]
+    assert len(e["seeds"]) == 15 and e["n_coefficients_per_readout"] == 6561 and e["auc_equal_exact"]
+    assert e["max_logit_err_exact"] < 3e-14 and round(e["max_logit_err_exact"] * 1e14, 1) == 2.6
+    loss1 = [x["auc_circuit"] - x["k1"]["auc"] for x in e["seeds"]]
+    loss2 = [x["auc_circuit"] - x["k2"]["auc"] for x in e["seeds"]]
+    assert (round(float(np.mean(loss1)), 3), round(max(loss1), 3)) == (0.058, 0.215)
+    assert (round(float(np.mean(loss2)), 3), round(max(loss2), 3)) == (0.011, 0.070)
+    assert s["n_seeds"] == 15
+    mean = {k: round(v, 3) for k, v in s["mean_auc"].items()}
+    assert mean == {"ORIGINAL": 0.660, "CIRCUIT_NEW": 0.652, "LINEAR4D": 0.654, "FOURIER2": 0.664,
+                    "FOURIER_FULL1": 0.668, "FOURIER_FULL2": 0.667}
+    c = s["contrasts"]
+    assert [round(c[f"CIRCUIT_NEW-{k}"]["p_cr2"], 3) for k in ("FOURIER2", "FOURIER_FULL1", "FOURIER_FULL2")] == [0.002, 0.001, 0.013]
+    assert round(c["ORIGINAL-FOURIER_FULL1"]["p_cr2"], 3) == 0.035 and c["ORIGINAL-FOURIER_FULL1"]["ci_two_way"][1] > 0
+    assert not c["CIRCUIT_NEW-LINEAR4D"]["resolved"] and not c["ORIGINAL-FOURIER2"]["resolved"]
+    rows = table_rows(SUPP, "tab:common_angles")
+    name = {"ORIGINAL": "Original", "CIRCUIT_NEW": "New circuit", "LINEAR4D": "Linear-4D", "FOURIER2": "Fourier-2",
+            "FOURIER_FULL1": "Tensor-81", "FOURIER_FULL2": "Tensor-625"}
+    for k, v in c.items():
+        a, b = k.split("-")
+        printed = [n for cell in rows[f"{name[a]} - {name[b]}"] for n in numbers(cell)]
+        expected = [v["delta"], *v["ci_cr2"], v["p_cr2"], *v["ci_two_way"]]
+        assert all(p.matches(x) for p, x in zip(printed, expected, strict=True)), k
+    in_text(MAIN_TEXT, "(15-seed mean AUC 0.652)", "(0.664; CR2 $p=0.002$)", "(0.668 and 0.667; $p=0.001$ and 0.013)",
+            "costs 0.058 AUC on average", "(CR2 $p=0.035$;")
+
+
 # ------------------------------------------------------------------ exp53: external benchmark
 def test_external_benchmark() -> None:
     e = _load("local_exp53_external_benchmark.json")

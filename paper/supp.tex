@@ -490,6 +490,33 @@ A version of the simulation uses the year sizes, prevalence (0.406) and score co
 
 For each of the 15 trained circuits of \texttt{LSTM+QNN}, the exact readouts $\langle Z_j\rangle$ were evaluated on the angles produced for the training and test rows (\path{exp34_circuit_spectrum.py}, part A). For the spectrum, each angle was swept over a full period $[0,2\pi)$ with the other three at the values of a test row, so the shares below describe the function on the whole torus; the least-squares fits that follow use only the angles the model actually visits (roughly 0.4--2.6\,rad, less than half a period), on which higher frequencies are well approximated by degree-1 terms. The two statements are therefore compatible: 24\,\% of the variance at frequency 2 over the full period, and $R^2=0.984$ for the degree-1 tensor basis on the visited range. Split by the per-coordinate frequency of its Fourier components, the variance of the readout over the full period is: 68.2\,\%, 24.2\,\%, 6.7\,\%, 0.9\,\% of the variance lies at frequencies 1, 2, 3 and 4 (circuits with random weights: 59.6\,\%, 29.1\,\%, 9.9\,\%, 1.4\,\%). Least-squares fits on the training angles, evaluated on the test angles, give $R^2$ of 0.984 (degree-1 tensor basis, 81 functions; range 0.95--1.00), 0.987 (degree-2 tensor basis, 625 functions; 0.88--1.00), 0.850 (separable degree 2) and 0.854 (separable degree 4). Fitting the degree-1 tensor basis to circuits with random weights on the same angles gives 0.974 (0.94--1.00): the near-linearity per coordinate is a property of this encoding on the visited angles. For the median seed, the 1st, 50th and 99th percentiles of the test angles of the four qubits are 0.65, 0.37, 1.01 and 0.58; 1.72, 1.40, 1.86 and 1.45; and 2.58, 2.48, 2.62 and 2.29 rad; between 0 and 14\,\% of the test angles of a seed lie within $\pi/18$ of 0 or $\pi$.
 
+\subsection{Emulation and Substitution on Common Angles}
+\label{app:emulation}
+
+\path{exp52_emulation_substitution.py} uses the 15 trained \texttt{LSTM+QNN} models of \path{exp31_shot_noise.py} (\path{checkpoints/exp31/}; their test probabilities reproduce the archived ones to $10^{-6}$; mean AUC 0.660 against 0.659 for the core fits). \emph{Emulation}: the four readouts are evaluated on the grid $q_j\in\{2\pi m/9\}$, $m=0,\dots,8$, and a four-dimensional discrete Fourier transform gives the $9^4=6{,}561$ coefficients of each readout; this is exact because the two re-uploading layers bound the frequencies at 4 per angle. Evaluated on the test angles and passed through the trained LayerNorm and output layer, the reconstruction differs from the circuit by at most $2.6\times10^{-14}$ in the logits, and the AUC is identical for every seed. Keeping only frequencies $|k_j|\le1$ (or $\le2$) per angle loses 0.058 (0.011) AUC on average, with a maximum of 0.215 (0.070), and changes the readouts by up to 0.95 (0.64) on uniform angles. \emph{Substitution}: for each seed, the LSTM and projection are frozen in evaluation mode and the angles of the training, validation and test rows computed once; on them the circuit (new random weights), Linear-4D, separable Fourier-2 and the 81- and 625-function tensor maps, each followed by LayerNorm and a linear output, are trained with the loop of the paper (AdamW $5\times10^{-3}$, batch 16, at most 25 epochs, patience 6) and the seed of the frozen model. Every head of a seed shares its extractor, so the years$\times$seeds bootstrap draws seeds jointly.
+
+\begin{table}[htbp]
+\centering
+\caption{Heads trained on the frozen angles of each seed (15 seeds; 529 test rows). Original: the end-to-end \texttt{LSTM+QNN} of the same seed. Differences of 15-seed means with the primary CR2 interval and the years$\times$seeds bootstrap (seeds drawn jointly).}
+\label{tab:common_angles}
+{\small
+\begin{tabular}{lccc}
+\toprule
+Difference & $\hat\Delta$ & CR2 95\,\% CI ($p$) & Years$\times$seeds 95\,\% CI \\
+\midrule
+Original $-$ New circuit & $+0.0083$ & $[-0.002,+0.019]$ (0.122) & $[-0.006,+0.023]$ \\
+New circuit $-$ Linear-4D & $-0.0025$ & $[-0.015,+0.009]$ (0.663) & $[-0.017,+0.013]$ \\
+New circuit $-$ Fourier-2 & $-0.0124$ & $[-0.019,-0.006]$ (0.002) & $[-0.024,-0.001]$ \\
+New circuit $-$ Tensor-81 & $-0.0166$ & $[-0.025,-0.008]$ (0.001) & $[-0.030,-0.005]$ \\
+New circuit $-$ Tensor-625 & $-0.0154$ & $[-0.027,-0.004]$ (0.013) & $[-0.031,-0.002]$ \\
+Original $-$ Linear-4D & $+0.0058$ & $[-0.004,+0.016]$ (0.233) & $[-0.006,+0.018]$ \\
+Original $-$ Fourier-2 & $-0.0040$ & $[-0.014,+0.006]$ (0.408) & $[-0.016,+0.007]$ \\
+Original $-$ Tensor-81 & $-0.0082$ & $[-0.016,-0.001]$ (0.035) & $[-0.019,+0.002]$ \\
+Original $-$ Tensor-625 & $-0.0070$ & $[-0.015,+0.001]$ (0.074) & $[-0.020,+0.005]$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 \subsection{All Models and Further Interface Variants}
 \label{app:variants}
 

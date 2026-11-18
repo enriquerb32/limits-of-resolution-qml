@@ -15,7 +15,11 @@ Rama `v2`. Cada cifra nueva del manuscrito está archivada en `results/` y compr
 | Añadido 2 (simulación) | Hecha la calibración en el diseño real; **no** se reproduce la cancelación | Se declara como limitación |
 | Añadido 2b (Apéndice A) | AUC analítica incorporada | Coincide con las referencias Monte Carlo |
 | Añadido 3 (control positivo) | Repetido con 4 teachers, 2 intensidades, 2 extracciones y un nulo | **Sí:** el circuito entrenado no supera a sus sustitutos; se reescribe la conclusión de la Tabla 8 |
-| Añadido 1 (benchmark externo), 3a (extractor común congelado, rejilla 9⁴), herramienta de la Tabla 14 | No hechos | Pendientes (ver final) |
+| Añadido 1 (benchmark externo) | Hecho, con diseño registrado antes de ajustar (`1e88a96`); no prospectivo | P1–P3 fallan y P4–P5 se cumplen; DeLong resuelve con signo erróneo hasta un 16 % de los tests pequeños, CR2 nunca |
+| Añadido 3a (emulación / sustitución / aprendizaje) | Hecho: rejilla 9⁴ y extractor común congelado | Emulación exacta; sobre los mismos ángulos, un circuito nuevo queda por debajo de los sustitutos clásicos |
+| Sensibilidad a años influyentes | Hecha (quitando un año cada vez) | RF − LSTM cambia de veredicto con 9 de 19 años |
+| Tabla 14 como herramienta | Hecha: `qml_resolution.report` (librería y CLI) | — |
+| Recomendación editorial | Hecha: variantes, shots y rankings secundarios al suplemento | — |
 
 ## 1. Fuga temporal
 
@@ -122,10 +126,35 @@ La verdad es analítica o se calcula con 300 copias independientes del diseño.
 
   **Esto cambia la conclusión.** El resultado de la Tabla 8 (circuito por encima de los mapas separables) no se generaliza. Los sustitutos tensoriales recuperan siempre la señal plantada, pero una cabeza con circuito entrenada no aprende una función generada por un circuito mejor que sus sustitutos clásicos. Se han reescrito el resumen, «What is new», §4.4, la conclusión y el ítem 7 del protocolo.
 
-## Pendiente (no hecho en esta revisión)
+## Segunda tanda (puntos que quedaban pendientes)
 
-1. **Benchmark externo con señal real** y evaluación prospectiva (añadido 1). Es la ampliación que el revisor considera más valiosa. Requiere elegir el problema y fijar de antemano los contrastes y el margen.
-2. **Separar emulación, sustitución y aprendizaje** (añadido 3): extractor común congelado, comparar cabezas sobre los mismos ángulos, y reconstrucción en rejilla de Fourier de 9⁴ puntos por circuito con paridad de logits tras el LayerNorm.
-3. **Convertir la Tabla 14 en herramienta.** La librería `qml_resolution` ya cubre el contraste pareado, CR2-BM, los bootstraps y el MDE, pero no ofrece una interfaz única ni curvas de potencia.
-4. **Recomendación editorial:** mover variantes, shots y rankings secundarios al suplemento.
-5. **Tabla 13 (segundo panel):** la tabla mantiene la columna del IC por bloques. Los veredictos con el método principal se dan en el texto: ningún contraste queda resuelto (CR2, ν = 17,7, p ≥ 0,107; `results/local_panel2_cr2.json`). Falta, si se quiere, sustituir la columna como en las Tablas 3, 6 y 7.
+**Benchmark externo** (`exp53_external_benchmark.py`; diseño, contrastes, margen de 0,01 y cinco predicciones registrados en `audit/prediction_external.txt`, commit `1e88a96`, antes de ajustar ningún modelo). California Housing, objetivo binario por encima de la mediana, celdas de 0,25° como clusters, partición por celdas (182 celdas y 10.282 filas de test). Las AUC van de 0,905 (LR) a 0,921 (RF): la señal es fuerte, pero las diferencias entre modelos son del mismo orden que en los paneles de precipitación.
+- La dependencia espacial domina: en el test completo, el error estándar CR2 es entre 4,4 y 6,6 veces el de DeLong, y RF − LR (+0,017) no se resuelve ni con 10.282 filas.
+- En 1.000 tests pequeños de 19 celdas, DeLong cubre la referencia solo en el 55–63 % de los casos y resuelve MLP − RF (dentro del margen) con signo erróneo en el 16 %. CR2 cubre en el 94–99,8 % y no comete errores de signo.
+- **Predicciones:** P1–P3 fallan. La población de referencia (39 celdas) era demasiado pequeña, y es un error de diseño que no he corregido a posteriori; la potencia de CR2 es del 4 % y su cobertura es conservadora. P4 se cumple. P5 se cumple en el límite y en parte por la corrección por población finita.
+- La evaluación prospectiva no es posible: necesita datos que todavía no existen.
+
+**Emulación, sustitución y aprendizaje** (`exp52_emulation_substitution.py`).
+- **Emulación:** la rejilla de 9⁴ puntos reconstruye exactamente los 15 circuitos entrenados. El error en los logits tras el mismo LayerNorm es como mucho 2,6·10⁻¹⁴ y las AUC son idénticas. Truncar la serie a frecuencia 1 cuesta 0,058 de AUC de media.
+- **Sustitución sobre ángulos comunes:** con el extractor de cada semilla congelado, un circuito entrenado desde cero (0,652) queda por debajo de Fourier-2 (0,664; p = 0,002) y de los mapas tensoriales (0,667–0,668), y no se distingue de Linear-4D. El circuito original (0,660) no se distingue de Fourier-2 y queda 0,008 por debajo del mapa de 81 funciones (CR2 p = 0,035; el bootstrap años×semillas no lo resuelve).
+
+**Años influyentes** (`exp51_review_extras.py`). Al quitar un año cada vez:
+- RF − LSTM cambia de veredicto con 9 de los 19 años, y RF − LSTM+QNN con 2.
+- RF − XGBoost pasa a resolverse sin 2020 o sin 2022.
+- RF − LSTM+QTL y los circuitos congelados no cambian.
+
+**Tabla 13.** Ya muestra el intervalo principal; ningún contraste del segundo panel queda resuelto (p ≥ 0,107).
+
+**Tabla 14 como herramienta:** `qml_resolution.report`, como librería y como comando (`python -m qml_resolution.report`). Devuelve el contraste pareado, CR2-BM, DeLong, el bootstrap años×semillas con semillas compartidas declaradas, los MDE, Holm dentro de la familia y una curva de potencia bajo supuestos declarados. Reproduce la Tabla 6 desde el archivo.
+
+**Material movido al suplemento:**
+- la variante PI-QNN y los controles Fourier-1/3/4 de las Tablas 5 y 7 (con la Figura 1 ajustada);
+- los detalles de shots y de re-ejecución;
+- las variantes de SEAS5 no especificadas antes del análisis.
+
+**Curva de resolución (Figura 2):** el texto aclara que es una comprobación de consistencia y no evidencia independiente, porque los subconjuntos se solapan, los modelos son los mismos y se usa DeLong.
+
+## Lo que sigue abierto
+
+- Evaluación prospectiva del benchmark externo y una población de referencia mayor, con un diseño nuevo que habría que registrar antes de analizar.
+- La suite completa de tests no ha terminado en esta máquina: la paró el sistema por falta de memoria al 71 %, sin fallos hasta ese punto. Los tests de manuscrito (56) y de unidad (63) pasan.

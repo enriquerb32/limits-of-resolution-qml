@@ -89,7 +89,9 @@ Step "a17c_primary_sim"     "$L\exp48_primary_calibration.py --reps 600 --B 299"
 Step "a17d_minor"           "$L\exp49_review_minor.py"                                              # ~15 min; within-cell AUC, SEAS5+clim, analytic AUC
 Step "a17e_teacher_grid"    "$L\exp50_teacher_grid.py --seeds 5" -Soft                              # ~2-3 h; repeated positive control
 Step "a17f_primary_sim_2yr" "$L\exp48_primary_calibration.py --reps 600 --B 299 --blocks 2 --scenarios iid specific_ar1 station_year_specific_ar1 --out results\local_exp48_primary_calibration_2yr.json"   # ~40 min
-Step "a17g_review_extras"   "$L\exp51_review_extras.py"                                             # ~2 min; causal neural refit, SEAS5 CR2, block sensitivity
+Step "a17g_review_extras"   "$L\exp51_review_extras.py"                                             # ~2 min; causal neural refit, SEAS5 / panel-2 CR2, blocks, leave-one-year-out
+Step "a17h_emulation"       "$L\exp52_emulation_substitution.py --part E S --seeds 15 $th"          # ~2.5 h; exact emulation, heads on common frozen angles
+Step "a17i_external"        "$L\exp53_external_benchmark.py"                                        # ~10 min; downloads California Housing to data\external
 Step "a18_summary"          "$L\exp42_v2_summary.py results"                                        # ~10 min; Tables 3, 5-7
 Step "a19_tables"           "$L\exp43_v2_tables.py results"                                         # ~1 min; Tables 2, 9-11, S10
 Step "a20_partition"        "scripts\make_partition_table.py"                                       # Table 1
