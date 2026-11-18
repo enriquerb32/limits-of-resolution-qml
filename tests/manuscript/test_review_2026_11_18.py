@@ -43,6 +43,15 @@ def in_text(text: str, *claims: str) -> None:
         assert c in text, c
 
 
+def test_no_unprotected_path_in_captions() -> None:
+    """\\path is fragile: inside a \\caption it breaks the build unless protected (it did once)."""
+    import re
+
+    for name, text in (("main", MAIN_TEXT), ("supp", SUPP_TEXT)):
+        for cap in re.findall(r"\\caption\{(.*?)\}\n\\label", text, flags=re.S):
+            assert not re.search(r"(?<!\\protect)\\path\{", cap), f"{name}: unprotected \\path in caption: {cap[:80]}"
+
+
 # ------------------------------------------------------------------ lookahead audit
 def test_truncation_test_and_reach() -> None:
     arc, cau = A47["truncation_archived"], A47["truncation_causal"]
