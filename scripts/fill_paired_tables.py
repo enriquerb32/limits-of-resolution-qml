@@ -13,9 +13,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tests" / "manuscript"))
-from test_v2_tables import PAIRED, PANEL2_ROWS, flip  # noqa: E402
+from test_v2_tables import PAIRED, PANEL2_ROWS, SUPP_PAIRED, flip  # noqa: E402
 
 TEX = ROOT / "paper" / "main.tex"
+SUPP = ROOT / "paper" / "supp.tex"
 
 
 def s(x, d):
@@ -30,6 +31,17 @@ def row_cells(p):
 
 def main():
     pairs = json.loads((ROOT / "results" / "local_exp42_v2_summary.json").read_text(encoding="utf-8"))["pairs"]
+    supp = SUPP.read_text(encoding="utf-8")                 # rows of Table 7 moved to the supplement
+    for table, rows in SUPP_PAIRED.items():
+        start = supp.index(f"\\label{{{table}}}"); end = supp.index("\\end{tabular}", start)
+        body = supp[start:end]
+        for label, (key, flipped) in rows.items():
+            p = flip(pairs[key]) if flipped else pairs[key]
+            tl = re.escape(label.replace(" - ", " $-$ "))
+            body, n = re.subn(rf"^({tl}) & .*\\\\$", lambda m, p=p: f"{m.group(1)} & {row_cells(p)}", body, flags=re.M)
+            assert n == 1, (table, label, n)
+        supp = supp[:start] + body + supp[end:]
+    SUPP.write_text(supp, encoding="utf-8")
     tex = TEX.read_text(encoding="utf-8")
     for table, rows in PAIRED.items():
         start = tex.index(f"\\label{{{table}}}"); end = tex.index("\\end{tabular}", start)

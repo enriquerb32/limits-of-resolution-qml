@@ -128,32 +128,41 @@ PAIRED = {
         "LSTM+QTL - QTL tensor-81": ("LSTM_QTL-QTL_TENSOR1", False),
     },
     "tab:controls": {
-        "Fourier-1 - LSTM+QNN": ("FOURIER1-LSTM_QNN", False),
         "Fourier-2 - LSTM+QNN": ("FOURIER2-LSTM_QNN", False),
-        "Fourier-3 - LSTM+QNN": ("FOURIER3-LSTM_QNN", False),
-        "Fourier-4 - LSTM+QNN": ("FOURIER4-LSTM_QNN", False),
         "Full Fourier-1 - LSTM+QNN": ("FOURIER_FULL1-LSTM_QNN", False),
         "Full Fourier-2 - LSTM+QNN": ("FOURIER_FULL2-LSTM_QNN", False),
         "Frozen random - LSTM+QNN": ("FROZEN_RANDOM-LSTM_QNN", False),
         "Frozen zero-angle - LSTM+QNN": ("FROZEN_IDENTITY-LSTM_QNN", False),
+    },
+}
+# rows moved to the supplement (same columns as Table 7)
+SUPP_PAIRED = {
+    "tab:controls_more": {
+        "Fourier-1 - LSTM+QNN": ("FOURIER1-LSTM_QNN", False),
+        "Fourier-3 - LSTM+QNN": ("FOURIER3-LSTM_QNN", False),
+        "Fourier-4 - LSTM+QNN": ("FOURIER4-LSTM_QNN", False),
         "Full Fourier-2 - Fourier-2": ("FOURIER_FULL2-FOURIER2", False),
     },
 }
-PAIRED_CASES = [(tab, row, key, f) for tab, rows in PAIRED.items() for row, (key, f) in rows.items()]
+PAIRED_CASES = [(TEX, tab, row, key, f) for tab, rows in PAIRED.items() for row, (key, f) in rows.items()]
+PAIRED_CASES += [(SUPP, tab, row, key, f) for tab, rows in SUPP_PAIRED.items() for row, (key, f) in rows.items()]
 
 
-@pytest.mark.parametrize(("table", "row", "key", "flipped"), PAIRED_CASES, ids=[c[1] for c in PAIRED_CASES])
-def test_paired_comparisons(table: str, row: str, key: str, flipped: bool) -> None:
-    rows = table_rows(TEX, table)
-    assert set(rows) >= set(PAIRED[table]), f"{table}: rows {sorted(rows)}"
+@pytest.mark.parametrize(("path", "table", "row", "key", "flipped"), PAIRED_CASES,
+                         ids=[f"{c[1]}:{c[2]}" for c in PAIRED_CASES])
+def test_paired_comparisons(path: Path, table: str, row: str, key: str, flipped: bool) -> None:
+    rows = table_rows(path, table)
+    expected_rows = {**PAIRED, **SUPP_PAIRED}[table]
+    assert set(rows) >= set(expected_rows), f"{table}: rows {sorted(rows)}"
     pair = flip(PAIRS[key]) if flipped else PAIRS[key]
     assert_row(flat(rows[row]), paired_row(pair), f"{table} / {row}")
 
 
 def test_paired_tables_have_no_unchecked_rows() -> None:
-    for table, expected in PAIRED.items():
-        printed = {r for r in table_rows(TEX, table) if r != "Difference"}
-        assert printed == set(expected), f"{table}: unchecked rows {printed - set(expected)}"
+    for path, tables in ((TEX, PAIRED), (SUPP, SUPP_PAIRED)):
+        for table, expected in tables.items():
+            printed = {r for r in table_rows(path, table) if r != "Difference"}
+            assert printed == set(expected), f"{table}: unchecked rows {printed ^ set(expected)}"
 
 
 # ------------------------------------------------------------------ Table 5: 15-seed AUC of every model
@@ -183,14 +192,20 @@ def _norm(label: str) -> str:
     return label.replace("Month\\times station", "Month x station").replace("Month\\timesstation", "Month x station")
 
 
-def test_model_auc_table() -> None:
-    rows = {_norm(k): v for k, v in table_rows(TEX, "tab:case").items() if k != "Model"}
-    assert set(rows) == set(CASE), f"rows {sorted(set(rows) ^ set(CASE))}"
+@pytest.mark.parametrize(("path", "label_", "complete"), [(TEX, "tab:case", False), (SUPP, "tab:case_all", True)],
+                         ids=["main", "supplement"])
+def test_model_auc_table(path: Path, label_: str, complete: bool) -> None:
+    """The main table shows a subset of the models; the supplementary table shows all of them."""
+    rows = {_norm(k): v for k, v in table_rows(path, label_).items() if k != "Model"}
+    if complete:
+        assert set(rows) == set(CASE), f"rows {sorted(set(rows) ^ set(CASE))}"
+    else:
+        assert set(rows) <= set(CASE) and len(rows) >= 12, f"rows {sorted(set(rows) - set(CASE))}"
     qnn = MODELS["LSTM_QNN"]["mean"]
-    for label, key in CASE.items():
-        m = MODELS[key]
-        expected = [m["mean"], m["mean"] - qnn] if key == "CLIM" else [m["mean"], m["sd"], m["mean"] - qnn]
-        assert all(s["n_seeds"] == 15 for k, s in MODELS.items() if k != "CLIM")
+    assert all(s["n_seeds"] == 15 for k, s in MODELS.items() if k != "CLIM")
+    for label in rows:
+        m = MODELS[CASE[label]]
+        expected = [m["mean"], m["mean"] - qnn] if CASE[label] == "CLIM" else [m["mean"], m["sd"], m["mean"] - qnn]
         assert_row(flat(rows[label]), expected, label)
 
 
