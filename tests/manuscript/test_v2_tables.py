@@ -353,11 +353,13 @@ def test_second_panel_table() -> None:
     assert (PANEL2["n_test"], PANEL2["K_years"]) == (884, 19)
     fp = _first_panel_probs()
     scale = np.sqrt(S42["n_test"] / PANEL2["n_test"])
+    cr2 = _load("local_panel2_cr2.json")
     for label, (key, a, b) in PANEL2_ROWS.items():
         p = PANEL2["pairs"][key]
         first_panel = MODELS[a]["mean"] - MODELS[b]["mean"]
         predicted = float(mde(paired_delong(fp["y"], fp[a], fp[b]).se)) * scale  # per-contrast N^{-1/2} scaling
-        expected = [p["delta"], first_panel, p["p_delong"], *p["ci_block"], *p["ci_two_way"], p["mde_delong"], predicted]
+        expected = [p["delta"], first_panel, p["p_delong"], *cr2[key]["ci_cr2"], cr2[key]["p_cr2"], *p["ci_two_way"],
+                    p["mde_delong"], predicted]
         expected += [p["ratio"], p["phases_excluding_zero"]]
         assert_row(flat(rows[label]), expected, label)
 

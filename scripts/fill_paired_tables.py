@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tests" / "manuscript"))
-from test_v2_tables import PAIRED, flip  # noqa: E402
+from test_v2_tables import PAIRED, PANEL2_ROWS, flip  # noqa: E402
 
 TEX = ROOT / "paper" / "main.tex"
 
@@ -41,8 +41,25 @@ def main():
             assert n == 1, (table, label, n)
         body = body.replace("Year-block 95\\,\\% CI", "CR2 95\\,\\% CI ($p$)")
         tex = tex[:start] + body + tex[end:]
+    # Table 13 (second panel): the fifth cell becomes the primary CR2 interval with its p-value
+    p2 = json.loads((ROOT / "results" / "local_panel2_cr2.json").read_text(encoding="utf-8"))
+    start = tex.index("\\label{tab:panel2}"); end = tex.index("\\end{tabular}", start)
+    body = tex[start:end]
+    for label, (key, _, _) in PANEL2_ROWS.items():
+        v = p2[key]
+        tl = re.escape(label.replace(" - ", " $-$ "))
+        cr2 = f"$[{s(v['ci_cr2'][0], 3)},{s(v['ci_cr2'][1], 3)}]$ ({v['p_cr2']:.3f})"
+
+        def repl(m, cr2=cr2):
+            cells = m.group(0)[:-2].split(" & ")
+            cells[4] = cr2
+            return " & ".join(cells) + "\\\\"
+        body, n = re.subn(rf"^{tl} & .*\\\\$", repl, body, flags=re.M)
+        assert n == 1, (label, n)
+    body = body.replace("Year-block 95\\,\\% CI", "CR2 95\\,\\% CI ($p$)")
+    tex = tex[:start] + body + tex[end:]
     TEX.write_text(tex, encoding="utf-8")
-    print("rewrote", sum(len(r) for r in PAIRED.values()), "rows")
+    print("rewrote", sum(len(r) for r in PAIRED.values()) + len(PANEL2_ROWS), "rows")
 
 
 if __name__ == "__main__":

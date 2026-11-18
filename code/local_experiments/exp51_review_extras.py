@@ -74,6 +74,30 @@ def blocks():
     return out
 
 
+def influential_years():
+    """Leave one test year out: difference and CR2 p-value of the pairs whose verdict matters."""
+    h = np.load(os.path.join(J, 'results_core_hybrids_controls_fixet0_p60_28.1_probs.npz'))
+    c = np.load(os.path.join(J, 'results_rerun_train_only_canonical_probs.npz'))
+    P = {k[:-6]: h[k] for k in h.files if k.endswith('_probs')}
+    P.update(RF=c['train_only_RF_probs'], XGB=c['train_only_XGB_probs'], LSTM_QTL=h['QTL_FIXED_probs'])
+    y = h['y_te'].astype(int); out = {}
+    for a, b in [('RF', 'XGB'), ('RF', 'PureLSTM'), ('RF', 'LSTM_QNN'), ('RF', 'LSTM_QTL'),
+                 ('FROZEN_RANDOM', 'LSTM_QNN'), ('FROZEN_IDENTITY', 'LSTM_QNN'), ('LSTM_QNN', 'CTRL_LINEAR4D')]:
+        full = cluster_robust_delta(y, P[a], P[b], YEARS)
+        rows = {}
+        for u in np.unique(YEARS):
+            keep = YEARS != u
+            r = cluster_robust_delta(y[keep], P[a][:, keep], P[b][:, keep], YEARS[keep]); lo, hi = r.ci()
+            rows[int(u)] = dict(delta=r.delta, p=r.p_value, resolved=bool(lo > 0 or hi < 0))
+        lo, hi = full.ci(); res_full = bool(lo > 0 or hi < 0)
+        flips = [u for u, v in rows.items() if v['resolved'] != res_full]
+        out[f'{a}-{b}'] = dict(full=dict(delta=full.delta, p=full.p_value, resolved=res_full),
+                               delta_range=[min(v['delta'] for v in rows.values()), max(v['delta'] for v in rows.values())],
+                               p_range=[min(v['p'] for v in rows.values()), max(v['p'] for v in rows.values())],
+                               years_that_flip_verdict=flips, by_year=rows)
+    return out
+
+
 def panel2():
     """Primary procedure for the contrasts of Table 13 (second panel, 884 test rows, 19 years)."""
     d = os.path.join(R, 'panel2', 'med2v2')
@@ -91,6 +115,7 @@ def panel2():
 
 def main():
     json.dump(panel2(), open(os.path.join(R, 'local_panel2_cr2.json'), 'w'), indent=2)
+    json.dump(influential_years(), open(os.path.join(R, 'local_cr2_leave_one_year.json'), 'w'), indent=2)
     path = os.path.join(R, 'local_exp47_truncation_audit.json')
     res = json.load(open(path)); res['refit_neural'] = causal_neural(); json.dump(res, open(path, 'w'), indent=2)
     json.dump(seas5(), open(os.path.join(R, 'local_seas5_cr2.json'), 'w'), indent=2)

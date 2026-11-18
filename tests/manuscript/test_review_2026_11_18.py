@@ -144,6 +144,23 @@ def test_two_year_clusters() -> None:
     in_text(SUPP_TEXT, "($p=0.061$ and 0.051)", "($p=0.027$)", "($p=0.064$)", "($p\\le0.018$)")
 
 
+def test_leave_one_year() -> None:
+    lo = _load("local_cr2_leave_one_year.json")
+    assert len(lo["RF-PureLSTM"]["years_that_flip_verdict"]) == 9
+    assert lo["RF-LSTM_QNN"]["years_that_flip_verdict"] == ["2020", "2023"] or lo["RF-LSTM_QNN"]["years_that_flip_verdict"] == [2020, 2023]
+    assert [int(u) for u in lo["RF-XGB"]["years_that_flip_verdict"]] == [2020, 2022]
+    for k in ("RF-LSTM_QTL", "FROZEN_RANDOM-LSTM_QNN", "FROZEN_IDENTITY-LSTM_QNN", "LSTM_QNN-CTRL_LINEAR4D"):
+        assert lo[k]["years_that_flip_verdict"] == [], k
+    r = lambda k, i: round(lo[k]["p_range"][i], 3)  # noqa: E731
+    assert (r("RF-PureLSTM", 0), r("RF-PureLSTM", 1)) == (0.013, 0.079)
+    assert (r("RF-LSTM_QNN", 0), r("RF-LSTM_QNN", 1)) == (0.021, 0.054)
+    assert (r("RF-XGB", 0), r("RF-XGB", 1)) == (0.032, 0.232)
+    assert r("RF-LSTM_QTL", 1) == 0.017 and max(r("FROZEN_RANDOM-LSTM_QNN", 1), r("FROZEN_IDENTITY-LSTM_QNN", 1)) == 0.037
+    assert round(lo["LSTM_QNN-CTRL_LINEAR4D"]["p_range"][0], 2) == 0.34
+    in_text(MAIN_TEXT, "for 9 of the 19 years")
+    in_text(SUPP_TEXT, "($p$ from 0.013 to 0.079)", "(2020 and 2023; $p$ from 0.021 to 0.054)", "($p$ from 0.032 to 0.232)")
+
+
 def test_primary_verdicts_in_text() -> None:
     pr = S42["pairs"]
     assert round(pr["RF-PureLSTM"]["p_cr2"], 3) == 0.041 and round(pr["RF-LSTM_QNN"]["p_cr2"], 3) == 0.031
