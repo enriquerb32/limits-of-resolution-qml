@@ -673,6 +673,56 @@ Full Fourier-2 (625) & 0.810 & 0.004 & Full Fourier-2 & 0.616 & 0.034 \\
 \label{app:refs}
 % ============================================================
 
+\subsection{Base Rates: Within-Station AUC and Station$\times$Month Label}
+\label{app:baserates}
+
+These tables support the base-rate paragraph of \Cref{M-sec:reference}.
+
+\begin{table}[htbp]
+\centering
+\caption{Pooled and within-station AUC (15-seed means, 529 test rows). Within-station AUC: positive--negative pairs of the same station only, per-station AUCs averaged with weights $n_{\text{pos}}n_{\text{neg}}$. SD: across seeds. Per-station AUC in the last four columns (test $n$: 220, 221, 37, 51).}
+\label{tab:within}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Model} & \textbf{Pooled AUC} & \textbf{Within-station AUC (SD)} & \textbf{Alicante} & \textbf{Barcelona} & \textbf{San Javier} & \textbf{Valencia} \\
+\midrule
+Month$\times$station climatology & 0.685 & 0.667 (--) & 0.696 & 0.648 & 0.575 & 0.651 \\
+\midrule
+Random Forest & 0.678 & 0.647 (0.002) & 0.690 & 0.620 & 0.513 & 0.594 \\
+XGBoost & 0.668 & 0.648 (0.014) & 0.682 & 0.625 & 0.529 & 0.623 \\
+Standalone LSTM & 0.664 & 0.634 (0.010) & 0.653 & 0.622 & 0.564 & 0.621 \\
+Linear-4D control & 0.655 & 0.623 (0.008) & 0.632 & 0.618 & 0.609 & 0.602 \\
+LSTM+QNN & 0.659 & 0.627 (0.022) & 0.653 & 0.608 & 0.600 & 0.609 \\
+LSTM+QTL & 0.655 & 0.627 (0.019) & 0.663 & 0.602 & 0.551 & 0.609 \\
+\bottomrule
+\end{tabular}}%
+}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Station$\times$month label: 15-seed test AUC and Brier skill after Platt recalibration on the validation partition, against the raw and the recalibrated climatology ($n$: seeds with BSS $>0$), with the year-block interval of the Brier difference to the recalibrated climatology (529 test rows, 37.8\,\% positive).}
+\label{tab:stationmonth}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{Mean AUC (SD)} & \textbf{BSS Platt vs raw clim.} ($n$) & \textbf{BSS Platt vs recal. clim.} ($n$) & $\Delta$\textbf{BS vs recal. [CI]} \\
+\midrule
+Month$\times$station climatology & 0.479 & -- & -- & -- \\
+\midrule
+Random Forest & 0.514 (0.005) & $+0.017$ (15) & $+0.006$ (15) & $[-0.004,+0.001]$ \\
+XGBoost & 0.510 (0.013) & $+0.015$ (15) & $+0.004$ (12) & $[-0.004,+0.002]$ \\
+Standalone LSTM & 0.510 (0.020) & $+0.015$ (15) & $+0.004$ (14) & $[-0.003,+0.002]$ \\
+Linear-4D control & 0.512 (0.015) & $+0.015$ (15) & $+0.004$ (14) & $[-0.004,+0.003]$ \\
+LSTM+QNN & 0.505 (0.018) & $+0.015$ (15) & $+0.004$ (13) & $[-0.003,+0.002]$ \\
+\bottomrule
+\end{tabular}}%
+}
+\end{table}
+
 \subsection{ECMWF SEAS5}
 \label{app:seas5}
 

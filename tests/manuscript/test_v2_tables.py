@@ -284,7 +284,7 @@ STATIONS = ["Alicante", "Barcelona", "San_Javier", "Valencia"]
 
 
 def test_within_station_table() -> None:
-    rows = {_norm(k): v for k, v in table_rows(TEX, "tab:within").items()}
+    rows = {_norm(k): v for k, v in table_rows(SUPP, "tab:within").items()}
     ws = T43["within_station"]
     c = ws["CLIM"]
     assert_row(
@@ -298,7 +298,7 @@ def test_within_station_table() -> None:
 
 # ------------------------------------------------------------------ Table 11: station x month label
 def test_stationmonth_table() -> None:
-    rows = {_norm(k): v for k, v in table_rows(TEX, "tab:stationmonth").items()}
+    rows = {_norm(k): v for k, v in table_rows(SUPP, "tab:stationmonth").items()}
     rc = T43["recal_stationmonth"]
     assert_row(flat(rows["Month x station climatology"]), [rc["CLIM"]["auc"]], "clim")
     for label, (_, key) in BRIER.items():
