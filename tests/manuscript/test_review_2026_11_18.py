@@ -87,14 +87,15 @@ def test_label_completeness_and_p60_set() -> None:
     reach = A47["interpolation_reach"]
     assert reach["labelled_months"]["val"] == 528
     assert {k: v for k, v in reach["labelled_months_with_missing_days"].items() if v} == {"test": 1}
-    in_text(SUPP_TEXT, "2{,}847 labelled training months", "Alicante 699, Barcelona 809, San Javier 629, Valencia 710",
+    in_text(SUPP_TEXT, "2{,}847 labelled months up to 1996", "Alicante 699, Barcelona 809, San Javier 629, Valencia 710",
             "all 528 labelled validation months")
 
 
 def test_lookahead_table() -> None:
     rows = {k: v for k, v in table_rows(SUPP, "tab:lookahead").items() if k != "Model"}
     src = {"Random Forest": A47["refit_trees"]["RF"], "XGBoost": A47["refit_trees"]["XGB"],
-           "LSTM": A47["refit_neural"]["PureLSTM"], "LSTM+QNN": A47["refit_neural"]["LSTM_QNN"]}
+           "LSTM": A47["refit_neural"]["PureLSTM"], "LSTM+QNN": A47["refit_neural"]["LSTM_QNN"],
+           "Linear-4D control": json.loads((RES / "local_exp55_review_closing.json").read_text(encoding="utf-8"))["causal"]["refit_linear4d"]}
     assert set(rows) == set(src)
     for name, r in src.items():
         expected = [r["auc_archived_common"], r["auc_causal_common"], r["delta_archived_minus_causal"], *r["ci95_year_block"]]

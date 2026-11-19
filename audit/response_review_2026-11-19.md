@@ -87,3 +87,32 @@ Las cuatro estaciones coinciden solo en **2008–2011**, y 2008–2012 son los c
 | Sensibilidad de los veredictos frágiles | **Hecho, en el suplemento (Fig. S2)** | `scripts/make_sensitivity_plot.py`, solo con resultados archivados (bloques de 1–3 años, dejar fuera un año, Alicante+Barcelona, segundo panel). Comprueba que los ficheros coinciden entre sí. Se cita desde M §4.1 y se registra en `run_v2.ps1`. |
 
 Ninguna figura existente se retira: las seis del texto principal y la del suplemento sostienen cada una una afirmación que no está en otra figura. El texto principal sigue en 30 páginas y el suplemento pasa de 20 a 21.
+---
+
+# Tercera parte: cierre del análisis (revisión del 19-11-2026, cuatro puntos)
+
+Las cifras nuevas salen de `exp55_review_closing.py` y `exp54_power_clusters_rows.py`, ambos sin entrenamiento. Además se reentrenó Linear-4D con imputación causal (`run_v2.ps1`, paso `03c_linear4d_causal`). Las comprueba `tests/manuscript/test_review_2026_11_19.py`. Pasan los 130 tests de `manuscript` y `unit`. M pasa a tener 31 páginas y S, 23.
+
+| Punto | Estado | Cambio en las conclusiones |
+|---|---|---|
+| 3. 1,2 % atribuido a ambos cocientes | **Corregido.** En las celdas de 19 años, 1,2 % para ≤ 0,59 y 5,8 % para ≤ 0,72 | — |
+| 3. Alicante + Barcelona | **Corregido.** RF − QNN (p = 0,014) pasaría el primer paso de Holm; se presenta como sensibilidad exploratoria | — |
+| 3. Conclusiones | **Corregido.** CR2 infracubre con AR(1) + año×estación; su calibración bajo la cancelación «no está establecida» | — |
+| 1. P60 | **Documentado.** 2.847 meses hasta 1996; los registros empiezan antes de la primera ventana (Barcelona en 1924). No es una fuga. S decía «1938–1996»; se corrige | — |
+| 1. Pipeline causal | **Hecho** para las dos familias principales (5 modelos, incluido Linear-4D reentrenado). Tabla S2 y fila «Causal refit» en la Fig. S2 | **Sí.** RF − LSTM deja de estar resuelto (p = 0,070) y RF − LSTM+QNN pasa Holm (p = 0,009), pero no con bloques de 3 años (p = 0,076). Ningún contraste no resuelto pasa a resuelto. |
+| 2. Resolución del segundo panel | **Hecho.** Columna «MDE CR2 (pred.)» en la Tabla 11 | **Sí.** «El escalado replicó» solo vale para DeLong. Con CR2, el MDE del panel 2 es 1,36–1,67 veces el predicho y mayor que el del panel 1 en los seis contrastes entre modelos completos. Fourier-2 es la excepción, porque su cociente cluster/iid baja. |
+| 2. Frase «Clusters, not rows» | **Sustituida** en el resumen («Independent information, not row count, sets the resolution»), §4.7, §5.3 y Conclusiones | — |
+| 4. Referencias | **Hecho.** La Tabla 10 se reconstruye con CR2: modelo − climatología, SEAS5 a lead 2 (operacional, primero) y lead 1, y el contraste incremental a lead 2. Los incrementos a lead 1 y las mezclas de sustitución pasan a la Tabla S23. La remisión rota de §4.5 a la Tabla 3 se corrige | No se detecta valor incremental (CR2 p ≥ 0,25 a lead 2; MDE 0,010–0,019). «The statistical models add nothing to it» pasa a «We did not detect incremental skill». |
+| Simulación de clústeres frente a filas | **Hecha.** 128 celdas con 1.000 réplicas: K = 10–76 clústeres y m = 12–96 filas por clúster, en 4 patrones de dependencia. Es la nueva Fig. 6 | Con casos independientes, filas y clústeres son intercambiables. Con dependencia, cada fila añadida aporta menos: el punto de igualdad está en unas 110 filas por clúster con efectos año×estación y en 290–460 en los otros casos. CR2 cubre a 0,930–0,967 en todas las celdas; DeLong rechaza un nulo verdadero hasta en un 17,6 %. La curva empírica de subconjuntos, basada en DeLong, pasa al suplemento (Fig. S4). |
+
+## Decisión: el pipeline archivado sigue siendo el principal
+
+El revisor proponía hacer principal el pipeline causal. No se hace, por tres razones:
+
+1. El archivado era el análisis principal antes de los reajustes causales. Cambiar al causal después de ver que mueve dos veredictos haría depender la elección de los resultados.
+2. Todo el paper comparte el pipeline archivado: controles, circuitos congelados, teachers, SEAS5 y segundo panel. Solo se han reajustado los cinco modelos de las familias principales.
+3. El cambio de veredictos ante una perturbación que mueve cada AUC como mucho 0,002 se presenta como resultado en §2.1, §4.1, en los pies de las Tablas 3 y 6 y en la Fig. 4, en Limitaciones y en Conclusiones. Refuerza la tesis: cerca del límite de resolución, un veredicto no es estable ni frente al pipeline de ajuste.
+
+## Renombrado
+
+El script de cierre se llama `exp55_review_closing.py`, porque `exp53` ya lo usaba `exp53_external_benchmark.py`.

@@ -78,7 +78,7 @@
 
 The daily files of each station (precipitation; maximum and minimum pressure; maximum and minimum temperature; sunshine duration; mean wind speed and maximum gust) are read separately and placed on a full daily calendar from the first to the last date found in any of them (\path{code/etl_v2.py}). Precipitation is taken from its own file only: a trace (``Ip'') counts as 0\,mm, and an empty or unparseable entry is missing. At the daily level, covariates stay missing where they are missing; no value is carried forward or backward. \Cref{tab:etl} lists the spans and the shares of missing days.
 
-Monthly aggregation (\path{code/local_experiments/dataset_v2.py}) produces, per station and calendar month: the \emph{label total}, the sum of daily precipitation, defined when at most 3 days of the month are missing; the \emph{precipitation lag}, the sum over observed days rescaled to the month length, defined with at least 10 observed days; and the covariates, means over observed days (sunshine and ET$_0$ sums as means times the month length), defined with at least 10 observed days, with at most two consecutive missing months interpolated linearly within the station (in a longer gap, its first two months; \Cref{sec:lookahead}). ET$_0$ follows FAO-56 Penman--Monteith with $u_2=0.748\,u_{10}$ from the observed mean wind (FAO-56 eq.~47 for a 10\,m anemometer). Every calendar month is kept, and a window with target month $t$ is used only if $t$ has a label total, month $t-1$ has all covariates and the 12 lags $t-12,\dots,t-1$ are defined. Training-partition medians replace undefined cells before the min--max scalers are fitted, so that rows that never enter a window do not stretch the scales. Thresholds ($P_{60}=29.9$\,mm, $P_{90}$) are percentiles of all 2{,}847 labelled training months of the four stations (Alicante 699, Barcelona 809, San Javier 629, Valencia 710), not only of the months that are window targets.
+Monthly aggregation (\path{code/local_experiments/dataset_v2.py}) produces, per station and calendar month: the \emph{label total}, the sum of daily precipitation, defined when at most 3 days of the month are missing; the \emph{precipitation lag}, the sum over observed days rescaled to the month length, defined with at least 10 observed days; and the covariates, means over observed days (sunshine and ET$_0$ sums as means times the month length), defined with at least 10 observed days, with at most two consecutive missing months interpolated linearly within the station (in a longer gap, its first two months; \Cref{sec:lookahead}). ET$_0$ follows FAO-56 Penman--Monteith with $u_2=0.748\,u_{10}$ from the observed mean wind (FAO-56 eq.~47 for a 10\,m anemometer). Every calendar month is kept, and a window with target month $t$ is used only if $t$ has a label total, month $t-1$ has all covariates and the 12 lags $t-12,\dots,t-1$ are defined. Training-partition medians replace undefined cells before the min--max scalers are fitted, so that rows that never enter a window do not stretch the scales. Thresholds ($P_{60}=29.9$\,mm, $P_{90}$) are percentiles of all 2{,}847 labelled months up to 1996 of the four stations (Alicante 699, Barcelona 809, San Javier 629, Valencia 710), not only of the months that are window targets; the precipitation records start before the first training window (Barcelona March 1924, Valencia November 1937, Alicante October 1938, San Javier August 1944), so the Barcelona count exceeds the 708 months of 1938--1996.
 
 \begin{table}[htbp]
 \centering
@@ -102,13 +102,33 @@ San Javier & 1944-08-01 & 2026-05-31 & 0.0 & 25.5 & 2.0 & 9.0 & 12.7 \\
 
 A forecast for month $t$ is issued at the end of month $t-1$, so its inputs may use only data up to that date. Three steps of the monthly pipeline used for the results of the paper do not satisfy this. (i) The interpolation of missing monthly covariates is two-sided: a missing $t-1$ is filled from $t-2$ and $t$, and the first two months of a longer gap from the month after the gap, up to 18 months later. (ii) The antecedent-summer evapotranspiration (\texttt{et0\_verano\_prev}) of a summer with an incomplete June--August record is interpolated towards the next complete summer and back-filled. (iii) A missing one-month evapotranspiration lag is replaced by the station mean over the full record, test years included. The chronological split does not prevent any of these.
 
-\textbf{Truncation test} (\path{exp47_truncation_audit.py}). For each test target month $t$ the monthly panel was rebuilt from the daily file cut at the end of $t-1$, with the transformations fitted on the training partition (anomaly statistics, medians, scalers and $P_{60}$, all from 1938--1996 and therefore unaffected by the cut); the label of $t$ is the outcome and comes from the full record. For all 529 test windows the 35 inputs and the eligibility of the window are identical to those of the full pipeline, and no window becomes eligible only after the cut. The reason is that the gaps that the interpolation fills lie before the test period or at stations whose records stop: 54 station-months receive an interpolated covariate; 26 of them are the last antecedent month of an eligible window (24 training, 2 validation windows) and none of a test window. The incomplete summers after 2011 (San Javier) and 2012 (Valencia) have no later complete summer to interpolate from. The daily file does not record when each value became available, so this is a retrospective check of lookahead in the processing, not a reconstruction of what could have been issued in real time.
+\textbf{Truncation test} (\path{exp47_truncation_audit.py}). For each test target month $t$ the monthly panel was rebuilt from the daily file cut at the end of $t-1$, with the transformations fitted on the training partition (anomaly statistics, medians, scalers and $P_{60}$, all from data up to 1996 and therefore unaffected by the cut); the label of $t$ is the outcome and comes from the full record. For all 529 test windows the 35 inputs and the eligibility of the window are identical to those of the full pipeline, and no window becomes eligible only after the cut. The reason is that the gaps that the interpolation fills lie before the test period or at stations whose records stop: 54 station-months receive an interpolated covariate; 26 of them are the last antecedent month of an eligible window (24 training, 2 validation windows) and none of a test window. The incomplete summers after 2011 (San Javier) and 2012 (Valencia) have no later complete summer to interpolate from. The daily file does not record when each value became available, so this is a retrospective check of lookahead in the processing, not a reconstruction of what could have been issued in real time.
 
-\textbf{Causal pipeline.} With \texttt{V2\_CAUSAL=1}, a missing covariate is carried forward from the last observed month for at most two months, \texttt{et0\_verano\_prev} is the last complete summer (before the first one, the station's training median), and a missing evapotranspiration lag takes the station's training mean. The same truncation test gives no change for any test window. The causal panel has 533 test windows instead of 529, because carrying forward also fills the last months before the covariate records of Valencia and San Javier stop. \Cref{tab:lookahead} compares models retrained on the two panels on the 529 common test windows: the differences are an order of magnitude below the standard error of one AUC (0.024) and below every minimum detectable difference between complete models.
+\textbf{Causal pipeline.} With \texttt{V2\_CAUSAL=1}, a missing covariate is carried forward from the last observed month for at most two months, \texttt{et0\_verano\_prev} is the last complete summer (before the first one, the station's training median), and a missing evapotranspiration lag takes the station's training mean. The same truncation test gives no change for any test window. The causal panel has 533 test windows instead of 529, because carrying forward also fills the last months before the covariate records of Valencia and San Javier stop. \Cref{tab:lookahead} compares models retrained on the two panels on the 529 common test windows: the differences are an order of magnitude below the standard error of one AUC (0.024) and below every minimum detectable difference between complete models. Small as they are, these changes act on differences that lie near the resolution limit. \Cref{tab:causal} repeats the two primary families on the causal refits: every comparison that is not resolved on the archived pipeline stays unresolved, but Random Forest against the LSTM is no longer resolved, and Random Forest against \texttt{LSTM+QNN} becomes resolved after the Holm correction. With clusters of two and three consecutive years its causal $p$-values are 0.020 and 0.076 on the common rows (archived 0.051 and 0.131), and those of Random Forest against the LSTM 0.058 and 0.143. Both verdicts therefore depend on the fitting pipeline as well as on the cluster definition, which is why the main text treats them as exploratory. The archived pipeline remains the primary analysis: every model, control and reference of the paper shares it, it was the primary analysis before the causal refits were made, and only the five models of the primary families were refitted.
 
 \begin{table}[htbp]
 \centering
-\caption{Test AUC (15-seed mean) of models retrained on the archived and on the causal panel, on the 529 common test windows. Interval: calendar-year block bootstrap ($B=2{,}000$) of the archived $-$ causal difference.}
+\caption{The two primary families on the archived and on the causal pipeline (15-seed means; RF, XGBoost, LSTM, \texttt{LSTM+QNN} and Linear-4D all refitted with \texttt{V2\_CAUSAL=1}; \protect\path{exp55_review_closing.py}). $\hat\Delta$ with the CR2 $p$-value (Bell--McCaffrey degrees of freedom, calendar-year clusters). $^{*}$: resolved (CR2 interval excludes zero); $^{**}$: resolved after Holm within the family of three.}
+\label{tab:causal}
+{\small
+\begin{tabular}{lccc}
+\toprule
+Comparison & Archived (529) & Causal, common (529) & Causal, own (533) \\
+\midrule
+RF $-$ XGBoost & $+0.0100$ (0.110) & $+0.0090$ (0.158) & $+0.0088$ (0.159) \\
+RF $-$ LSTM & $+0.0146$ (0.041)$^{*}$ & $+0.0163$ (0.070) & $+0.0169$ (0.058) \\
+XGBoost $-$ LSTM & $+0.0046$ (0.580) & $+0.0073$ (0.355) & $+0.0080$ (0.293) \\
+\midrule
+RF $-$ LSTM+QNN & $+0.0197$ (0.031)$^{*}$ & $+0.0218$ (0.009)$^{**}$ & $+0.0220$ (0.008)$^{**}$ \\
+LSTM+QNN $-$ Linear-4D & $+0.0034$ (0.608) & $+0.0022$ (0.800) & $+0.0027$ (0.762) \\
+LSTM $-$ LSTM+QNN & $+0.0051$ (0.324) & $+0.0055$ (0.263) & $+0.0051$ (0.294) \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Test AUC (15-seed mean) of models retrained on the archived and on the causal panel, on the 529 common test windows (Linear-4D: \protect\path{exp55_review_closing.py}). Interval: calendar-year block bootstrap ($B=2{,}000$) of the archived $-$ causal difference.}
 \label{tab:lookahead}
 {\small
 \begin{tabular}{lcccc}
@@ -119,11 +139,12 @@ Random Forest & 0.6784 & 0.6797 & $-0.0013$ & $[-0.003,+0.000]$ \\
 XGBoost & 0.6684 & 0.6707 & $-0.0023$ & $[-0.009,+0.004]$ \\
 LSTM & 0.6638 & 0.6634 & $+0.0004$ & $[-0.006,+0.006]$ \\
 LSTM+QNN & 0.6587 & 0.6579 & $+0.0008$ & $[-0.006,+0.006]$ \\
+Linear-4D control & 0.6553 & 0.6558 & $-0.0004$ & $[-0.003,+0.002]$ \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-\textbf{Label completeness.} The label rule admits up to 3 missing days, and with missing days the observed total is a lower bound of the true one, so that a fixed threshold can only produce false negatives. In this panel all 529 test targets, all 528 labelled validation months and all 2{,}847 labelled training months that define $P_{60}$ have complete records; one labelled month of the test period has missing days but is not a window target. A sensitivity analysis restricted to complete months therefore reproduces the reported AUCs and $P_{60}$ exactly.
+\textbf{Label completeness.} The label rule admits up to 3 missing days, and with missing days the observed total is a lower bound of the true one, so that a fixed threshold can only produce false negatives. In this panel all 529 test targets, all 528 labelled validation months and all 2{,}847 labelled months up to 1996 that define $P_{60}$ have complete records; one labelled month of the test period has missing days but is not a window target. A sensitivity analysis restricted to complete months therefore reproduces the reported AUCs and $P_{60}$ exactly.
 
 \subsection{Engineered Features}
 \label{sec:glossary}
@@ -342,12 +363,12 @@ Under every mechanism with independent years CR2 with Bell--McCaffrey degrees of
 
 \textbf{Clusters of consecutive years.} With CR2 on clusters of two consecutive years (10 clusters, $\nu=7.5$), the coverage under serially correlated scorer-specific effects rises from 0.937 to 0.953, but with year$\times$station effects it only moves from 0.908 to 0.915, and the power at a difference of 0.02 with independent years falls from 0.28 to 0.22 (\path{local_exp48_primary_calibration_2yr.json}). On the panel (\path{local_cr2_block_sensitivity.json}), the differences that the primary procedure resolves for Random Forest against the LSTM and \texttt{LSTM+QNN} ($p=0.041$ and 0.031) are not resolved with two-year clusters ($p=0.061$ and 0.051) or three-year clusters ($p=0.13$ for both); Random Forest against \texttt{LSTM+QTL} holds with two-year clusters ($p=0.027$) but not three ($p=0.064$); the effect of freezing the circuit holds with every block length ($p\le0.018$). As a check of the cluster definition itself, the CR1 interval is also computed with 12-month clusters starting in each of the 12 calendar months (``phases'); the number of phases for which it excludes zero is reported in \Cref{M-tab:panel2} and for SEAS5.
 
-\textbf{Influential years} (\path{local_cr2_leave_one_year.json}). Leaving out one test year at a time, the primary verdict on Random Forest against the LSTM changes for 9 of the 19 years ($p$ from 0.013 to 0.079) and on Random Forest against \texttt{LSTM+QNN} for 2 (2020 and 2023; $p$ from 0.021 to 0.054); Random Forest against XGBoost, not resolved on all years, becomes resolved without 2020 or 2022 ($p$ from 0.032 to 0.232). Random Forest against \texttt{LSTM+QTL} ($p\le0.017$) and the two frozen circuits ($p\le0.037$) keep their verdicts for every omitted year, and \texttt{LSTM+QNN} against Linear-4D stays unresolved ($p\ge0.34$). \Cref{fig:sensitivity} collects these checks for the resolved differences: the two exploratory verdicts fail with two- and three-year clusters, change with single omitted years and do not recur on the second panel, whereas the effect of freezing the circuit survives every check.
+\textbf{Influential years} (\path{local_cr2_leave_one_year.json}). Leaving out one test year at a time, the primary verdict on Random Forest against the LSTM changes for 9 of the 19 years ($p$ from 0.013 to 0.079) and on Random Forest against \texttt{LSTM+QNN} for 2 (2020 and 2023; $p$ from 0.021 to 0.054); Random Forest against XGBoost, not resolved on all years, becomes resolved without 2020 or 2022 ($p$ from 0.032 to 0.232). Random Forest against \texttt{LSTM+QTL} ($p\le0.017$) and the two frozen circuits ($p\le0.037$) keep their verdicts for every omitted year, and \texttt{LSTM+QNN} against Linear-4D stays unresolved ($p\ge0.34$). \Cref{fig:sensitivity} collects these checks for the resolved differences: the two exploratory verdicts fail with two- and three-year clusters, change with single omitted years, move under the causal refit and do not recur on the second panel, whereas the effect of freezing the circuit survives every check.
 
 \begin{figure}[htbp]
     \centering
     \safefig{figs/fig_sensitivity.pdf}{0.95\textwidth}
-    \caption{Sensitivity of the resolved differences of 15-seed means to the robustness checks (\protect\path{scripts/make_sensitivity_plot.py}; archived results only). Each dot is the CR2 $p$-value of one check (blue: the primary analysis); filled dots exclude zero at 0.05. Leave one year out: 19 dots, one per omitted test year. Second panel: a different test set (\Cref{app:panel2}), with its difference; the contrasts of the bottom row were not part of it. $^{\dagger}$Exploratory verdicts (\Cref{M-tab:paired_ci,M-tab:qnn_paired}).}
+    \caption{Sensitivity of the resolved differences of 15-seed means to the robustness checks (\protect\path{scripts/make_sensitivity_plot.py}; archived results only). Each dot is the CR2 $p$-value of one check (blue: the primary analysis); filled dots exclude zero at 0.05. Leave one year out: 19 dots, one per omitted test year. Causal refit: models refitted with causal imputation, on the 529 test rows shared with the archived pipeline (\Cref{tab:causal}). Second panel: a different test set (\Cref{app:panel2}), with its difference; the contrasts of the bottom row were not part of it, nor of the causal refit. $^{\dagger}$Exploratory verdicts (\Cref{M-tab:paired_ci,M-tab:qnn_paired}).}
     \label{fig:sensitivity}
 \end{figure}
 
@@ -480,11 +501,18 @@ A version of the simulation uses the year sizes, prevalence (0.406) and score co
 \section{Empirical Resolution Curve}
 \label{app:resolution}
 
-\path{exp43_v2_tables.py} draws, for each number of test years, 60 random subsets of whole years (all stations of a year together) and computes the 80\,\%-power DeLong MDE on the archived predictions; \Cref{tab:resolution} lists the medians plotted in \Cref{M-fig:resolution}.
+\path{exp43_v2_tables.py} draws, for each number of test years, 60 random subsets of whole years (all stations of a year together) and computes the 80\,\%-power DeLong MDE on the archived predictions; \Cref{tab:resolution} lists the medians plotted in \Cref{fig:resolution}.
+
+\begin{figure}[htbp]
+    \centering
+    \safefig{figs/fig_resolution.pdf}{0.80\textwidth}
+    \caption{Empirical resolution curve: median 80\,\%-power DeLong MDE over 60 random subsets of whole test years per size (archived predictions; log-log axes). Single run: seed $s$ against seed $s$, averaged over seeds; 15-seed means: paired DeLong on seed-averaged components. Dashed: Hanley--McNeil single-run approximation of \Cref{M-tab:hm_mde} (prevalence 0.406, AUC 0.68, correlation 0.75). Dotted: illustrative $N^{-1/2}$ extrapolation of the 15-seed curve from the full test set, valid only if added years are independent clusters. Top axis: number of test years, the independent clusters, behind each point. Values in \Cref{tab:resolution}.}
+    \label{fig:resolution}
+\end{figure}
 
 \begin{table}[htbp]
 \centering
-\caption{Values of \Cref{M-fig:resolution}. Empirical resolution curve: median 80\,\%-power DeLong MDE over random subsets of test years (60 subsets per size; archived predictions). Single run: seed $s$ against seed $s$, averaged over seeds. 15-seed means: paired DeLong on seed-averaged components. The last row is the full test set; HM: Hanley--McNeil single-run value at the same $N$ (prevalence 0.406, AUC 0.68, correlation 0.75).}
+\caption{Values of \Cref{fig:resolution}. Empirical resolution curve: median 80\,\%-power DeLong MDE over random subsets of test years (60 subsets per size; archived predictions). Single run: seed $s$ against seed $s$, averaged over seeds. 15-seed means: paired DeLong on seed-averaged components. The last row is the full test set; HM: Hanley--McNeil single-run value at the same $N$ (prevalence 0.406, AUC 0.68, correlation 0.75).}
 \label{tab:resolution}
 {\small
 \begin{tabular}{rrcccc}
@@ -762,6 +790,34 @@ LSTM+QNN & 0.659 (0.014) & -- & 0.505 (0.018) & -- \\
 Blend climatology+SEAS5 & 0.730 & $+0.060$ & 0.641 & $+0.065$ \\
 Blend RF+SEAS5 & 0.731 (0.001) & $+0.061$ & 0.638 (0.002) & $+0.060$ \\
 Blend LSTM+QNN+SEAS5 & 0.730 (0.003) & $+0.059$ & 0.637 (0.004) & $+0.060$ \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{SEAS5 combinations not shown in \Cref{M-tab:seas5} (529 test rows; columns as there; \protect\path{exp55_review_closing.py}). Increment: SEAS5 + climatology + model against SEAS5 + climatology. Blend: logistic combination of the logits of the named model and of SEAS5 (the model replaces the climatology). Combinations fitted per seed on the validation partition. Secondary analysis: $p$-values unadjusted.}
+\label{tab:seas5_blends}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Comparison & $\hat\Delta$ & CR2 95\,\% CI ($p$) & DeLong $p$ & Year-block 95\,\% CI & MDE (CR2) \\
+\midrule
+\multicolumn{6}{@{}l}{\textit{Increment over SEAS5 + climatology at lead 1}} \\
+Increment Random Forest (L1) & $-0.0004$ & $[-0.011,+0.010]$ (0.944) & 0.948 & $[-0.010,+0.009]$ & 0.015 \\
+Increment XGBoost (L1) & $-0.0030$ & $[-0.016,+0.010]$ (0.629) & 0.619 & $[-0.014,+0.009]$ & 0.018 \\
+Increment Standalone LSTM (L1) & $+0.0005$ & $[-0.007,+0.008]$ (0.874) & 0.891 & $[-0.006,+0.007]$ & 0.010 \\
+Increment Linear-4D control (L1) & $+0.0002$ & $[-0.011,+0.011]$ (0.976) & 0.976 & $[-0.009,+0.010]$ & 0.015 \\
+Increment LSTM+QNN (L1) & $-0.0000$ & $[-0.007,+0.007]$ (0.992) & 0.992 & $[-0.006,+0.007]$ & 0.010 \\
+\midrule
+\multicolumn{6}{@{}l}{\textit{Combinations that replace the climatology by a model (lead 1)}} \\
+Blend RF $-$ blend climatology & $+0.0006$ & $[-0.008,+0.010]$ (0.882) & 0.877 & $[-0.008,+0.008]$ & 0.013 \\
+Blend XGBoost $-$ blend climatology & $-0.0002$ & $[-0.013,+0.012]$ (0.977) & 0.970 & $[-0.012,+0.011]$ & 0.018 \\
+Blend LSTM $-$ blend climatology & $+0.0007$ & $[-0.006,+0.007]$ (0.811) & 0.831 & $[-0.006,+0.008]$ & 0.009 \\
+Blend Linear-4D $-$ blend climatology & $+0.0008$ & $[-0.009,+0.010]$ (0.863) & 0.858 & $[-0.008,+0.010]$ & 0.014 \\
+Blend LSTM+QNN $-$ blend climatology & $+0.0002$ & $[-0.007,+0.007]$ (0.952) & 0.952 & $[-0.006,+0.008]$ & 0.010 \\
+Blend LSTM+QNN $-$ blend Linear-4D & $-0.0006$ & $[-0.006,+0.004]$ (0.806) & 0.744 & $[-0.005,+0.004]$ & 0.007 \\
 \bottomrule
 \end{tabular}}}
 \end{table}

@@ -178,8 +178,12 @@ Commands run from the repository root. Table numbers refer to `paper/main.pdf`; 
 | **Figure 4** | Forest plot of Tables 3, 6 and 7 | `paper/figs/fig_forest.pdf` | `scripts/make_forest_plot.py` | — |
 | **Figure 5** | Calibration of the candidate procedures | `paper/figs/fig_calibration.pdf` | `scripts/make_calibration_plot.py` | — |
 | **Figure S2** | Sensitivity of the resolved verdicts to the robustness checks | `paper/figs/fig_sensitivity.pdf` | `scripts/make_sensitivity_plot.py` | — |
+| **Figure 6**, §4.3 | Clusters against rows: true MDE by number of clusters and rows per cluster | `results/local_exp54_power_clusters_rows.json` | `exp54_power_clusters_rows.py`; figure: `scripts/make_clusters_rows_plot.py` | — |
+| **Table 10**, **Table S-seas5_blends** | References under the primary procedure: models against the climatology, SEAS5 at both leads, incremental and replacement combinations | `results/local_exp55_review_closing.json` (`seas5`), `local_exp42_v2_summary.json`, `local_exp49_review_minor.json` | `exp55_review_closing.py` | — |
+| **Table 11**, MDE CR2 column | CR2 resolution of the second panel against the scaled first-panel value | `results/local_exp55_review_closing.json` (`panel2_mde`) | `exp55_review_closing.py` | — |
+| **Table S-causal**, Linear-4D row of **Table S-lookahead** | Primary families on the causal refits (529 common and 533 own rows), Holm, 1–3-year clusters | `results/local_exp55_review_closing.json` (`causal`) | `exp55_review_closing.py` | `run_v2.ps1` steps `03b_core_causal`, `03c_linear4d_causal` |
 | **Table 4** | Hanley–McNeil MDE by test size and prevalence | — | `qml_resolution.paired_mde_hanley_mcneil` | — |
-| **Figure 6**, **Table S10** | Empirical resolution curve | `results/local_exp43_v2_tables.json` (`resolution_curve`) | `exp43_v2_tables.py results`; figure: `scripts/make_resolution_plot.py` | as Table 5 |
+| **Figure S3**, **Table S10** | Empirical resolution curve (moved to the supplement) | `results/local_exp43_v2_tables.json` (`resolution_curve`) | `exp43_v2_tables.py results`; figure: `scripts/make_resolution_plot.py` | as Table 5 |
 | **Table 5** | 15-seed AUC of every model and control | `results/local_exp42_v2_summary.json` (`models`) | `exp42_v2_summary.py results` | `exp17`, `exp27_controls.py`, `exp30_fourier_full.py` |
 | **Tables 6, 7** | Hybrids, Fourier surrogates and frozen circuits against `LSTM+QNN` | `results/local_exp42_v2_summary.json` (`pairs`) | `exp42_v2_summary.py results` | as Table 5 |
 | **Table 8** | Positive control: heads given the angles of a teacher circuit | `results/local_exp38_teacher_control_interface.json` | — | `exp38_teacher_control.py --mode interface --seeds 5` |

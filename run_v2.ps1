@@ -54,6 +54,9 @@ Step "03_core"       "$L\exp17_hybrids_multiseed.py --fix-et0 --models $models $
 $env:V2_CAUSAL = "1"; New-Item -ItemType Directory -Force results\causal | Out-Null
 Step "03b_core_causal" "$L\exp17_hybrids_multiseed.py --fix-et0 --models PureLSTM LSTM_QNN $th --out-dir results\causal"   # ~2-3 h
 $env:V2_CAUSAL = "0"
+New-Item -ItemType Directory -Force results\causal_linear4d | Out-Null; $env:V2_CAUSAL = "1"
+Step "03c_linear4d_causal" "$L\exp17_hybrids_multiseed.py --fix-et0 --models CTRL_LINEAR4D $th --out-dir results\causal_linear4d"   # ~30 min; completes the second primary family (review 2026-11-19)
+$env:V2_CAUSAL = "0"
 foreach ($ext in ".json", "_probs.npz") {                                                           # v1 file names, read by the analyses
   Copy-Item "results\json\results_hybrids_trainonly_fixet0$ext" "results\json\results_hybrids_trainonly_fixet0_p60_28.1$ext" -Force }
 Step "04_classical"  "$L\exp41_v2_classical.py --seeds 15"                                          # ~5 min
@@ -90,6 +93,8 @@ Step "a17d_minor"           "$L\exp49_review_minor.py"                          
 Step "a17e_teacher_grid"    "$L\exp50_teacher_grid.py --seeds 5" -Soft                              # ~2-3 h; repeated positive control
 Step "a17f_primary_sim_2yr" "$L\exp48_primary_calibration.py --reps 600 --B 299 --blocks 2 --scenarios iid specific_ar1 station_year_specific_ar1 --out results\local_exp48_primary_calibration_2yr.json"   # ~40 min
 Step "a17g_review_extras"   "$L\exp51_review_extras.py"                                             # ~2 min; causal neural refit, SEAS5 / panel-2 CR2, blocks, leave-one-year-out
+Step "a17j_review_closing"  "$L\exp55_review_closing.py"                                            # ~1 min; causal primary families, panel-2 CR2 MDE, SEAS5 under CR2
+Step "a17k_clusters_rows"   "$L\exp54_power_clusters_rows.py"                                       # ~10 min; simulation of clusters against rows
 Step "a17h_emulation"       "$L\exp52_emulation_substitution.py --part E S --seeds 15 $th"          # ~2.5 h; exact emulation, heads on common frozen angles
 Step "a17i_external"        "$L\exp53_external_benchmark.py"                                        # ~10 min; downloads California Housing to data\external
 Step "a18_summary"          "$L\exp42_v2_summary.py results"                                        # ~10 min; Tables 3, 5-7
@@ -100,6 +105,7 @@ Step "a21b_resolution"      "scripts\make_resolution_plot.py"                   
 Step "a21c_design"         "scripts\make_design_plot.py"                                           # study design figure
 Step "a21d_calibration"    "scripts\make_calibration_plot.py"                                      # calibration figure
 Step "a21f_sensitivity"     "scripts\make_sensitivity_plot.py"                                      # sensitivity figure (supplement)
+Step "a21g_clusters_rows"   "scripts\make_clusters_rows_plot.py"                                    # clusters against rows figure
 Step "a21e_tables"         "scripts\fill_paired_tables.py"                                         # paired-table rows from the archive
 Step "a22_trace_v2"         "scripts\build_traceability_v2.py"
 Step "a23_manuscript"       "-m pytest tests\manuscript -q"                                         # paper/main.tex vs archives

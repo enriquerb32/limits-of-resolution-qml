@@ -315,31 +315,13 @@ def test_stationmonth_table() -> None:
         assert_row(flat(rows[label]), expected, label)
 
 
-# ------------------------------------------------------------------ Table 12: SEAS5
-SEAS5_ROWS = {
-    "SEAS5 - climatology": "SEAS5_QM_L1-CLIM",
-    "SEAS5 (lead 2) - climatology": "SEAS5_QM_L2-CLIM",
-    "Random Forest - SEAS5": "RF_2273-SEAS5_QM_L1",
-    "LSTM+QNN - SEAS5": "LSTM_QNN-SEAS5_QM_L1",
-    "Blend RF - blend climatology": "BLEND_RF_2273_L1-BLEND_CLIM_L1",
-    "Blend XGBoost - blend climatology": "BLEND_XGB_L1-BLEND_CLIM_L1",
-    "Blend LSTM - blend climatology": "BLEND_PureLSTM_L1-BLEND_CLIM_L1",
-    "Blend Linear-4D - blend climatology": "BLEND_CTRL_LINEAR4D_L1-BLEND_CLIM_L1",
-    "Blend LSTM+QNN - blend climatology": "BLEND_LSTM_QNN_L1-BLEND_CLIM_L1",
-    "Blend LSTM+QNN - blend Linear-4D": "BLEND_LSTM_QNN_L1-BLEND_CTRL_LINEAR4D_L1",
-}
-
-
+# ------------------------------------------------------------------ Table 10: references (climatology and SEAS5)
+# The table was rebuilt around the primary procedure after the review of 2026-11-19; its rows are checked against
+# the archive in test_review_2026_11_19.py (test_reference_table, test_replacement_blends_in_supplement).
 def test_seas5_table() -> None:
-    rows = {k: v for k, v in table_rows(TEX, "tab:seas5").items() if k != "Comparison"}
-    assert set(rows) == set(SEAS5_ROWS)
+    rows = {k for k in table_rows(TEX, "tab:seas5") if k != "Comparison"}
+    assert len(rows) == 16
     assert SEAS5["n_test"] == 529
-    for label, key in SEAS5_ROWS.items():
-        p = SEAS5["pairs"][key]
-        expected = [p["delta"], p["p_delong"], *p["ci_delong"], *p["ci_block"], *p["ci_two_way"], p["ratio"]]
-        expected.append(p["mde_delong"])
-        assert_row(flat(rows[label]), expected, label)
-
 
 # ------------------------------------------------------------------ Table 13: second panel
 PANEL2_ROWS = {
@@ -375,8 +357,9 @@ def test_second_panel_table() -> None:
         p = PANEL2["pairs"][key]
         first_panel = MODELS[a]["mean"] - MODELS[b]["mean"]
         predicted = float(mde(paired_delong(fp["y"], fp[a], fp[b]).se)) * scale  # per-contrast N^{-1/2} scaling
+        e53 = _load("local_exp55_review_closing.json")["panel2_mde"]["pairs"][key]
         expected = [p["delta"], first_panel, p["p_delong"], *cr2[key]["ci_cr2"], cr2[key]["p_cr2"], *p["ci_two_way"],
-                    p["mde_delong"], predicted]
+                    p["mde_delong"], predicted, e53["mde_cr2_second"], e53["mde_cr2_predicted"]]
         expected += [p["ratio"], p["phases_excluding_zero"]]
         assert_row(flat(rows[label]), expected, label)
 

@@ -1,0 +1,2873 @@
+{
+  "scenarios": [
+    {
+      "name": "iid",
+      "tp": 0.0,
+      "ts": 0.0,
+      "tm": 0.0,
+      "tc": 0.0,
+      "phi": 0.0,
+      "rho": 0.85
+    },
+    {
+      "name": "specific",
+      "tp": 0.3,
+      "ts": 0.3,
+      "tm": 0.15,
+      "tc": 0.0,
+      "phi": 0.0,
+      "rho": 0.85
+    },
+    {
+      "name": "station_year",
+      "tp": 0.3,
+      "ts": 0.3,
+      "tm": 0.0,
+      "tc": 0.25,
+      "phi": 0.0,
+      "rho": 0.85
+    },
+    {
+      "name": "specific_ar1",
+      "tp": 0.3,
+      "ts": 0.3,
+      "tm": 0.15,
+      "tc": 0.0,
+      "phi": 0.5,
+      "rho": 0.85
+    }
+  ],
+  "K_grid": [
+    10,
+    19,
+    38,
+    76
+  ],
+  "m_grid": [
+    12,
+    24,
+    48,
+    96
+  ],
+  "reps": 1000,
+  "seed": 54,
+  "mc_se_coverage": 0.006892024376045111,
+  "rows": [
+    {
+      "K": 10,
+      "m": 12,
+      "N": 120,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.03007981718686739,
+      "mde_true": 0.0842711711942681,
+      "mde_cr2_mean": 0.09070099466670649,
+      "mde_delong_mean": 0.08305217850638356,
+      "rejection": {
+        "cr2_bm": 0.048,
+        "delong": 0.049
+      },
+      "coverage": {
+        "cr2_bm": 0.952,
+        "delong": 0.951
+      }
+    },
+    {
+      "K": 10,
+      "m": 12,
+      "N": 120,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.030126095858571407,
+      "mde_true": 0.08440082483682797,
+      "mde_cr2_mean": 0.091766458901507,
+      "mde_delong_mean": 0.08248499466348524,
+      "rejection": {
+        "cr2_bm": 0.088,
+        "delong": 0.106
+      },
+      "coverage": {
+        "cr2_bm": 0.949,
+        "delong": 0.946
+      }
+    },
+    {
+      "K": 10,
+      "m": 24,
+      "N": 240,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.020384753573243798,
+      "mde_true": 0.057109624285675335,
+      "mde_cr2_mean": 0.06309354866221124,
+      "mde_delong_mean": 0.05764965840966354,
+      "rejection": {
+        "cr2_bm": 0.042,
+        "delong": 0.05
+      },
+      "coverage": {
+        "cr2_bm": 0.958,
+        "delong": 0.95
+      }
+    },
+    {
+      "K": 10,
+      "m": 24,
+      "N": 240,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.02046882297289003,
+      "mde_true": 0.057345151873019855,
+      "mde_cr2_mean": 0.06275201484716003,
+      "mde_delong_mean": 0.05732656054987115,
+      "rejection": {
+        "cr2_bm": 0.14,
+        "delong": 0.156
+      },
+      "coverage": {
+        "cr2_bm": 0.96,
+        "delong": 0.95
+      }
+    },
+    {
+      "K": 10,
+      "m": 48,
+      "N": 480,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.014743308875894581,
+      "mde_true": 0.04130463621277998,
+      "mde_cr2_mean": 0.04426560220839265,
+      "mde_delong_mean": 0.04046498739545853,
+      "rejection": {
+        "cr2_bm": 0.053,
+        "delong": 0.056
+      },
+      "coverage": {
+        "cr2_bm": 0.947,
+        "delong": 0.944
+      }
+    },
+    {
+      "K": 10,
+      "m": 48,
+      "N": 480,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.013996770979694258,
+      "mde_true": 0.039213146678024,
+      "mde_cr2_mean": 0.04314210968000989,
+      "mde_delong_mean": 0.04019899392188326,
+      "rejection": {
+        "cr2_bm": 0.237,
+        "delong": 0.271
+      },
+      "coverage": {
+        "cr2_bm": 0.956,
+        "delong": 0.96
+      }
+    },
+    {
+      "K": 10,
+      "m": 96,
+      "N": 960,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.010134466066911946,
+      "mde_true": 0.02839257032652798,
+      "mde_cr2_mean": 0.030920074989080313,
+      "mde_delong_mean": 0.028375313460465477,
+      "rejection": {
+        "cr2_bm": 0.059,
+        "delong": 0.051
+      },
+      "coverage": {
+        "cr2_bm": 0.941,
+        "delong": 0.949
+      }
+    },
+    {
+      "K": 10,
+      "m": 96,
+      "N": 960,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.010120209034656342,
+      "mde_true": 0.02835262803570652,
+      "mde_cr2_mean": 0.030775878011079012,
+      "mde_delong_mean": 0.028308499381759687,
+      "rejection": {
+        "cr2_bm": 0.421,
+        "delong": 0.512
+      },
+      "coverage": {
+        "cr2_bm": 0.945,
+        "delong": 0.943
+      }
+    },
+    {
+      "K": 19,
+      "m": 12,
+      "N": 228,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.021922053186560663,
+      "mde_true": 0.06141650015815465,
+      "mde_cr2_mean": 0.06143360750886258,
+      "mde_delong_mean": 0.05898623182753943,
+      "rejection": {
+        "cr2_bm": 0.054,
+        "delong": 0.068
+      },
+      "coverage": {
+        "cr2_bm": 0.946,
+        "delong": 0.932
+      }
+    },
+    {
+      "K": 19,
+      "m": 12,
+      "N": 228,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.021478855630639556,
+      "mde_true": 0.06017484443678228,
+      "mde_cr2_mean": 0.06115664322389756,
+      "mde_delong_mean": 0.05877065295867201,
+      "rejection": {
+        "cr2_bm": 0.137,
+        "delong": 0.149
+      },
+      "coverage": {
+        "cr2_bm": 0.945,
+        "delong": 0.946
+      }
+    },
+    {
+      "K": 19,
+      "m": 24,
+      "N": 456,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.014145454776457903,
+      "mde_true": 0.03962969700520994,
+      "mde_cr2_mean": 0.04284773687021146,
+      "mde_delong_mean": 0.04136330752234541,
+      "rejection": {
+        "cr2_bm": 0.035,
+        "delong": 0.04
+      },
+      "coverage": {
+        "cr2_bm": 0.965,
+        "delong": 0.96
+      }
+    },
+    {
+      "K": 19,
+      "m": 24,
+      "N": 456,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.014131178707913502,
+      "mde_true": 0.03958970138260318,
+      "mde_cr2_mean": 0.042859669860616935,
+      "mde_delong_mean": 0.04107749378561634,
+      "rejection": {
+        "cr2_bm": 0.22,
+        "delong": 0.236
+      },
+      "coverage": {
+        "cr2_bm": 0.953,
+        "delong": 0.954
+      }
+    },
+    {
+      "K": 19,
+      "m": 48,
+      "N": 912,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.010446230205960269,
+      "mde_true": 0.029266004130023476,
+      "mde_cr2_mean": 0.030696364425448066,
+      "mde_delong_mean": 0.02913827589711757,
+      "rejection": {
+        "cr2_bm": 0.047,
+        "delong": 0.054
+      },
+      "coverage": {
+        "cr2_bm": 0.953,
+        "delong": 0.946
+      }
+    },
+    {
+      "K": 19,
+      "m": 48,
+      "N": 912,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.010383476421888917,
+      "mde_true": 0.029090194056188526,
+      "mde_cr2_mean": 0.029986077332892082,
+      "mde_delong_mean": 0.02900562690391402,
+      "rejection": {
+        "cr2_bm": 0.457,
+        "delong": 0.477
+      },
+      "coverage": {
+        "cr2_bm": 0.951,
+        "delong": 0.953
+      }
+    },
+    {
+      "K": 19,
+      "m": 96,
+      "N": 1824,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.0068923811263444665,
+      "mde_true": 0.01930959308116747,
+      "mde_cr2_mean": 0.02154490524013157,
+      "mde_delong_mean": 0.020562781568006696,
+      "rejection": {
+        "cr2_bm": 0.035,
+        "delong": 0.034
+      },
+      "coverage": {
+        "cr2_bm": 0.965,
+        "delong": 0.966
+      }
+    },
+    {
+      "K": 19,
+      "m": 96,
+      "N": 1824,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.00712455774361671,
+      "mde_true": 0.019960055660108857,
+      "mde_cr2_mean": 0.021399879904158512,
+      "mde_delong_mean": 0.020468097222451714,
+      "rejection": {
+        "cr2_bm": 0.754,
+        "delong": 0.781
+      },
+      "coverage": {
+        "cr2_bm": 0.955,
+        "delong": 0.955
+      }
+    },
+    {
+      "K": 38,
+      "m": 12,
+      "N": 456,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.014522103153670711,
+      "mde_true": 0.04068490953123559,
+      "mde_cr2_mean": 0.04258985578224471,
+      "mde_delong_mean": 0.04157061610486671,
+      "rejection": {
+        "cr2_bm": 0.047,
+        "delong": 0.045
+      },
+      "coverage": {
+        "cr2_bm": 0.953,
+        "delong": 0.955
+      }
+    },
+    {
+      "K": 38,
+      "m": 12,
+      "N": 456,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.014869061586701485,
+      "mde_true": 0.04165694314851424,
+      "mde_cr2_mean": 0.04192135820564335,
+      "mde_delong_mean": 0.041199570541057225,
+      "rejection": {
+        "cr2_bm": 0.25,
+        "delong": 0.277
+      },
+      "coverage": {
+        "cr2_bm": 0.951,
+        "delong": 0.949
+      }
+    },
+    {
+      "K": 38,
+      "m": 24,
+      "N": 912,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.010492127746174345,
+      "mde_true": 0.02939459000023498,
+      "mde_cr2_mean": 0.02961987712035495,
+      "mde_delong_mean": 0.0291205876698298,
+      "rejection": {
+        "cr2_bm": 0.047,
+        "delong": 0.053
+      },
+      "coverage": {
+        "cr2_bm": 0.953,
+        "delong": 0.947
+      }
+    },
+    {
+      "K": 38,
+      "m": 24,
+      "N": 912,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.0101095679652197,
+      "mde_true": 0.028322816172867908,
+      "mde_cr2_mean": 0.02963292670216642,
+      "mde_delong_mean": 0.029019561371034376,
+      "rejection": {
+        "cr2_bm": 0.488,
+        "delong": 0.493
+      },
+      "coverage": {
+        "cr2_bm": 0.957,
+        "delong": 0.961
+      }
+    },
+    {
+      "K": 38,
+      "m": 48,
+      "N": 1824,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.0073370553524215116,
+      "mde_true": 0.02055538581982074,
+      "mde_cr2_mean": 0.021146563240061814,
+      "mde_delong_mean": 0.02062513404157889,
+      "rejection": {
+        "cr2_bm": 0.046,
+        "delong": 0.046
+      },
+      "coverage": {
+        "cr2_bm": 0.954,
+        "delong": 0.954
+      }
+    },
+    {
+      "K": 38,
+      "m": 48,
+      "N": 1824,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.007260337090614722,
+      "mde_true": 0.02034045307158352,
+      "mde_cr2_mean": 0.02089120424509063,
+      "mde_delong_mean": 0.02042043573690074,
+      "rejection": {
+        "cr2_bm": 0.771,
+        "delong": 0.783
+      },
+      "coverage": {
+        "cr2_bm": 0.953,
+        "delong": 0.949
+      }
+    },
+    {
+      "K": 38,
+      "m": 96,
+      "N": 3648,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.0052227745440578755,
+      "mde_true": 0.014632047960169241,
+      "mde_cr2_mean": 0.014821279712808595,
+      "mde_delong_mean": 0.014534355768018105,
+      "rejection": {
+        "cr2_bm": 0.041,
+        "delong": 0.041
+      },
+      "coverage": {
+        "cr2_bm": 0.959,
+        "delong": 0.959
+      }
+    },
+    {
+      "K": 38,
+      "m": 96,
+      "N": 3648,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.005076138497669545,
+      "mde_true": 0.014221234580165169,
+      "mde_cr2_mean": 0.014781566069564425,
+      "mde_delong_mean": 0.01444340802693551,
+      "rejection": {
+        "cr2_bm": 0.955,
+        "delong": 0.966
+      },
+      "coverage": {
+        "cr2_bm": 0.962,
+        "delong": 0.952
+      }
+    },
+    {
+      "K": 76,
+      "m": 12,
+      "N": 912,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.010645015345984945,
+      "mde_true": 0.029822917639897126,
+      "mde_cr2_mean": 0.029354563027311983,
+      "mde_delong_mean": 0.02913357442790846,
+      "rejection": {
+        "cr2_bm": 0.057,
+        "delong": 0.058
+      },
+      "coverage": {
+        "cr2_bm": 0.943,
+        "delong": 0.942
+      }
+    },
+    {
+      "K": 76,
+      "m": 12,
+      "N": 912,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.010502886274788412,
+      "mde_true": 0.029424730934968796,
+      "mde_cr2_mean": 0.0292069331183638,
+      "mde_delong_mean": 0.028982684247095315,
+      "rejection": {
+        "cr2_bm": 0.477,
+        "delong": 0.48
+      },
+      "coverage": {
+        "cr2_bm": 0.945,
+        "delong": 0.943
+      }
+    },
+    {
+      "K": 76,
+      "m": 24,
+      "N": 1824,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.007241825877091224,
+      "mde_true": 0.020288592329406753,
+      "mde_cr2_mean": 0.020752361257563804,
+      "mde_delong_mean": 0.020575701700639347,
+      "rejection": {
+        "cr2_bm": 0.049,
+        "delong": 0.048
+      },
+      "coverage": {
+        "cr2_bm": 0.951,
+        "delong": 0.952
+      }
+    },
+    {
+      "K": 76,
+      "m": 24,
+      "N": 1824,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.007292789754193867,
+      "mde_true": 0.020431371974155246,
+      "mde_cr2_mean": 0.020611887254320116,
+      "mde_delong_mean": 0.020468559108967867,
+      "rejection": {
+        "cr2_bm": 0.773,
+        "delong": 0.789
+      },
+      "coverage": {
+        "cr2_bm": 0.954,
+        "delong": 0.948
+      }
+    },
+    {
+      "K": 76,
+      "m": 48,
+      "N": 3648,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.005208958849514251,
+      "mde_true": 0.01459334211455786,
+      "mde_cr2_mean": 0.014651039961414892,
+      "mde_delong_mean": 0.014549455378834179,
+      "rejection": {
+        "cr2_bm": 0.051,
+        "delong": 0.046
+      },
+      "coverage": {
+        "cr2_bm": 0.949,
+        "delong": 0.954
+      }
+    },
+    {
+      "K": 76,
+      "m": 48,
+      "N": 3648,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.005218481123887855,
+      "mde_true": 0.014620019577685765,
+      "mde_cr2_mean": 0.014514220566331386,
+      "mde_delong_mean": 0.014431361689397983,
+      "rejection": {
+        "cr2_bm": 0.977,
+        "delong": 0.979
+      },
+      "coverage": {
+        "cr2_bm": 0.947,
+        "delong": 0.951
+      }
+    },
+    {
+      "K": 76,
+      "m": 96,
+      "N": 7296,
+      "scenario": "iid",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.0037878072462426624,
+      "mde_true": 0.010611864790134632,
+      "mde_cr2_mean": 0.010365139252990808,
+      "mde_delong_mean": 0.010272617306897982,
+      "rejection": {
+        "cr2_bm": 0.063,
+        "delong": 0.064
+      },
+      "coverage": {
+        "cr2_bm": 0.937,
+        "delong": 0.936
+      }
+    },
+    {
+      "K": 76,
+      "m": 96,
+      "N": 7296,
+      "scenario": "iid",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.003507197194781277,
+      "mde_true": 0.009825711817906495,
+      "mde_cr2_mean": 0.01032409042683183,
+      "mde_delong_mean": 0.010202577037119647,
+      "rejection": {
+        "cr2_bm": 0.999,
+        "delong": 1.0
+      },
+      "coverage": {
+        "cr2_bm": 0.963,
+        "delong": 0.963
+      }
+    },
+    {
+      "K": 10,
+      "m": 12,
+      "N": 120,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.02933732443882012,
+      "mde_true": 0.08219101448678279,
+      "mde_cr2_mean": 0.09232524684287463,
+      "mde_delong_mean": 0.08431502757250457,
+      "rejection": {
+        "cr2_bm": 0.047,
+        "delong": 0.038
+      },
+      "coverage": {
+        "cr2_bm": 0.953,
+        "delong": 0.962
+      }
+    },
+    {
+      "K": 10,
+      "m": 12,
+      "N": 120,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.029417483130966985,
+      "mde_true": 0.08241558589380471,
+      "mde_cr2_mean": 0.09227995430031243,
+      "mde_delong_mean": 0.08345612680445245,
+      "rejection": {
+        "cr2_bm": 0.089,
+        "delong": 0.105
+      },
+      "coverage": {
+        "cr2_bm": 0.962,
+        "delong": 0.955
+      }
+    },
+    {
+      "K": 10,
+      "m": 24,
+      "N": 240,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.02189775163138214,
+      "mde_true": 0.061348417280389346,
+      "mde_cr2_mean": 0.06594231509919771,
+      "mde_delong_mean": 0.058569529224934504,
+      "rejection": {
+        "cr2_bm": 0.047,
+        "delong": 0.058
+      },
+      "coverage": {
+        "cr2_bm": 0.953,
+        "delong": 0.942
+      }
+    },
+    {
+      "K": 10,
+      "m": 24,
+      "N": 240,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.02106087315950224,
+      "mde_true": 0.05900383092421364,
+      "mde_cr2_mean": 0.06424300109866182,
+      "mde_delong_mean": 0.05808541421195093,
+      "rejection": {
+        "cr2_bm": 0.14,
+        "delong": 0.158
+      },
+      "coverage": {
+        "cr2_bm": 0.959,
+        "delong": 0.946
+      }
+    },
+    {
+      "K": 10,
+      "m": 48,
+      "N": 480,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.015253175597128521,
+      "mde_true": 0.042733071282196715,
+      "mde_cr2_mean": 0.047414120501431824,
+      "mde_delong_mean": 0.04107985897317026,
+      "rejection": {
+        "cr2_bm": 0.042,
+        "delong": 0.074
+      },
+      "coverage": {
+        "cr2_bm": 0.958,
+        "delong": 0.926
+      }
+    },
+    {
+      "K": 10,
+      "m": 48,
+      "N": 480,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.01523208005148024,
+      "mde_true": 0.04267397031334046,
+      "mde_cr2_mean": 0.046341810346140794,
+      "mde_delong_mean": 0.04070046982746445,
+      "rejection": {
+        "cr2_bm": 0.237,
+        "delong": 0.3
+      },
+      "coverage": {
+        "cr2_bm": 0.959,
+        "delong": 0.94
+      }
+    },
+    {
+      "K": 10,
+      "m": 96,
+      "N": 960,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.011365627419907943,
+      "mde_true": 0.031841773774193526,
+      "mde_cr2_mean": 0.0347588536737207,
+      "mde_delong_mean": 0.02889359997947603,
+      "rejection": {
+        "cr2_bm": 0.052,
+        "delong": 0.067
+      },
+      "coverage": {
+        "cr2_bm": 0.948,
+        "delong": 0.933
+      }
+    },
+    {
+      "K": 10,
+      "m": 96,
+      "N": 960,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.011089360577292144,
+      "mde_true": 0.031067788671666364,
+      "mde_cr2_mean": 0.034234351666106375,
+      "mde_delong_mean": 0.02861857576274198,
+      "rejection": {
+        "cr2_bm": 0.351,
+        "delong": 0.499
+      },
+      "coverage": {
+        "cr2_bm": 0.957,
+        "delong": 0.941
+      }
+    },
+    {
+      "K": 19,
+      "m": 12,
+      "N": 228,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.021878098650256736,
+      "mde_true": 0.06129335777897656,
+      "mde_cr2_mean": 0.06330191390099912,
+      "mde_delong_mean": 0.060188063869709034,
+      "rejection": {
+        "cr2_bm": 0.053,
+        "delong": 0.063
+      },
+      "coverage": {
+        "cr2_bm": 0.947,
+        "delong": 0.937
+      }
+    },
+    {
+      "K": 19,
+      "m": 12,
+      "N": 228,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.021706427298800488,
+      "mde_true": 0.060812405858363255,
+      "mde_cr2_mean": 0.06337718636730291,
+      "mde_delong_mean": 0.05979756826572018,
+      "rejection": {
+        "cr2_bm": 0.156,
+        "delong": 0.177
+      },
+      "coverage": {
+        "cr2_bm": 0.947,
+        "delong": 0.947
+      }
+    },
+    {
+      "K": 19,
+      "m": 24,
+      "N": 456,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.01535885582487979,
+      "mde_true": 0.04302914344611148,
+      "mde_cr2_mean": 0.04487056233496915,
+      "mde_delong_mean": 0.042097004400799,
+      "rejection": {
+        "cr2_bm": 0.049,
+        "delong": 0.058
+      },
+      "coverage": {
+        "cr2_bm": 0.951,
+        "delong": 0.942
+      }
+    },
+    {
+      "K": 19,
+      "m": 24,
+      "N": 456,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.015980592356690082,
+      "mde_true": 0.04477099132319202,
+      "mde_cr2_mean": 0.044641287417178196,
+      "mde_delong_mean": 0.0417726421119246,
+      "rejection": {
+        "cr2_bm": 0.246,
+        "delong": 0.282
+      },
+      "coverage": {
+        "cr2_bm": 0.944,
+        "delong": 0.933
+      }
+    },
+    {
+      "K": 19,
+      "m": 48,
+      "N": 912,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.010743852238424011,
+      "mde_true": 0.030099817616758638,
+      "mde_cr2_mean": 0.0327689629347014,
+      "mde_delong_mean": 0.029637686687947654,
+      "rejection": {
+        "cr2_bm": 0.036,
+        "delong": 0.051
+      },
+      "coverage": {
+        "cr2_bm": 0.964,
+        "delong": 0.949
+      }
+    },
+    {
+      "K": 19,
+      "m": 48,
+      "N": 912,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.011341674014787763,
+      "mde_true": 0.03177466626848536,
+      "mde_cr2_mean": 0.032143045902756885,
+      "mde_delong_mean": 0.02939213830101002,
+      "rejection": {
+        "cr2_bm": 0.406,
+        "delong": 0.468
+      },
+      "coverage": {
+        "cr2_bm": 0.946,
+        "delong": 0.929
+      }
+    },
+    {
+      "K": 19,
+      "m": 96,
+      "N": 1824,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.008160554773347544,
+      "mde_true": 0.022862489624611706,
+      "mde_cr2_mean": 0.024044895533313165,
+      "mde_delong_mean": 0.02087893297012115,
+      "rejection": {
+        "cr2_bm": 0.041,
+        "delong": 0.072
+      },
+      "coverage": {
+        "cr2_bm": 0.959,
+        "delong": 0.928
+      }
+    },
+    {
+      "K": 19,
+      "m": 96,
+      "N": 1824,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.008141862022059894,
+      "mde_true": 0.02281012028891836,
+      "mde_cr2_mean": 0.023973116877797563,
+      "mde_delong_mean": 0.020713330713949832,
+      "rejection": {
+        "cr2_bm": 0.653,
+        "delong": 0.751
+      },
+      "coverage": {
+        "cr2_bm": 0.954,
+        "delong": 0.921
+      }
+    },
+    {
+      "K": 38,
+      "m": 12,
+      "N": 456,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.014922991246474109,
+      "mde_true": 0.04180803168615108,
+      "mde_cr2_mean": 0.043394584946825215,
+      "mde_delong_mean": 0.04205064309260149,
+      "rejection": {
+        "cr2_bm": 0.046,
+        "delong": 0.049
+      },
+      "coverage": {
+        "cr2_bm": 0.954,
+        "delong": 0.951
+      }
+    },
+    {
+      "K": 38,
+      "m": 12,
+      "N": 456,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.014446330228116746,
+      "mde_true": 0.04047262522307042,
+      "mde_cr2_mean": 0.043150255387136446,
+      "mde_delong_mean": 0.04176600543924902,
+      "rejection": {
+        "cr2_bm": 0.269,
+        "delong": 0.278
+      },
+      "coverage": {
+        "cr2_bm": 0.965,
+        "delong": 0.964
+      }
+    },
+    {
+      "K": 38,
+      "m": 24,
+      "N": 912,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.010870335404113168,
+      "mde_true": 0.030454170984093514,
+      "mde_cr2_mean": 0.03116959066944435,
+      "mde_delong_mean": 0.029650878825690313,
+      "rejection": {
+        "cr2_bm": 0.047,
+        "delong": 0.053
+      },
+      "coverage": {
+        "cr2_bm": 0.953,
+        "delong": 0.947
+      }
+    },
+    {
+      "K": 38,
+      "m": 24,
+      "N": 912,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.011056602908003624,
+      "mde_true": 0.030976015269607814,
+      "mde_cr2_mean": 0.030923274439351934,
+      "mde_delong_mean": 0.02937053583991901,
+      "rejection": {
+        "cr2_bm": 0.436,
+        "delong": 0.468
+      },
+      "coverage": {
+        "cr2_bm": 0.951,
+        "delong": 0.939
+      }
+    },
+    {
+      "K": 38,
+      "m": 48,
+      "N": 1824,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.007900367102733025,
+      "mde_true": 0.022133551692682822,
+      "mde_cr2_mean": 0.022691624559406192,
+      "mde_delong_mean": 0.020901216329661645,
+      "rejection": {
+        "cr2_bm": 0.046,
+        "delong": 0.06
+      },
+      "coverage": {
+        "cr2_bm": 0.954,
+        "delong": 0.94
+      }
+    },
+    {
+      "K": 38,
+      "m": 48,
+      "N": 1824,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.007830815937013551,
+      "mde_true": 0.021938698174900618,
+      "mde_cr2_mean": 0.022449187007625455,
+      "mde_delong_mean": 0.02077011140304968,
+      "rejection": {
+        "cr2_bm": 0.694,
+        "delong": 0.757
+      },
+      "coverage": {
+        "cr2_bm": 0.951,
+        "delong": 0.943
+      }
+    },
+    {
+      "K": 38,
+      "m": 96,
+      "N": 3648,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.005915573501653297,
+      "mde_true": 0.016572983278892648,
+      "mde_cr2_mean": 0.016871394478526168,
+      "mde_delong_mean": 0.014765173443952576,
+      "rejection": {
+        "cr2_bm": 0.05,
+        "delong": 0.078
+      },
+      "coverage": {
+        "cr2_bm": 0.95,
+        "delong": 0.922
+      }
+    },
+    {
+      "K": 38,
+      "m": 96,
+      "N": 3648,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.00586954124072849,
+      "mde_true": 0.01644401997712939,
+      "mde_cr2_mean": 0.016706141821940138,
+      "mde_delong_mean": 0.014660692430805686,
+      "rejection": {
+        "cr2_bm": 0.906,
+        "delong": 0.953
+      },
+      "coverage": {
+        "cr2_bm": 0.949,
+        "delong": 0.925
+      }
+    },
+    {
+      "K": 76,
+      "m": 12,
+      "N": 912,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.0110372639597965,
+      "mde_true": 0.03092183555817688,
+      "mde_cr2_mean": 0.0303648396771045,
+      "mde_delong_mean": 0.029605383123987965,
+      "rejection": {
+        "cr2_bm": 0.06,
+        "delong": 0.062
+      },
+      "coverage": {
+        "cr2_bm": 0.94,
+        "delong": 0.938
+      }
+    },
+    {
+      "K": 76,
+      "m": 12,
+      "N": 912,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.010805401542329165,
+      "mde_true": 0.030272253236764458,
+      "mde_cr2_mean": 0.03023008455101768,
+      "mde_delong_mean": 0.02946771098019055,
+      "rejection": {
+        "cr2_bm": 0.467,
+        "delong": 0.485
+      },
+      "coverage": {
+        "cr2_bm": 0.946,
+        "delong": 0.94
+      }
+    },
+    {
+      "K": 76,
+      "m": 24,
+      "N": 1824,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.007696879127751796,
+      "mde_true": 0.02156346278991167,
+      "mde_cr2_mean": 0.02172680636017566,
+      "mde_delong_mean": 0.020872221554598357,
+      "rejection": {
+        "cr2_bm": 0.047,
+        "delong": 0.054
+      },
+      "coverage": {
+        "cr2_bm": 0.953,
+        "delong": 0.946
+      }
+    },
+    {
+      "K": 76,
+      "m": 24,
+      "N": 1824,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.007633372433804653,
+      "mde_true": 0.02138554337489813,
+      "mde_cr2_mean": 0.0215705268423131,
+      "mde_delong_mean": 0.020762733401743345,
+      "rejection": {
+        "cr2_bm": 0.731,
+        "delong": 0.761
+      },
+      "coverage": {
+        "cr2_bm": 0.949,
+        "delong": 0.945
+      }
+    },
+    {
+      "K": 76,
+      "m": 48,
+      "N": 3648,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.005698557946519252,
+      "mde_true": 0.015964995707528528,
+      "mde_cr2_mean": 0.015853869106703656,
+      "mde_delong_mean": 0.014755944778008644,
+      "rejection": {
+        "cr2_bm": 0.049,
+        "delong": 0.064
+      },
+      "coverage": {
+        "cr2_bm": 0.951,
+        "delong": 0.936
+      }
+    },
+    {
+      "K": 76,
+      "m": 48,
+      "N": 3648,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.005444964171464207,
+      "mde_true": 0.015254531135928848,
+      "mde_cr2_mean": 0.015827292334945245,
+      "mde_delong_mean": 0.014655739579183855,
+      "rejection": {
+        "cr2_bm": 0.947,
+        "delong": 0.964
+      },
+      "coverage": {
+        "cr2_bm": 0.956,
+        "delong": 0.936
+      }
+    },
+    {
+      "K": 76,
+      "m": 96,
+      "N": 7296,
+      "scenario": "specific",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.004211905957567272,
+      "mde_true": 0.011800013470802418,
+      "mde_cr2_mean": 0.011764749158357717,
+      "mde_delong_mean": 0.01042587482888754,
+      "rejection": {
+        "cr2_bm": 0.056,
+        "delong": 0.078
+      },
+      "coverage": {
+        "cr2_bm": 0.944,
+        "delong": 0.922
+      }
+    },
+    {
+      "K": 76,
+      "m": 96,
+      "N": 7296,
+      "scenario": "specific",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.004132697498533822,
+      "mde_true": 0.011578104222824797,
+      "mde_cr2_mean": 0.011793286462471887,
+      "mde_delong_mean": 0.010363343496247244,
+      "rejection": {
+        "cr2_bm": 0.997,
+        "delong": 0.998
+      },
+      "coverage": {
+        "cr2_bm": 0.96,
+        "delong": 0.92
+      }
+    },
+    {
+      "K": 10,
+      "m": 12,
+      "N": 120,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.03414018924509317,
+      "mde_true": 0.09564664953263237,
+      "mde_cr2_mean": 0.10419834444493474,
+      "mde_delong_mean": 0.09123030534934938,
+      "rejection": {
+        "cr2_bm": 0.053,
+        "delong": 0.055
+      },
+      "coverage": {
+        "cr2_bm": 0.947,
+        "delong": 0.945
+      }
+    },
+    {
+      "K": 10,
+      "m": 12,
+      "N": 120,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.03374194147877712,
+      "mde_true": 0.09453092447737481,
+      "mde_cr2_mean": 0.10404546245800922,
+      "mde_delong_mean": 0.0909123486924795,
+      "rejection": {
+        "cr2_bm": 0.083,
+        "delong": 0.114
+      },
+      "coverage": {
+        "cr2_bm": 0.955,
+        "delong": 0.938
+      }
+    },
+    {
+      "K": 10,
+      "m": 24,
+      "N": 240,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.02418070696647465,
+      "mde_true": 0.06774431120079666,
+      "mde_cr2_mean": 0.07646343466221801,
+      "mde_delong_mean": 0.06364135172411244,
+      "rejection": {
+        "cr2_bm": 0.045,
+        "delong": 0.057
+      },
+      "coverage": {
+        "cr2_bm": 0.955,
+        "delong": 0.943
+      }
+    },
+    {
+      "K": 10,
+      "m": 24,
+      "N": 240,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.025640479074464633,
+      "mde_true": 0.071833987160355,
+      "mde_cr2_mean": 0.07674246031462194,
+      "mde_delong_mean": 0.0632089226193839,
+      "rejection": {
+        "cr2_bm": 0.108,
+        "delong": 0.181
+      },
+      "coverage": {
+        "cr2_bm": 0.959,
+        "delong": 0.926
+      }
+    },
+    {
+      "K": 10,
+      "m": 48,
+      "N": 480,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.019300631129513232,
+      "mde_true": 0.054072362872695276,
+      "mde_cr2_mean": 0.058783490469121395,
+      "mde_delong_mean": 0.044658719569784074,
+      "rejection": {
+        "cr2_bm": 0.057,
+        "delong": 0.104
+      },
+      "coverage": {
+        "cr2_bm": 0.943,
+        "delong": 0.896
+      }
+    },
+    {
+      "K": 10,
+      "m": 48,
+      "N": 480,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.019045765959591735,
+      "mde_true": 0.05335833638003136,
+      "mde_cr2_mean": 0.0594339724297507,
+      "mde_delong_mean": 0.044394469378912234,
+      "rejection": {
+        "cr2_bm": 0.143,
+        "delong": 0.275
+      },
+      "coverage": {
+        "cr2_bm": 0.962,
+        "delong": 0.907
+      }
+    },
+    {
+      "K": 10,
+      "m": 96,
+      "N": 960,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.01649189620995359,
+      "mde_true": 0.04620345264045927,
+      "mde_cr2_mean": 0.04850590704109048,
+      "mde_delong_mean": 0.03150222204346979,
+      "rejection": {
+        "cr2_bm": 0.046,
+        "delong": 0.176
+      },
+      "coverage": {
+        "cr2_bm": 0.954,
+        "delong": 0.824
+      }
+    },
+    {
+      "K": 10,
+      "m": 96,
+      "N": 960,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.0156492333700616,
+      "mde_true": 0.043842660884364774,
+      "mde_cr2_mean": 0.04805073303499842,
+      "mde_delong_mean": 0.03122484486973333,
+      "rejection": {
+        "cr2_bm": 0.189,
+        "delong": 0.455
+      },
+      "coverage": {
+        "cr2_bm": 0.949,
+        "delong": 0.847
+      }
+    },
+    {
+      "K": 19,
+      "m": 12,
+      "N": 228,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.024139339107689714,
+      "mde_true": 0.0676284156191198,
+      "mde_cr2_mean": 0.0716809121562757,
+      "mde_delong_mean": 0.06544239999341629,
+      "rejection": {
+        "cr2_bm": 0.052,
+        "delong": 0.06
+      },
+      "coverage": {
+        "cr2_bm": 0.948,
+        "delong": 0.94
+      }
+    },
+    {
+      "K": 19,
+      "m": 12,
+      "N": 228,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.024817421788401645,
+      "mde_true": 0.06952812203406075,
+      "mde_cr2_mean": 0.07095205121012281,
+      "mde_delong_mean": 0.0649118460519396,
+      "rejection": {
+        "cr2_bm": 0.111,
+        "delong": 0.156
+      },
+      "coverage": {
+        "cr2_bm": 0.94,
+        "delong": 0.932
+      }
+    },
+    {
+      "K": 19,
+      "m": 24,
+      "N": 456,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.01828121809523454,
+      "mde_true": 0.051216390384708405,
+      "mde_cr2_mean": 0.05316784734392804,
+      "mde_delong_mean": 0.04582294566424918,
+      "rejection": {
+        "cr2_bm": 0.047,
+        "delong": 0.072
+      },
+      "coverage": {
+        "cr2_bm": 0.953,
+        "delong": 0.928
+      }
+    },
+    {
+      "K": 19,
+      "m": 24,
+      "N": 456,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.017985196853707572,
+      "mde_true": 0.050387061650199,
+      "mde_cr2_mean": 0.053160840059842764,
+      "mde_delong_mean": 0.04567067264647716,
+      "rejection": {
+        "cr2_bm": 0.174,
+        "delong": 0.245
+      },
+      "coverage": {
+        "cr2_bm": 0.954,
+        "delong": 0.923
+      }
+    },
+    {
+      "K": 19,
+      "m": 48,
+      "N": 912,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.014496290311712746,
+      "mde_true": 0.040612592654768666,
+      "mde_cr2_mean": 0.04159195302212366,
+      "mde_delong_mean": 0.03236127424451758,
+      "rejection": {
+        "cr2_bm": 0.054,
+        "delong": 0.112
+      },
+      "coverage": {
+        "cr2_bm": 0.946,
+        "delong": 0.888
+      }
+    },
+    {
+      "K": 19,
+      "m": 48,
+      "N": 912,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.01407695096642473,
+      "mde_true": 0.03943777774363659,
+      "mde_cr2_mean": 0.04087032907528124,
+      "mde_delong_mean": 0.03197414092852171,
+      "rejection": {
+        "cr2_bm": 0.287,
+        "delong": 0.425
+      },
+      "coverage": {
+        "cr2_bm": 0.944,
+        "delong": 0.886
+      }
+    },
+    {
+      "K": 19,
+      "m": 96,
+      "N": 1824,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.011551930021492946,
+      "mde_true": 0.03236371638889007,
+      "mde_cr2_mean": 0.0337559266081633,
+      "mde_delong_mean": 0.022802528791950136,
+      "rejection": {
+        "cr2_bm": 0.048,
+        "delong": 0.159
+      },
+      "coverage": {
+        "cr2_bm": 0.952,
+        "delong": 0.841
+      }
+    },
+    {
+      "K": 19,
+      "m": 96,
+      "N": 1824,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.011104126439586129,
+      "mde_true": 0.03110915649320188,
+      "mde_cr2_mean": 0.03342801391250063,
+      "mde_delong_mean": 0.022555699170733873,
+      "rejection": {
+        "cr2_bm": 0.422,
+        "delong": 0.69
+      },
+      "coverage": {
+        "cr2_bm": 0.957,
+        "delong": 0.852
+      }
+    },
+    {
+      "K": 38,
+      "m": 12,
+      "N": 456,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.01664120709656052,
+      "mde_true": 0.04662175981328059,
+      "mde_cr2_mean": 0.04885960237606722,
+      "mde_delong_mean": 0.04574680068608088,
+      "rejection": {
+        "cr2_bm": 0.043,
+        "delong": 0.051
+      },
+      "coverage": {
+        "cr2_bm": 0.957,
+        "delong": 0.949
+      }
+    },
+    {
+      "K": 38,
+      "m": 12,
+      "N": 456,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.017390737086748938,
+      "mde_true": 0.04872163195432481,
+      "mde_cr2_mean": 0.04881340821838102,
+      "mde_delong_mean": 0.04548969334918658,
+      "rejection": {
+        "cr2_bm": 0.211,
+        "delong": 0.258
+      },
+      "coverage": {
+        "cr2_bm": 0.949,
+        "delong": 0.924
+      }
+    },
+    {
+      "K": 38,
+      "m": 24,
+      "N": 912,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.012503769676800934,
+      "mde_true": 0.035030376297214665,
+      "mde_cr2_mean": 0.03657801288861717,
+      "mde_delong_mean": 0.03221321276168494,
+      "rejection": {
+        "cr2_bm": 0.049,
+        "delong": 0.073
+      },
+      "coverage": {
+        "cr2_bm": 0.951,
+        "delong": 0.927
+      }
+    },
+    {
+      "K": 38,
+      "m": 24,
+      "N": 912,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.012706272132754041,
+      "mde_true": 0.03559770418444446,
+      "mde_cr2_mean": 0.03626900318042702,
+      "mde_delong_mean": 0.03202187705694246,
+      "rejection": {
+        "cr2_bm": 0.346,
+        "delong": 0.444
+      },
+      "coverage": {
+        "cr2_bm": 0.949,
+        "delong": 0.92
+      }
+    },
+    {
+      "K": 38,
+      "m": 48,
+      "N": 1824,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.009879131441271382,
+      "mde_true": 0.027677228613660967,
+      "mde_cr2_mean": 0.02829192180237182,
+      "mde_delong_mean": 0.02277237460970964,
+      "rejection": {
+        "cr2_bm": 0.048,
+        "delong": 0.106
+      },
+      "coverage": {
+        "cr2_bm": 0.952,
+        "delong": 0.894
+      }
+    },
+    {
+      "K": 38,
+      "m": 48,
+      "N": 1824,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.009933938006913917,
+      "mde_true": 0.027830773877820632,
+      "mde_cr2_mean": 0.028180655208144775,
+      "mde_delong_mean": 0.02262271862195378,
+      "rejection": {
+        "cr2_bm": 0.488,
+        "delong": 0.666
+      },
+      "coverage": {
+        "cr2_bm": 0.941,
+        "delong": 0.889
+      }
+    },
+    {
+      "K": 38,
+      "m": 96,
+      "N": 3648,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.008220988827682593,
+      "mde_true": 0.023031800777907414,
+      "mde_cr2_mean": 0.02320954295897599,
+      "mde_delong_mean": 0.016092266874346756,
+      "rejection": {
+        "cr2_bm": 0.055,
+        "delong": 0.171
+      },
+      "coverage": {
+        "cr2_bm": 0.945,
+        "delong": 0.829
+      }
+    },
+    {
+      "K": 38,
+      "m": 96,
+      "N": 3648,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.008157961688921285,
+      "mde_true": 0.022855224877613777,
+      "mde_cr2_mean": 0.023105201473487165,
+      "mde_delong_mean": 0.015976068382738212,
+      "rejection": {
+        "cr2_bm": 0.673,
+        "delong": 0.865
+      },
+      "coverage": {
+        "cr2_bm": 0.95,
+        "delong": 0.836
+      }
+    },
+    {
+      "K": 76,
+      "m": 12,
+      "N": 912,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.012505231528495241,
+      "mde_true": 0.03503447179931251,
+      "mde_cr2_mean": 0.03436654118753951,
+      "mde_delong_mean": 0.032281356008957866,
+      "rejection": {
+        "cr2_bm": 0.057,
+        "delong": 0.074
+      },
+      "coverage": {
+        "cr2_bm": 0.943,
+        "delong": 0.926
+      }
+    },
+    {
+      "K": 76,
+      "m": 12,
+      "N": 912,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.011995443040039964,
+      "mde_true": 0.03360625590569205,
+      "mde_cr2_mean": 0.034011417287404415,
+      "mde_delong_mean": 0.032051762285602116,
+      "rejection": {
+        "cr2_bm": 0.388,
+        "delong": 0.438
+      },
+      "coverage": {
+        "cr2_bm": 0.952,
+        "delong": 0.938
+      }
+    },
+    {
+      "K": 76,
+      "m": 24,
+      "N": 1824,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.008988196378542002,
+      "mde_true": 0.025181198111619788,
+      "mde_cr2_mean": 0.025499953857404938,
+      "mde_delong_mean": 0.022734261145197495,
+      "rejection": {
+        "cr2_bm": 0.044,
+        "delong": 0.077
+      },
+      "coverage": {
+        "cr2_bm": 0.956,
+        "delong": 0.923
+      }
+    },
+    {
+      "K": 76,
+      "m": 24,
+      "N": 1824,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.008994309002671353,
+      "mde_true": 0.025198323149024458,
+      "mde_cr2_mean": 0.0253288845718846,
+      "mde_delong_mean": 0.022554451325629707,
+      "rejection": {
+        "cr2_bm": 0.613,
+        "delong": 0.698
+      },
+      "coverage": {
+        "cr2_bm": 0.948,
+        "delong": 0.921
+      }
+    },
+    {
+      "K": 76,
+      "m": 48,
+      "N": 3648,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.006990106284357774,
+      "mde_true": 0.019583378439295304,
+      "mde_cr2_mean": 0.019852681801260926,
+      "mde_delong_mean": 0.01605562618157235,
+      "rejection": {
+        "cr2_bm": 0.056,
+        "delong": 0.105
+      },
+      "coverage": {
+        "cr2_bm": 0.944,
+        "delong": 0.895
+      }
+    },
+    {
+      "K": 76,
+      "m": 48,
+      "N": 3648,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.006695587477572532,
+      "mde_true": 0.018758258903749502,
+      "mde_cr2_mean": 0.01980230820344986,
+      "mde_delong_mean": 0.015972872346448286,
+      "rejection": {
+        "cr2_bm": 0.804,
+        "delong": 0.9
+      },
+      "coverage": {
+        "cr2_bm": 0.964,
+        "delong": 0.911
+      }
+    },
+    {
+      "K": 76,
+      "m": 96,
+      "N": 7296,
+      "scenario": "station_year",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.005648239446539665,
+      "mde_true": 0.015824024141788098,
+      "mde_cr2_mean": 0.016351569707760773,
+      "mde_delong_mean": 0.011360882843773663,
+      "rejection": {
+        "cr2_bm": 0.033,
+        "delong": 0.159
+      },
+      "coverage": {
+        "cr2_bm": 0.967,
+        "delong": 0.841
+      }
+    },
+    {
+      "K": 76,
+      "m": 96,
+      "N": 7296,
+      "scenario": "station_year",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.005496045714091071,
+      "mde_true": 0.015397640430670677,
+      "mde_cr2_mean": 0.016095300329239507,
+      "mde_delong_mean": 0.011275620193346558,
+      "rejection": {
+        "cr2_bm": 0.951,
+        "delong": 0.988
+      },
+      "coverage": {
+        "cr2_bm": 0.952,
+        "delong": 0.859
+      }
+    },
+    {
+      "K": 10,
+      "m": 12,
+      "N": 120,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.029898448596441307,
+      "mde_true": 0.0837630516323004,
+      "mde_cr2_mean": 0.09239673154335991,
+      "mde_delong_mean": 0.08422638094945403,
+      "rejection": {
+        "cr2_bm": 0.056,
+        "delong": 0.045
+      },
+      "coverage": {
+        "cr2_bm": 0.944,
+        "delong": 0.955
+      }
+    },
+    {
+      "K": 10,
+      "m": 12,
+      "N": 120,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.028908081185496006,
+      "mde_true": 0.08098845293329522,
+      "mde_cr2_mean": 0.09087257803926613,
+      "mde_delong_mean": 0.08356320141923919,
+      "rejection": {
+        "cr2_bm": 0.095,
+        "delong": 0.097
+      },
+      "coverage": {
+        "cr2_bm": 0.957,
+        "delong": 0.958
+      }
+    },
+    {
+      "K": 10,
+      "m": 24,
+      "N": 240,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.02110223188937106,
+      "mde_true": 0.05911970093045405,
+      "mde_cr2_mean": 0.06445904613650462,
+      "mde_delong_mean": 0.05830283968378751,
+      "rejection": {
+        "cr2_bm": 0.051,
+        "delong": 0.048
+      },
+      "coverage": {
+        "cr2_bm": 0.949,
+        "delong": 0.952
+      }
+    },
+    {
+      "K": 10,
+      "m": 24,
+      "N": 240,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.02140379425959944,
+      "mde_true": 0.059964553609224994,
+      "mde_cr2_mean": 0.06370789270530643,
+      "mde_delong_mean": 0.057997430653179236,
+      "rejection": {
+        "cr2_bm": 0.14,
+        "delong": 0.163
+      },
+      "coverage": {
+        "cr2_bm": 0.945,
+        "delong": 0.945
+      }
+    },
+    {
+      "K": 10,
+      "m": 48,
+      "N": 480,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.015499131460386102,
+      "mde_true": 0.043422137593007365,
+      "mde_cr2_mean": 0.04621694456036665,
+      "mde_delong_mean": 0.04102966325464783,
+      "rejection": {
+        "cr2_bm": 0.059,
+        "delong": 0.069
+      },
+      "coverage": {
+        "cr2_bm": 0.941,
+        "delong": 0.931
+      }
+    },
+    {
+      "K": 10,
+      "m": 48,
+      "N": 480,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.01529119073502974,
+      "mde_true": 0.04283957393060529,
+      "mde_cr2_mean": 0.045263971299585364,
+      "mde_delong_mean": 0.04064523213420706,
+      "rejection": {
+        "cr2_bm": 0.254,
+        "delong": 0.308
+      },
+      "coverage": {
+        "cr2_bm": 0.946,
+        "delong": 0.936
+      }
+    },
+    {
+      "K": 10,
+      "m": 96,
+      "N": 960,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.011350193300203298,
+      "mde_true": 0.03179853377257441,
+      "mde_cr2_mean": 0.033595858209542535,
+      "mde_delong_mean": 0.028743994347465673,
+      "rejection": {
+        "cr2_bm": 0.058,
+        "delong": 0.074
+      },
+      "coverage": {
+        "cr2_bm": 0.942,
+        "delong": 0.926
+      }
+    },
+    {
+      "K": 10,
+      "m": 96,
+      "N": 960,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 9.0,
+      "sd_delta_hat": 0.011668366608604513,
+      "mde_true": 0.03268992341018935,
+      "mde_cr2_mean": 0.033408268707564234,
+      "mde_delong_mean": 0.028648737398764574,
+      "rejection": {
+        "cr2_bm": 0.375,
+        "delong": 0.478
+      },
+      "coverage": {
+        "cr2_bm": 0.936,
+        "delong": 0.912
+      }
+    },
+    {
+      "K": 19,
+      "m": 12,
+      "N": 228,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.02134584471435826,
+      "mde_true": 0.059802203019880935,
+      "mde_cr2_mean": 0.06324867957617435,
+      "mde_delong_mean": 0.05997919655949911,
+      "rejection": {
+        "cr2_bm": 0.048,
+        "delong": 0.054
+      },
+      "coverage": {
+        "cr2_bm": 0.952,
+        "delong": 0.946
+      }
+    },
+    {
+      "K": 19,
+      "m": 12,
+      "N": 228,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.021934032454828507,
+      "mde_true": 0.06145006109905765,
+      "mde_cr2_mean": 0.06307073683097796,
+      "mde_delong_mean": 0.05964349435538208,
+      "rejection": {
+        "cr2_bm": 0.147,
+        "delong": 0.163
+      },
+      "coverage": {
+        "cr2_bm": 0.949,
+        "delong": 0.937
+      }
+    },
+    {
+      "K": 19,
+      "m": 24,
+      "N": 456,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.015210518889842246,
+      "mde_true": 0.04261356488161011,
+      "mde_cr2_mean": 0.044152176354749564,
+      "mde_delong_mean": 0.04207681293203827,
+      "rejection": {
+        "cr2_bm": 0.053,
+        "delong": 0.056
+      },
+      "coverage": {
+        "cr2_bm": 0.947,
+        "delong": 0.944
+      }
+    },
+    {
+      "K": 19,
+      "m": 24,
+      "N": 456,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.015531121138138369,
+      "mde_true": 0.04351175940133031,
+      "mde_cr2_mean": 0.04406292644032258,
+      "mde_delong_mean": 0.04180579283890712,
+      "rejection": {
+        "cr2_bm": 0.243,
+        "delong": 0.274
+      },
+      "coverage": {
+        "cr2_bm": 0.94,
+        "delong": 0.944
+      }
+    },
+    {
+      "K": 19,
+      "m": 48,
+      "N": 912,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.01157247274893138,
+      "mde_true": 0.032421268590421305,
+      "mde_cr2_mean": 0.03227402862511784,
+      "mde_delong_mean": 0.02947807218171492,
+      "rejection": {
+        "cr2_bm": 0.049,
+        "delong": 0.066
+      },
+      "coverage": {
+        "cr2_bm": 0.951,
+        "delong": 0.934
+      }
+    },
+    {
+      "K": 19,
+      "m": 48,
+      "N": 912,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.011060008358246335,
+      "mde_true": 0.03098555592866881,
+      "mde_cr2_mean": 0.03217681385973123,
+      "mde_delong_mean": 0.029419345896384414,
+      "rejection": {
+        "cr2_bm": 0.426,
+        "delong": 0.513
+      },
+      "coverage": {
+        "cr2_bm": 0.946,
+        "delong": 0.938
+      }
+    },
+    {
+      "K": 19,
+      "m": 96,
+      "N": 1824,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.008832495265286802,
+      "mde_true": 0.024744988174280287,
+      "mde_cr2_mean": 0.02374753640863904,
+      "mde_delong_mean": 0.02084804558829931,
+      "rejection": {
+        "cr2_bm": 0.066,
+        "delong": 0.105
+      },
+      "coverage": {
+        "cr2_bm": 0.934,
+        "delong": 0.895
+      }
+    },
+    {
+      "K": 19,
+      "m": 96,
+      "N": 1824,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 17.999999999999986,
+      "sd_delta_hat": 0.008519773313650395,
+      "mde_true": 0.02386887097719629,
+      "mde_cr2_mean": 0.023412961774832073,
+      "mde_delong_mean": 0.020735086906300902,
+      "rejection": {
+        "cr2_bm": 0.666,
+        "delong": 0.744
+      },
+      "coverage": {
+        "cr2_bm": 0.938,
+        "delong": 0.905
+      }
+    },
+    {
+      "K": 38,
+      "m": 12,
+      "N": 456,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.015403335371402732,
+      "mde_true": 0.04315375668615852,
+      "mde_cr2_mean": 0.043505036141702716,
+      "mde_delong_mean": 0.04219564957794245,
+      "rejection": {
+        "cr2_bm": 0.051,
+        "delong": 0.058
+      },
+      "coverage": {
+        "cr2_bm": 0.949,
+        "delong": 0.942
+      }
+    },
+    {
+      "K": 38,
+      "m": 12,
+      "N": 456,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.015396931821923344,
+      "mde_true": 0.043135816596593615,
+      "mde_cr2_mean": 0.04298424142308809,
+      "mde_delong_mean": 0.041846122970896904,
+      "rejection": {
+        "cr2_bm": 0.252,
+        "delong": 0.26
+      },
+      "coverage": {
+        "cr2_bm": 0.95,
+        "delong": 0.942
+      }
+    },
+    {
+      "K": 38,
+      "m": 24,
+      "N": 912,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.011522045193034106,
+      "mde_true": 0.03227999149523393,
+      "mde_cr2_mean": 0.03099423355597228,
+      "mde_delong_mean": 0.02958156920224154,
+      "rejection": {
+        "cr2_bm": 0.064,
+        "delong": 0.072
+      },
+      "coverage": {
+        "cr2_bm": 0.936,
+        "delong": 0.928
+      }
+    },
+    {
+      "K": 38,
+      "m": 24,
+      "N": 912,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.010906266806617973,
+      "mde_true": 0.030554835870217043,
+      "mde_cr2_mean": 0.03076773131264878,
+      "mde_delong_mean": 0.029401573467097385,
+      "rejection": {
+        "cr2_bm": 0.42,
+        "delong": 0.453
+      },
+      "coverage": {
+        "cr2_bm": 0.949,
+        "delong": 0.939
+      }
+    },
+    {
+      "K": 38,
+      "m": 48,
+      "N": 1824,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.008149051392883182,
+      "mde_true": 0.02283026192394442,
+      "mde_cr2_mean": 0.02233795444666546,
+      "mde_delong_mean": 0.02091415694095442,
+      "rejection": {
+        "cr2_bm": 0.059,
+        "delong": 0.081
+      },
+      "coverage": {
+        "cr2_bm": 0.941,
+        "delong": 0.919
+      }
+    },
+    {
+      "K": 38,
+      "m": 48,
+      "N": 1824,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.007806561398363833,
+      "mde_true": 0.02187074701794742,
+      "mde_cr2_mean": 0.022285876675049773,
+      "mde_delong_mean": 0.020700245168902107,
+      "rejection": {
+        "cr2_bm": 0.698,
+        "delong": 0.758
+      },
+      "coverage": {
+        "cr2_bm": 0.949,
+        "delong": 0.938
+      }
+    },
+    {
+      "K": 38,
+      "m": 96,
+      "N": 3648,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.006225482145922023,
+      "mde_true": 0.01744121875564134,
+      "mde_cr2_mean": 0.01663305997255137,
+      "mde_delong_mean": 0.014737156262267846,
+      "rejection": {
+        "cr2_bm": 0.056,
+        "delong": 0.098
+      },
+      "coverage": {
+        "cr2_bm": 0.944,
+        "delong": 0.902
+      }
+    },
+    {
+      "K": 38,
+      "m": 96,
+      "N": 3648,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 36.99999999999995,
+      "sd_delta_hat": 0.005855833993034726,
+      "mde_true": 0.016405617954609528,
+      "mde_cr2_mean": 0.01656407754375876,
+      "mde_delong_mean": 0.014633187183023524,
+      "rejection": {
+        "cr2_bm": 0.895,
+        "delong": 0.947
+      },
+      "coverage": {
+        "cr2_bm": 0.95,
+        "delong": 0.918
+      }
+    },
+    {
+      "K": 76,
+      "m": 12,
+      "N": 912,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.01053068394202707,
+      "mde_true": 0.029502608468602642,
+      "mde_cr2_mean": 0.03025978299556343,
+      "mde_delong_mean": 0.02965962188206143,
+      "rejection": {
+        "cr2_bm": 0.04,
+        "delong": 0.041
+      },
+      "coverage": {
+        "cr2_bm": 0.96,
+        "delong": 0.959
+      }
+    },
+    {
+      "K": 76,
+      "m": 12,
+      "N": 912,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.010741680177161,
+      "mde_true": 0.030093732402031347,
+      "mde_cr2_mean": 0.029890167165800872,
+      "mde_delong_mean": 0.02937106475171474,
+      "rejection": {
+        "cr2_bm": 0.481,
+        "delong": 0.478
+      },
+      "coverage": {
+        "cr2_bm": 0.956,
+        "delong": 0.956
+      }
+    },
+    {
+      "K": 76,
+      "m": 24,
+      "N": 1824,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.007973039119082268,
+      "mde_true": 0.022337148539457324,
+      "mde_cr2_mean": 0.021594717563775852,
+      "mde_delong_mean": 0.020890182491345683,
+      "rejection": {
+        "cr2_bm": 0.051,
+        "delong": 0.065
+      },
+      "coverage": {
+        "cr2_bm": 0.949,
+        "delong": 0.935
+      }
+    },
+    {
+      "K": 76,
+      "m": 24,
+      "N": 1824,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.007987910058574878,
+      "mde_true": 0.022378810743719276,
+      "mde_cr2_mean": 0.021543939340655273,
+      "mde_delong_mean": 0.020728400355952324,
+      "rejection": {
+        "cr2_bm": 0.747,
+        "delong": 0.779
+      },
+      "coverage": {
+        "cr2_bm": 0.936,
+        "delong": 0.924
+      }
+    },
+    {
+      "K": 76,
+      "m": 48,
+      "N": 3648,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.005928097967001041,
+      "mde_true": 0.016608071635875656,
+      "mde_cr2_mean": 0.01582886887080134,
+      "mde_delong_mean": 0.014765579703508619,
+      "rejection": {
+        "cr2_bm": 0.068,
+        "delong": 0.079
+      },
+      "coverage": {
+        "cr2_bm": 0.932,
+        "delong": 0.921
+      }
+    },
+    {
+      "K": 76,
+      "m": 48,
+      "N": 3648,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.005636306210737078,
+      "mde_true": 0.015790592164759313,
+      "mde_cr2_mean": 0.01564923345378429,
+      "mde_delong_mean": 0.014663649330274761,
+      "rejection": {
+        "cr2_bm": 0.94,
+        "delong": 0.954
+      },
+      "coverage": {
+        "cr2_bm": 0.95,
+        "delong": 0.934
+      }
+    },
+    {
+      "K": 76,
+      "m": 96,
+      "N": 7296,
+      "scenario": "specific_ar1",
+      "delta": 0.0,
+      "delta_true": 0.0,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.004479961890610295,
+      "mde_true": 0.012550995010443228,
+      "mde_cr2_mean": 0.011795604785604293,
+      "mde_delong_mean": 0.010435951939056626,
+      "rejection": {
+        "cr2_bm": 0.07,
+        "delong": 0.099
+      },
+      "coverage": {
+        "cr2_bm": 0.93,
+        "delong": 0.901
+      }
+    },
+    {
+      "K": 76,
+      "m": 96,
+      "N": 7296,
+      "scenario": "specific_ar1",
+      "delta": 0.02,
+      "delta_true": 0.020000000000000018,
+      "reps": 1000,
+      "df_bm": 75.00000000000004,
+      "sd_delta_hat": 0.00432009403712446,
+      "mde_true": 0.012103111595265864,
+      "mde_cr2_mean": 0.011788504376681209,
+      "mde_delong_mean": 0.010373799181928848,
+      "rejection": {
+        "cr2_bm": 0.994,
+        "delong": 0.996
+      },
+      "coverage": {
+        "cr2_bm": 0.943,
+        "delong": 0.901
+      }
+    }
+  ]
+}

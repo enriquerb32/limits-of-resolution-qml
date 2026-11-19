@@ -10,6 +10,7 @@ one check, drawn as the CR2 p-value (Bell-McCaffrey degrees of freedom) on a log
   results/local_cr2_leave_one_year.json      primary procedure without each of the 19 test years
   results/local_two_station_subset.json      Alicante and Barcelona only (441 rows)
   results/local_panel2_cr2.json              second panel (different test set; its difference is printed)
+  results/local_exp55_review_closing.json    models refitted with causal imputation, 529 common rows
 
   python scripts/make_sensitivity_plot.py      # -> paper/figs/fig_sensitivity.pdf and .png
 """
@@ -30,7 +31,7 @@ PAIRS = [(f'RF {MINUS} LSTM †', 'RF-PureLSTM', 'RF_2273-PureLSTM'),
          (f'RF {MINUS} LSTM+QTL', 'RF-LSTM_QTL', None),
          (f'Frozen random circuit {MINUS} LSTM+QNN', 'FROZEN_RANDOM-LSTM_QNN', None)]
 ROWS = ['Primary: 1-year clusters', '2-year clusters', '3-year clusters', 'Leave one year out (19)',
-        'Alicante + Barcelona only', 'Second panel']
+        'Alicante + Barcelona only', 'Causal refit (529 rows)', 'Second panel']
 ACCENT, INK, MUTED, GRID, SURFACE = '#2a78d6', '#3d3c39', '#8a8985', '#e4e3df', '#fcfcfb'
 
 
@@ -42,19 +43,23 @@ def load(name):
 def main():
     blk, loo = load('local_cr2_block_sensitivity.json'), load('local_cr2_leave_one_year.json')
     two, p2 = load('local_two_station_subset.json')['pairs'], load('local_panel2_cr2.json')
+    cau = {k: v for fam in load('local_exp55_review_closing.json')['causal']['families']['causal_common_529'].values()
+           for k, v in fam.items()}
     for _, k, k2 in PAIRS:   # the archived files must agree with each other on the full-panel verdict
         assert abs(blk[k]['1yr']['p'] - loo[k]['full']['p']) < 1e-9, k
         assert k2 is None or k2 in p2, k2
     plt.rcParams.update({'font.size': 8, 'font.family': 'DejaVu Sans', 'axes.edgecolor': MUTED,
                          'xtick.color': MUTED, 'ytick.color': INK, 'pdf.fonttype': 42})
-    fig, axes = plt.subplots(2, 2, figsize=(6.8, 4.3), sharex=True, sharey=True)
+    fig, axes = plt.subplots(2, 2, figsize=(6.8, 4.7), sharex=True, sharey=True)
     for ax, (title, k, k2) in zip(axes.flat, PAIRS):
         pts = {0: [blk[k]['1yr']['p']], 1: [blk[k]['2yr']['p']], 2: [blk[k]['3yr']['p']],
                3: [v['p'] for v in loo[k]['by_year'].values()], 4: [two[k]['p_cr2']]}
         notes = {}
+        if k in cau:
+            pts[5] = [cau[k]['p_cr2']]
         if k2 is not None:
-            pts[5] = [p2[k2]['p_cr2']]
-            notes[5] = f'Δ = {p2[k2]["delta"]:+.3f}'.replace('-', MINUS)
+            pts[6] = [p2[k2]['p_cr2']]
+            notes[6] = f'Δ = {p2[k2]["delta"]:+.3f}'.replace('-', MINUS)
         ax.axvline(0.05, color=INK, lw=1.0, zorder=1)
         ax.axvline(0.05 / 3, color=MUTED, lw=0.9, ls=(0, (3, 2)), zorder=1)
         for i, ps in pts.items():
@@ -66,8 +71,9 @@ def main():
             if i in notes:
                 ax.annotate(notes[i], (ps[0], y), xytext=(-7, 0), textcoords='offset points', va='center', ha='right',
                             fontsize=7, color=MUTED)
-        if k2 is None:
-            ax.text(0.9, 0, 'not run', ha='right', va='center', fontsize=7, color=MUTED)
+        for i in (5, 6):
+            if i not in pts:
+                ax.text(0.9, len(ROWS) - 1 - i, 'not run', ha='right', va='center', fontsize=7, color=MUTED)
         ax.set_title(title, fontsize=8.5, loc='left', color=INK, fontweight='bold')
         ax.set_xscale('log')
         ax.set_xlim(1e-3, 1.3)
