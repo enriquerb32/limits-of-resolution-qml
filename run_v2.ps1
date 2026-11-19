@@ -99,6 +99,7 @@ Step "a21_forest"           "scripts\make_forest_plot.py"                       
 Step "a21b_resolution"      "scripts\make_resolution_plot.py"                                       # Figure 2
 Step "a21c_design"         "scripts\make_design_plot.py"                                           # study design figure
 Step "a21d_calibration"    "scripts\make_calibration_plot.py"                                      # calibration figure
+Step "a21f_sensitivity"     "scripts\make_sensitivity_plot.py"                                      # sensitivity figure (supplement)
 Step "a21e_tables"         "scripts\fill_paired_tables.py"                                         # paired-table rows from the archive
 Step "a22_trace_v2"         "scripts\build_traceability_v2.py"
 Step "a23_manuscript"       "-m pytest tests\manuscript -q"                                         # paper/main.tex vs archives

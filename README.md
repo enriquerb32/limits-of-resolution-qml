@@ -173,9 +173,13 @@ Commands run from the repository root. Table numbers refer to `paper/main.pdf`; 
 | **Table 1** | Test windows and prevalence by station | `results/test_meta.csv`, `results/panel_v2_monthly.csv` | `scripts/make_partition_table.py` | `export_test_meta.py` |
 | **Table 2** | Noise budget: SE of one AUC, seed SD, seed share | `results/local_exp43_v2_tables.json` (`noise_budget`) | `exp43_v2_tables.py results` | `exp17`, `exp41`, `exp27` |
 | **Table 3** | Paired comparisons of the classical models | `results/local_exp42_v2_summary.json` (`pairs`) | `exp42_v2_summary.py results` | `exp41_v2_classical.py` |
-| **Figure 1** | Forest plot of Tables 3, 6 and 7 | `paper/figs/fig_forest.pdf` | `scripts/make_forest_plot.py` | — |
+| **Figures 1, 3** | Inference map; hybrid and its interface controls | TikZ in `paper/main.tex` | — | — |
+| **Figure 2** | Study design: windows per station and year, test-year clusters | `paper/figs/fig_design.pdf` | `scripts/make_design_plot.py` | — |
+| **Figure 4** | Forest plot of Tables 3, 6 and 7 | `paper/figs/fig_forest.pdf` | `scripts/make_forest_plot.py` | — |
+| **Figure 5** | Calibration of the candidate procedures | `paper/figs/fig_calibration.pdf` | `scripts/make_calibration_plot.py` | — |
+| **Figure S2** | Sensitivity of the resolved verdicts to the robustness checks | `paper/figs/fig_sensitivity.pdf` | `scripts/make_sensitivity_plot.py` | — |
 | **Table 4** | Hanley–McNeil MDE by test size and prevalence | — | `qml_resolution.paired_mde_hanley_mcneil` | — |
-| **Figure 2**, **Table S10** | Empirical resolution curve | `results/local_exp43_v2_tables.json` (`resolution_curve`) | `exp43_v2_tables.py results`; figure: `scripts/make_resolution_plot.py` | as Table 5 |
+| **Figure 6**, **Table S10** | Empirical resolution curve | `results/local_exp43_v2_tables.json` (`resolution_curve`) | `exp43_v2_tables.py results`; figure: `scripts/make_resolution_plot.py` | as Table 5 |
 | **Table 5** | 15-seed AUC of every model and control | `results/local_exp42_v2_summary.json` (`models`) | `exp42_v2_summary.py results` | `exp17`, `exp27_controls.py`, `exp30_fourier_full.py` |
 | **Tables 6, 7** | Hybrids, Fourier surrogates and frozen circuits against `LSTM+QNN` | `results/local_exp42_v2_summary.json` (`pairs`) | `exp42_v2_summary.py results` | as Table 5 |
 | **Table 8** | Positive control: heads given the angles of a teacher circuit | `results/local_exp38_teacher_control_interface.json` | — | `exp38_teacher_control.py --mode interface --seeds 5` |

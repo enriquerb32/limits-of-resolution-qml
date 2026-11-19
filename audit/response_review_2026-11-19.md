@@ -76,9 +76,14 @@ Las cuatro estaciones coinciden solo en **2008–2011**, y 2008–2012 son los c
 - **Ordenar los contrastes por tamaño del efecto.** Se rompería la agrupación por familias, que es la que sigue el texto y la corrección de Holm.
 - **Franja de resultados en la Fig. 2.** La figura aparece en §2, antes de los resultados. El hallazgo está en §4.4 y en las Conclusiones.
 
-## Pendiente (decisión del autor)
+## Decisiones sobre lo pendiente
 
-- **Reordenar las figuras** (el mapa de inferencia como Figura 1). Es un cambio de estructura y de paginación.
-- **Simplificar la prosa de la Fig. 3.** Sus cajas ya siguen el flujo de cinco pasos que propone la revisión, porque se escribió para lectores sin formación estadística. Recortarla es una decisión de estilo.
-- **Partir las Figs. 2 y 4 en paneles.**
-- **Figura «headline» y figura de sensibilidad de los veredictos frágiles.** La segunda es viable con resultados archivados: `local_cr2_block_sensitivity.json`, el análisis dejando fuera un año y la variante solo Alicante/Barcelona. Iría mejor en el suplemento, porque el texto principal ya tiene 30 páginas.
+| Propuesta | Decisión | Motivo |
+|---|---|---|
+| Mapa de inferencia como Figura 1 | **Hecho** | Pasa a la Introducción, al final de las contribuciones. Es la figura que resume la contribución metodológica. El diseño pasa a ser la Fig. 2. |
+| Recortar la prosa de la Fig. 1 (antes Fig. 3) | **Hecho** | Cada caja tiene ahora una frase. El pie ya no se dirige a «readers without a statistical background». |
+| Partir las Figs. 3 y 4 en paneles | **No** | La Fig. 3 ya separa visualmente el modelo (arriba) de los controles (recuadro discontinuo); partirla repetiría el bloque común. La Fig. 4 ya agrupa por familias con encabezados; en paneles separados, los intervalos dejarían de compartir eje y no se podrían comparar entre familias. |
+| Figura «headline» | **No** | Repetiría resultados que ya están en las Figs. 4–6 y en §4.7, y añadiría una página. |
+| Sensibilidad de los veredictos frágiles | **Hecho, en el suplemento (Fig. S2)** | `scripts/make_sensitivity_plot.py`, solo con resultados archivados (bloques de 1–3 años, dejar fuera un año, Alicante+Barcelona, segundo panel). Comprueba que los ficheros coinciden entre sí. Se cita desde M §4.1 y se registra en `run_v2.ps1`. |
+
+Ninguna figura existente se retira: las seis del texto principal y la del suplemento sostienen cada una una afirmación que no está en otra figura. El texto principal sigue en 30 páginas y el suplemento pasa de 20 a 21.

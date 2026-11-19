@@ -89,7 +89,7 @@ Many comparisons in machine learning are decided by a difference of a few hundre
 
 \textbf{Related work.} Applied weather and climate QML studies \citep{schwabe2025op,schwabe2025,pastori2026,dasilva2026,bazgir2024,fellner2026,kumar2026,marchisio2026} often report quantum models as better than, or as potentially outperforming, classical baselines on the basis of point estimates. \citet{marchisio2026} report a 15.4\,\% lower MSE than a parameter-matched classical neuron on a 2{,}000-sample test set with one value per model; \citet{dasilva2026} show the spread of 10 runs per configuration but compare models through single error values, on test sets of 14 and 5 days. We do not claim that these effects are spurious, only that the evidence reported cannot separate them from sampling and seed noise. Underpowered comparisons and ignored clustering have been documented in NLP, neuroimaging and language-model evaluation \citep{card2020,varoquaux2018,miller2024}. On the quantum side, a circuit that encodes its inputs as angles computes a truncated Fourier series of them \citep{schuld2021fourier}; such models admit classical surrogates \citep{schreiber2023,landman2023,sweke2025}, and trainable variational models are often classically simulable \citep{cerezo2025,thanasilp2024,gilfuster2025}. A classical model with the spectrum of the circuit is therefore the natural control for a claimed quantum contribution, and applied benchmarks rarely include it.
 
-\textbf{Scope.} The paper does not rank architectures. In particular, it does not show that tree ensembles beat quantum or neural models on tabular data: no learned model improves on a month$\times$station climatology (\Cref{sec:not_show}), and the panel is used for the statistical question, for which small differences between models are the case of interest (\Cref{sec:testbed}). A difference is called \emph{resolved} when the interval of the primary procedure excludes zero (\Cref{sec:multiplicity}); not resolved means that this test set and procedure cannot separate the two models, not that they are equal. The two differences resolved in the primary families, Random Forest against the LSTM and against \texttt{LSTM+QNN}, do not survive the Holm correction or clusters of two consecutive years and do not recur on a second panel, so they are treated as exploratory (\Cref{sec:budget}).
+\textbf{Scope.} The paper does not rank architectures. In particular, it does not show that tree ensembles beat quantum or neural models on tabular data: no learned model is resolvably better than a month$\times$station climatology (\Cref{sec:not_show}), and the panel is used for the statistical question, for which small differences between models are the case of interest (\Cref{sec:testbed}). A difference is called \emph{resolved} when the interval of the primary procedure excludes zero (\Cref{sec:multiplicity}); not resolved means that this test set and procedure cannot separate the two models, not that they are equal. The two differences resolved in the primary families, Random Forest against the LSTM and against \texttt{LSTM+QNN}, do not survive the Holm correction or clusters of two consecutive years and do not recur on a second panel, so they are treated as exploratory (\Cref{sec:budget}).
 
 \textbf{Contributions.} The statistical tools are standard; what is new is that each is checked on the design of the study instead of assumed, and that the checks form a protocol.
 \begin{enumerate}
@@ -99,7 +99,46 @@ Many comparisons in machine learning are decided by a difference of a few hundre
     \item \textbf{Tested quantum controls}: classical and frozen-circuit controls at the circuit's interface, an exact classical emulation of the trained circuits, heads trained on common frozen angles, repeated planted circuit signals with a null, and climatological and operational (ECMWF SEAS5) references (\Cref{sec:applying,sec:reference}).
     \item \textbf{A reporting protocol and a tool} that implements its inferential items from archived predictions, labels, clusters and seeds (\Cref{tab:protocol}).
 \end{enumerate}
-Together they turn a small benchmark with dependent test cases into a calibrated comparison: state the estimand, select the inference by calibration on the design, separate seed from sampling uncertainty, report what the design can resolve, and attribute a difference to an architectural component, such as a quantum circuit, only through classical controls at its interface whose ability to detect a planted effect has been checked.
+Together they turn a small benchmark with dependent test cases into a calibrated comparison: state the estimand, select the inference by calibration on the design, separate seed from sampling uncertainty, report what the design can resolve, and attribute a difference to an architectural component, such as a quantum circuit, only through classical controls at its interface whose ability to detect a planted effect has been checked (\Cref{fig:inference_map}).
+
+\begin{figure}[tbp]
+\centering
+\begin{tikzpicture}[
+  font=\small, node distance=4mm and 3mm,
+  box/.style={draw=inkgray, rounded corners=2pt, align=center, inner sep=4pt, text width=#1, fill=white, execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}},
+  box/.default=4.2cm,
+  prim/.style={box=#1, draw=primaryblue, line width=1.1pt, fill=paleblue},
+  prim/.default=4.2cm,
+  refb/.style={box=#1, draw=inkgray!60, dashed, fill=palegray},
+  refb/.default=4.2cm,
+  wide/.style={box=13.6cm, fill=white},
+  arr/.style={-{Stealth[length=2.2mm]}, draw=inkgray, line width=0.6pt},
+  q/.style={font=\small\itshape, text=inkgray, align=center, text width=4.2cm}]
+\node[wide] (data) {\textbf{Input:} test predictions of two models, 15 seeds each, on the same 529 station-months};
+\node[wide, below=of data] (est) {\textbf{1. Estimand:} the difference of seed-mean AUCs, for \emph{new years} at the same stations};
+\node[q, below=6mm of est, xshift=-4.7cm] (qa) {Which months are in the test set?};
+\node[q, below=6mm of est] (qb) {Which seed was used?};
+\node[q, below=6mm of est, xshift=4.7cm] (qc) {Could the design see a difference?};
+\node[prim, below=2mm of qa] (cr2) {\textbf{Primary interval: CR2}\\ 19 year clusters; calibrated on this design (\Cref{fig:calibration})};
+\node[refb, below=of cr2] (dl) {\textbf{Reference: DeLong}\\ assumes independence; does not decide};
+\node[box, below=2mm of qb] (tw) {\textbf{Years$\times$seeds bootstrap}\\ adds the variation between training runs};
+\node[box, below=2mm of qc] (mde) {\textbf{Minimum detectable}\\\textbf{difference}\\ design sensitivity, not a threshold};
+\node[wide, anchor=north, yshift=-6mm] (holm) at (dl.south -| tw.south) {\textbf{2. Multiplicity:} Holm on the CR2 $p$-values within the two primary families};
+\node[prim=13.6cm, below=of holm] (dec) {\textbf{3. Decision:} \emph{resolved} only if the CR2 interval excludes zero (and passes Holm in the primary families); \emph{not resolved} is not equality};
+\node[refb=13.6cm, below=of dec] (rob) {\textbf{4. Robustness:} consecutive-year blocks $\cdot$ one year left out $\cdot$ two-station subset $\cdot$ other cluster procedures};
+\draw[arr] (data) -- (est);
+\draw[arr] (est.south) -- ++(0,-2mm) -| (qa.north);
+\draw[arr] (est.south) -- (qb.north);
+\draw[arr] (est.south) -- ++(0,-2mm) -| (qc.north);
+\draw[arr] (cr2.west) -- ++(-2.5mm,0) |- (holm.west);
+\draw[arr] (tw.south) -- (holm.north);
+\draw[arr] (holm) -- (dec);
+\draw[arr] (dec) -- (rob);
+\draw[arr, dashed, draw=inkgray!60] (cr2) -- (dl);
+\end{tikzpicture}
+\caption{How a comparison between two models is decided. The three columns separate the sources of uncertainty: the test sample, the training seed and the design. Only the primary interval (blue frame), with the Holm correction in the primary families, decides whether a difference is resolved; the grey boxes are references and robustness checks.}
+\label{fig:inference_map}
+\end{figure}
 
 % ============================================================
 \section{Data, Task and Models}
@@ -185,47 +224,6 @@ Valencia    & 8416 (13\,m) & 51  & 2012 & 54.9\% (28 / 51) \\
 \label{sec:framework}
 % ============================================================
 
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[
-  font=\small, node distance=4mm and 3mm,
-  box/.style={draw=inkgray, rounded corners=2pt, align=center, inner sep=4pt, text width=#1, fill=white, execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}},
-  box/.default=4.2cm,
-  prim/.style={box=#1, draw=primaryblue, line width=1.1pt, fill=paleblue},
-  prim/.default=4.2cm,
-  refb/.style={box=#1, draw=inkgray!60, dashed, fill=palegray},
-  refb/.default=4.2cm,
-  wide/.style={box=13.6cm, fill=white},
-  arr/.style={-{Stealth[length=2.2mm]}, draw=inkgray, line width=0.6pt},
-  q/.style={font=\small\itshape, text=inkgray, align=center, text width=4.2cm}]
-\node[wide] (data) {\textbf{Input:} test predictions of two models on the same 529 station-months, for each of 15 training seeds};
-\node[wide, below=of data] (est) {\textbf{1. What is compared?} The difference between the two models' AUC, averaged over seeds, on the same test months.\\
-The question it answers: would the difference persist in \emph{new years} at the same stations?};
-\node[q, below=6mm of est, xshift=-4.7cm] (qa) {Which months happened to be in the test set?};
-\node[q, below=6mm of est] (qb) {Which training run (seed) was used?};
-\node[q, below=6mm of est, xshift=4.7cm] (qc) {Could the design have seen a difference at all?};
-\node[prim, below=2mm of qa] (cr2) {\textbf{Primary interval: CR2}\\ treats the months of one year as a block (19 blocks); chosen because it kept 95\,\% coverage in simulations of this design (\Cref{fig:calibration})};
-\node[refb, below=of cr2] (dl) {\textbf{Reference: DeLong}\\ assumes every month is independent; shown for comparison, not used to decide};
-\node[box, below=2mm of qb] (tw) {\textbf{Years$\times$seeds bootstrap}\\ resamples years and seeds together, adding the variation between training runs};
-\node[box, below=2mm of qc] (mde) {\textbf{Minimum detectable}\\\textbf{difference}\\ the smallest true difference found 80\,\% of the time; a property of the design, not a threshold for results};
-\node[wide, anchor=north, yshift=-6mm] (holm) at (dl.south -| tw.south) {\textbf{2. Many comparisons at once.} In the two main families of three comparisons, the CR2 $p$-values are corrected (Holm), so that a family does not produce chance findings};
-\node[prim=13.6cm, below=of holm] (dec) {\textbf{3. Decision.} A difference is \emph{resolved} if its CR2 interval excludes zero (and, in the main families, it passes Holm). Otherwise it is \emph{not resolved}: this test set and procedure cannot tell the two models apart, which does not mean they are equal};
-\node[refb=13.6cm, below=of dec] (rob) {\textbf{4. Is the decision robust?} Blocks of two or three consecutive years $\cdot$ leaving out one year at a time $\cdot$ only the two stations present every year $\cdot$ serial correlation between years $\cdot$ other cluster procedures (CR1, jackknife, wild bootstrap)};
-\draw[arr] (data) -- (est);
-\draw[arr] (est.south) -- ++(0,-2mm) -| (qa.north);
-\draw[arr] (est.south) -- (qb.north);
-\draw[arr] (est.south) -- ++(0,-2mm) -| (qc.north);
-\draw[arr] (cr2.west) -- ++(-2.5mm,0) |- (holm.west);
-\draw[arr] (tw.south) -- (holm.north);
-\draw[arr] (holm) -- (dec);
-\draw[arr] (dec) -- (rob);
-\draw[arr, dashed, draw=inkgray!60] (cr2) -- (dl);
-\end{tikzpicture}
-\caption{How a comparison between two models is decided in this paper, for readers without a statistical background. Each column answers one question about uncertainty: the test sample (left), the training seed (middle) and the design (right). Only the primary interval (solid blue frame), corrected for multiple comparisons where the comparison is part of a main family, decides whether a difference is resolved; DeLong and the other procedures (grey) are shown as references and robustness checks.}
-\label{fig:inference_map}
-\end{figure}
-
-
 \subsection{Estimand}
 \label{sec:estimand}
 
@@ -308,7 +306,7 @@ XGBoost $-$ LSTM & $+0.0046$ & 0.0104 & $0.44$ (0.662) & $[-0.013,+0.022]$ (0.58
 
 \textbf{Why the procedures disagree.} DeLong treats every test month as independent; the cluster procedures treat the months of one calendar year as a block. They differ here only for Random Forest against the neural and hybrid models, whose cluster standard error is 59--78\,\% of the DeLong one (81--142\,\% for pairs of neural or hybrid models; column ``Cluster/iid''). A smaller cluster error means that the advantage of one model is steadier from year to year than independent months would suggest. Splitting each year's contribution by station shows why (\Cref{S-app:cancellation}): in the years in which Random Forest gains on the LSTM at one station, it tends to lose at another, so the station contributions partly cancel within each year. Shuffling the years independently within each station, which breaks that link, brings the ratio back towards 0.75--0.87, and the observed values lie in the lower tail of that distribution ($p=0.07$ and 0.12). The cancellation comes from seasonal patterns that differ between stations and between the two model families, it is concentrated in 2008--2012, the only five years with more than two stations (all four in 2008--2011), and it did not appear on the second panel (\Cref{sec:replication}).
 
-\textbf{How secure the verdicts are.} The cluster procedures are not wrong on this panel, but their extra power over DeLong rests on a pattern that the calibration of the primary procedure does not contain: no simulated mechanism produces cluster/iid ratios as low as 0.60 or 0.72 in more than 1.2\,\% of replications, and we could not construct one that does. The verdicts on Random Forest against the LSTM and \texttt{LSTM+QNN} are therefore the least secure of the paper. They depend on treating calendar years as independent: with clusters of two consecutive years they are no longer resolved ($p=0.061$ and 0.051), and leaving out a single test year reverses the verdict on Random Forest against the LSTM for 9 of the 19 years. They do not depend on the changing station mix: on Alicante and Barcelona alone, present in every test year (441 rows), Random Forest is 0.019 above the LSTM and 0.027 above \texttt{LSTM+QNN} (CR2 $p=0.026$ and 0.014), and no verdict of the pairs discussed here changes. Other few-cluster procedures (CR1, the jackknife and the wild cluster bootstrap) give the same verdicts, and the effect of freezing the circuit holds for blocks of one to three years and for every omitted year (\Cref{S-app:fewclusters}).
+\textbf{How secure the verdicts are.} The cluster procedures are not wrong on this panel, but their extra power over DeLong rests on a pattern that the calibration of the primary procedure does not contain: no simulated mechanism produces cluster/iid ratios as low as 0.60 or 0.72 in more than 1.2\,\% of replications, and we could not construct one that does. The verdicts on Random Forest against the LSTM and \texttt{LSTM+QNN} are therefore the least secure of the paper. They depend on treating calendar years as independent: with clusters of two consecutive years they are no longer resolved ($p=0.061$ and 0.051), and leaving out a single test year reverses the verdict on Random Forest against the LSTM for 9 of the 19 years. They do not depend on the changing station mix: on Alicante and Barcelona alone, present in every test year (441 rows), Random Forest is 0.019 above the LSTM and 0.027 above \texttt{LSTM+QNN} (CR2 $p=0.026$ and 0.014), and no verdict of the pairs discussed here changes. Other few-cluster procedures (CR1, the jackknife and the wild cluster bootstrap) give the same verdicts, and the effect of freezing the circuit holds for blocks of one to three years and for every omitted year (\Cref{S-app:fewclusters}; all checks in \Cref{S-fig:sensitivity}).
 
 \subsection{Simulation with Known Truth}
 \label{sec:simulation}
