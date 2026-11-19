@@ -95,6 +95,7 @@ Step "a17f_primary_sim_2yr" "$L\exp48_primary_calibration.py --reps 600 --B 299 
 Step "a17g_review_extras"   "$L\exp51_review_extras.py"                                             # ~2 min; causal neural refit, SEAS5 / panel-2 CR2, blocks, leave-one-year-out
 Step "a17j_review_closing"  "$L\exp55_review_closing.py"                                            # ~1 min; causal primary families, panel-2 CR2 MDE, SEAS5 under CR2
 Step "a17k_clusters_rows"   "$L\exp54_power_clusters_rows.py"                                       # ~10 min; simulation of clusters against rows
+Step "a17l_panel2_lookahead" "$L\exp56_panel2_truncation.py"                                        # truncation test of the second panel
 Step "a17h_emulation"       "$L\exp52_emulation_substitution.py --part E S --seeds 15 $th"          # ~2.5 h; exact emulation, heads on common frozen angles
 Step "a17i_external"        "$L\exp53_external_benchmark.py"                                        # ~10 min; downloads California Housing to data\external
 Step "a18_summary"          "$L\exp42_v2_summary.py results"                                        # ~10 min; Tables 3, 5-7

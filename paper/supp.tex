@@ -155,7 +155,7 @@ Each window has 35 covariates: 12 precipitation lags, 17 physical and synoptic i
 \centering
 \caption{Complete enumeration of the 35 engineered features ($12 \text{ lags} + 17 \text{ physical} + 2 \text{ cyclic} + 4 \text{ station indicators}$).}
 \label{tab:glossary}
-{\small
+{\footnotesize\setstretch{1.0}
 \begin{tabularx}{\textwidth}{lllX}
 \toprule
 \textbf{Group} & \textbf{Feature Label} & \textbf{Code Token} & \textbf{Definition / Formulation} \\
@@ -761,7 +761,7 @@ LSTM+QNN & 0.505 (0.018) & $+0.015$ (15) & $+0.004$ (13) & $[-0.003,+0.002]$ \\
 \subsection{ECMWF SEAS5}
 \label{app:seas5}
 
-Monthly mean total precipitation (\texttt{seasonal-monthly-single-levels}, system 51, members 0--24) was downloaded for the hindcast (1981--2016) and forecast (2017--2026) starts of every month and interpolated bilinearly to the stations (\path{exp33_seas5_reference.py}). Three probability definitions were computed; the quantile-corrected one was specified before the analysis and is the only one used in the inferential comparisons: the fraction of members above the model's own quantile at level $1-p_{\text{clim}}$ of the station and calendar month, from the 1981--1996 hindcasts. The ensemble-mean variant maps the standardized ensemble-mean anomaly through a normal distribution; the uncorrected variant counts members above the observed threshold. Platt maps and blends are fitted on the validation partition (1997--2007).
+Monthly mean total precipitation (\texttt{seasonal-monthly-single-levels}, system 51, members 0--24) was downloaded through the CDS API on 9--10 November 2026 for the hindcast (1981--2016) and forecast (2017--2026) starts of every month and interpolated bilinearly to the stations (\path{exp33_seas5_reference.py}). Three probability definitions were computed; the quantile-corrected one was specified before the analysis and is the only one used in the inferential comparisons: the fraction of members above the model's own quantile at level $1-p_{\text{clim}}$ of the station and calendar month, from the 1981--1996 hindcasts. The ensemble-mean variant maps the standardized ensemble-mean anomaly through a normal distribution; the uncorrected variant counts members above the observed threshold. Platt maps and blends are fitted on the validation partition (1997--2007).
 
 \begin{table}[htbp]
 \centering

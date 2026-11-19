@@ -203,7 +203,7 @@ Valencia    & 8416 (13\,m) & 51  & 2012 & 54.9\% (28 / 51) \\
 \node[blk, right=of lstm, text width=1.8cm] (proj) {projection\\to 4 angles\\$q\in[0,\pi]^4$};
 \node[qb, right=8mm of proj, text width=2.7cm] (circ) {\textbf{4-qubit circuit}\\2 re-uploading layers\\readouts $\langle Z_1\rangle,\dots,\langle Z_4\rangle$};
 \node[blk, right=8mm of circ, text width=1.9cm] (ln) {LayerNorm\\+ linear output};
-\node[blk, below=3mm of ln, text width=1.9cm] (out) {$P(\text{wet month})$};
+\node[blk, below=3mm of ln, text width=2.3cm] (out) {$P(\text{wet month})$};
 \draw[arr] (in) -- (lstm); \draw[arr] (lstm) -- (proj); \draw[arr] (proj) -- (circ); \draw[arr] (circ) -- (ln); \draw[arr] (ln) -- (out);
 \draw[arr] (in.north) -- ++(0,4mm) -| (proj.north);
 \node[ctl, below=11mm of circ, xshift=-2.1cm] (c1) {\textbf{Is any nonlinearity needed?}\\ Linear-4D: linear $4\to4$ map};
@@ -702,7 +702,7 @@ Card, D., Henderson, P., Khandelwal, U., Jia, R., Mahowald, K., \& Jurafsky, D. 
 Cerezo, M., Larocca, M., Garc\'ia-Mart\'in, D., Diaz, N. L., Braccia, P., Fontana, E., Rudolph, M. S., Bermejo, P., Ijaz, A., Thanasilp, S., Anschuetz, E. R., \& Holmes, Z. (2025). Does provable absence of barren plateaus imply classical simulability? \textit{Nature Communications}, 16, 7907. \url{https://doi.org/10.1038/s41467-025-63099-6}
 
 \bibitem[Copernicus Climate Change Service(2018)]{c3s_seasonal_monthly}
-Copernicus Climate Change Service, Climate Data Store (2018). Seasonal forecast monthly statistics on single levels. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). \url{https://doi.org/10.24381/cds.68dd14c3}\todo{add the date on which the SEAS5 fields were retrieved (DOI checked on 18 November 2026)}
+Copernicus Climate Change Service, Climate Data Store (2018). Seasonal forecast monthly statistics on single levels. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). \url{https://doi.org/10.24381/cds.68dd14c3} (data retrieved through the CDS API on 9--10 November 2026).
 
 \bibitem[da Silva et al.(2026)]{dasilva2026}
 da Silva, M. H. F., de Jesus, G. F., Nascimento, C. M. S., da Silva, V. L., \& Cruz, C. S. (2026). Exploring quantum machine learning for weather forecasting. \textit{Brazilian Journal of Physics}, 56, 22. \url{https://doi.org/10.1007/s13538-025-01941-4}

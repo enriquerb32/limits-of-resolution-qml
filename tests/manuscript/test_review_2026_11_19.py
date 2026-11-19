@@ -226,3 +226,9 @@ def test_clusters_rows_claims() -> None:
             "CR2 covers at 0.930--0.967 and rejects a null difference in 3.3--7.0\\,\\% of replications in all 128 cells",
             "DeLong rejects it in up to 17.6\\,\\%", "Independent information, not row count, sets the resolution.")
     assert "Clusters, not rows" not in MAIN_TEXT and "not of rows" not in MAIN_TEXT
+
+
+def test_seas5_retrieval_date() -> None:
+    in_text(MAIN_TEXT, "(data retrieved through the CDS API on 9--10 November 2026)")
+    in_text(SUPP_TEXT, "was downloaded through the CDS API on 9--10 November 2026")
+    assert "add the date on which the SEAS5 fields were retrieved" not in MAIN_TEXT
