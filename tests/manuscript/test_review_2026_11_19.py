@@ -232,3 +232,17 @@ def test_seas5_retrieval_date() -> None:
     in_text(MAIN_TEXT, "(data retrieved through the CDS API on 9--10 November 2026)")
     in_text(SUPP_TEXT, "was downloaded through the CDS API on 9--10 November 2026")
     assert "add the date on which the SEAS5 fields were retrieved" not in MAIN_TEXT
+
+
+def test_panel2_truncation() -> None:
+    t = _load("local_exp56_panel2_truncation.json")
+    a, c, imp = t["archived"], t["causal"], t["impact"]
+    assert (a["test_rows_full"], a["eligible_full_only"], a["eligible_cut_only"], a["rows_with_changed_inputs"]) == (884, 2, 0, 0)
+    assert (c["test_rows_full"], c["test_rows_cut"], c["eligible_full_only"], c["rows_with_changed_inputs"]) == (884, 884, 0, 0)
+    assert imp["late_windows"] == ["Almeria_2020-05-01", "Almeria_2020-06-01"]
+    pairs = imp["pairs"].values()
+    assert max(abs(v["delta_all"] - v["delta_kept"]) for v in pairs) < 1e-4
+    assert max(abs(v["p_all"] - v["p_kept"]) for v in pairs) < 0.006
+    assert all(v["resolved_all"] == v["resolved_kept"] for v in pairs) and round(min(v["p_kept"] for v in pairs), 3) == 0.108
+    in_text(SUPP_TEXT, "two of them (Almería, May and June 2020) are eligible only because", "($p\\ge0.108$), so no verdict changes")
+    in_text(MAIN_TEXT, "Its truncation test finds two test windows that the archived imputation makes eligible with later data")

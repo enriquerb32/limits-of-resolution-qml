@@ -116,3 +116,16 @@ El revisor proponía hacer principal el pipeline causal. No se hace, por tres ra
 ## Renombrado
 
 El script de cierre se llama `exp55_review_closing.py`, porque `exp53` ya lo usaba `exp53_external_benchmark.py`.
+
+---
+
+# Cuarta parte: cierre (19-11-2026)
+
+- **Fecha de SEAS5.** Descarga por la API del CDS el 9 y el 10 de noviembre de 2026, según las fechas de los GRIB en `QML_Antigravity/data/seas5`. Va en la referencia de M y en S6.2. Ya no queda ese `\todo`.
+- **Tabla S4 (variables).** Era 182 pt más alta que la página; ahora tiene letra `\footnotesize` e interlineado simple dentro de la tabla.
+- **Fig. 3.** El nodo de salida se salía 3,7 pt; se ensancha.
+- **README.** Los números de tabla y figura de la v2 corresponden ahora a los de los PDF actuales.
+- **Suite completa de tests** (unit, manuscript, quantum, regression) en el entorno fijado: 222 pasan y 4 se omiten (alias de modelos archivados).
+- **Prueba de truncado del segundo panel** (`exp56_panel2_truncation.py`). Las 884 ventanas de test conservan sus entradas. Dos de ellas (Almería, mayo y junio de 2020) solo son elegibles porque la interpolación archivada usa meses posteriores. Con imputación causal, las 884 son elegibles y no cambian. Sin esas dos ventanas, ningún veredicto de la Tabla 11 cambia (Δ < 0,0001; p ≥ 0,108). Queda dicho en S «Second Panel» y en M §4.6.
+
+**Pendiente del autor:** crear la release en Zenodo y poner su DOI en «Data and Code Availability», que es el único `\todo` que queda. Después, fusionar `v2` con `main`; `main` está abierta en la copia de trabajo de `QML_Antigravity` y no se ha tocado.
