@@ -42,11 +42,13 @@ ROWS = [
     ('Circuit vs controls', 'Frozen random - LSTM+QNN', 'FROZEN_RANDOM-LSTM_QNN', False),
     ('Circuit vs controls', 'Frozen zero-angle - LSTM+QNN', 'FROZEN_IDENTITY-LSTM_QNN', False),
 ]
-# validated categorical slots 1-3 (dataviz reference palette, light mode); aqua is below 3:1 contrast,
-# so every procedure also has its own marker shape and the legend is always shown
-PROC = [('CR2, Bell–McCaffrey df (primary)', 'ci_cr2', '#eb6834', 's'),
-        ('DeLong (independence)', 'ci_delong', '#2a78d6', 'o'),
-        ('Years × seeds bootstrap', 'ci_two_way', '#1baf7a', '^')]
+# only the primary procedure carries the accent colour (as in the calibration figure and the inference map); the
+# two references are neutral greys and also differ by marker shape, so identity never rests on colour alone
+PROC = [('CR2, Bell–McCaffrey df (primary)', 'ci_cr2', '#2a78d6', 's'),
+        ('DeLong (independence)', 'ci_delong', '#8a8985', 'o'),
+        ('Years × seeds bootstrap', 'ci_two_way', '#bdbcb8', '^')]
+# resolved by CR2 before but not after Holm and not robust to clusters of two consecutive years (Tables 3 and 6)
+EXPLORATORY = {'RF-PureLSTM', 'RF-LSTM_QNN'}
 INK, MUTED, GRID = '#0b0b0b', '#52514e', '#e4e3df'
 
 
@@ -69,7 +71,8 @@ def main():
     a = ap.parse_args()
     with open(SUMMARY, encoding='utf-8') as fh:
         pairs = json.load(fh)['pairs']
-    rows = [(g, lab.replace(' - ', f' {MINUS} '), entry(pairs, k, fl)) for g, lab, k, fl in ROWS]
+    rows = [(g, lab.replace(' - ', f' {MINUS} ') + (' †' if k in EXPLORATORY else ''), entry(pairs, k, fl))
+            for g, lab, k, fl in ROWS]
 
     plt.rcParams.update({'font.size': 8.5, 'font.family': 'DejaVu Sans', 'axes.edgecolor': MUTED,
                          'axes.labelcolor': INK, 'xtick.color': MUTED, 'ytick.color': INK, 'pdf.fonttype': 42})
@@ -94,8 +97,11 @@ def main():
     for yy, e in pos:
         for j, (_, key, col, mk) in enumerate(PROC):
             off = (1 - j) * 0.22
-            ax.plot(e[key], [yy + off] * 2, color=col, lw=2.0, solid_capstyle='round', zorder=2)
-            ax.plot(e['delta'], yy + off, marker=mk, ms=4.5, color=col, mec='#fcfcfb', mew=0.8, zorder=3)
+            prim = j == 0
+            ax.plot(e[key], [yy + off] * 2, color=col, lw=2.4 if prim else 1.6, solid_capstyle='round',
+                    zorder=3 if prim else 2)
+            ax.plot(e['delta'], yy + off, marker=mk, ms=5.0 if prim else 4.2, color=col, mec='#fcfcfb', mew=0.8,
+                    zorder=4 if prim else 3)
     ax.set_yticks(ticks + [yy for yy, _ in heads])
     ax.set_yticklabels(labels + [g for _, g in heads])
     for t in ax.get_yticklabels()[len(ticks):]:

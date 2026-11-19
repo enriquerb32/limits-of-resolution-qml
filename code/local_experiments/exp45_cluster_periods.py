@@ -1,5 +1,5 @@
 """exp45_cluster_periods.py - cluster/iid ratio of the seed-mean AUC difference under year subsets (same estimator as exp42):
-all years, without the partial year 2026, 2008-2012 (four stations) and 2013-2026 (two stations).
+all years, without the partial year 2026, 2008-2012 (more than two stations; all four only in 2008-2011) and 2013-2026 (two stations).
 Also the cross-station share of the cluster variance per period. AUCs are recomputed on each subset.
 Archives only (no training).  Usage: python code/local_experiments/exp45_cluster_periods.py
 Output: results/local_exp45_cluster_periods.json"""

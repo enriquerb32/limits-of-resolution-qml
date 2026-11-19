@@ -35,3 +35,50 @@ Rama `v2`. Solo hay cambios de redacción. No hay cifras nuevas: todas las que a
 
 - **5. Reorganizar el cuerpo y adelantar la Fig. 3.** Es un cambio estructural. El texto ha pasado de 29 a 30 páginas con estos añadidos.
 - **6. Una validación verdaderamente independiente** (un tercer dominio, un test prospectivo o un benchmark público con clústeres). Requiere experimentos nuevos y sigue declarada en Limitaciones.
+
+---
+
+# Segunda parte: revisión de las figuras (19-11-2026)
+
+Se regeneran cuatro figuras con sus scripts (`scripts/make_*_plot.py`), sin datos nuevos.
+
+## Error factual encontrado al revisar la Fig. 1
+
+El texto decía «2008–2012, the only five years with all four stations», en M §4.1, en M Limitaciones y en S «cancellation by period». Los datos del panel dicen otra cosa:
+
+- San Javier tiene ventanas hasta 2011 (una sola en ese año).
+- En 2012 solo hay tres estaciones.
+
+Las cuatro estaciones coinciden solo en **2008–2011**, y 2008–2012 son los cinco años con **más de dos** estaciones. Las cifras de `exp45` (periodo 2008–2012) no cambian; se corrige la descripción en M, en S y en el docstring de `exp45`. `make_design_plot.py` comprueba ahora ambos datos con asserts: 19 años de test y 2008–2011 como únicos años con las cuatro estaciones.
+
+## Confirmado y corregido
+
+| Figura | Cambio |
+|---|---|
+| 1. Diseño | Recuadro sobre 2008–2011 y nota «19 test years = 19 clusters; the only 4 with all four stations». Los recuentos de test pasan junto al nombre de la estación. El pie se reescribe. |
+| 2. Arquitectura | La etiqueta «swap» pasa a «replaces the circuit». |
+| 4. Forest plot | Solo CR2 (el procedimiento que decide) va en color; DeLong y el bootstrap van en grises y con marcador propio. RF − LSTM y RF − LSTM+QNN llevan †. El pie dice que ninguna diferencia de las familias Holm pasa la corrección. |
+| 5. Calibración | La línea de 0,95 es más marcada y lleva rótulo. Las celdas AR(1) + año×estación, el único régimen sin calibración, se dibujan con un rombo propio y tienen entrada en la leyenda. |
+| 6. Resolución | Se añade un eje superior con el número de años (clústeres) de cada punto. La extrapolación se rotula como «illustrative… if added years are independent». |
+
+## La revisión no acierta
+
+- **Fig. 1: colores de partición parecidos.** Son azul, verde y naranja, y ya había una línea temporal etiquetada encima.
+- **Fig. 4: tres marcadores difíciles de distinguir.** Ya tenían color y forma a la vez. El cambio a color/gris se hace por jerarquía, no por legibilidad.
+- **Fig. 4: «Cluster/iid» poco explicativo.** Esa abreviatura no aparece en la figura; está en las tablas, y sus pies la definen.
+- **Fig. 5: «seis colores».** La figura ya usaba un solo color de acento (CR2), con los demás procedimientos en gris.
+- **Fig. 6: etiquetas numéricas internas.** Ya estaban solo en N = 529 y en el punto extrapolado.
+- **Fig. 6: anotar que añadir filas dentro de los mismos clústeres no reduce el MDE.** La figura no muestra eso: sus subconjuntos son años completos. La anotación afirmaría algo que el gráfico no contiene. El eje superior de clústeres transmite la idea sin afirmarlo.
+
+## Desaconsejado
+
+- **Banda de MDE en el forest plot.** Una banda ±MDE alrededor de cero invita a leer el MDE como umbral de significación, que es justo lo que el texto prohíbe (§3.3, protocolo ítem 2). El MDE de cada contraste sigue en las tablas.
+- **Ordenar los contrastes por tamaño del efecto.** Se rompería la agrupación por familias, que es la que sigue el texto y la corrección de Holm.
+- **Franja de resultados en la Fig. 2.** La figura aparece en §2, antes de los resultados. El hallazgo está en §4.4 y en las Conclusiones.
+
+## Pendiente (decisión del autor)
+
+- **Reordenar las figuras** (el mapa de inferencia como Figura 1). Es un cambio de estructura y de paginación.
+- **Simplificar la prosa de la Fig. 3.** Sus cajas ya siguen el flujo de cinco pasos que propone la revisión, porque se escribió para lectores sin formación estadística. Recortarla es una decisión de estilo.
+- **Partir las Figs. 2 y 4 en paneles.**
+- **Figura «headline» y figura de sensibilidad de los veredictos frágiles.** La segunda es viable con resultados archivados: `local_cr2_block_sensitivity.json`, el análisis dejando fuera un año y la variante solo Alicante/Barcelona. Iría mejor en el suplemento, porque el texto principal ya tiene 30 páginas.

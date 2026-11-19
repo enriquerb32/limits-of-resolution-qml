@@ -62,10 +62,11 @@ def main():
     ax.plot(ext_n, m529 * np.sqrt(n[-1] / ext_n), color='#1baf7a', lw=1.4, ls=(0, (1, 2)), zorder=2)
     n_half = n[-1] * 4
     ax.plot([n_half], [m529 / 2], marker='^', ms=6, mfc='#fcfcfb', mec='#1baf7a', mew=1.4, zorder=3)
-    ax.annotate(f'{m529 / 2:.3f} at N ≈ {int(round(n_half, -2)):,}\n($N^{{-1/2}}$ extrapolation)', (n_half, m529 / 2),
-                xytext=(0, -10), textcoords='offset points', ha='center', va='top', fontsize=7.5, color=INK)
+    ax.annotate(f'{m529 / 2:.3f} at N ≈ {int(round(n_half, -2)):,}: illustrative $N^{{-1/2}}$\n'
+                'extrapolation, if added years are independent', (n_half, m529 / 2),
+                xytext=(-9, -1), textcoords='offset points', ha='right', va='top', fontsize=7.5, color=INK)
     ax.axvline(n[-1], color=GRID, lw=1.0, zorder=1)
-    ax.text(n[-1] * 0.97, 0.0127, f'full test set\nN = {int(n[-1])}', color=MUTED, fontsize=7.5, va='bottom', ha='right')
+    ax.text(n[-1] * 0.97, 0.115, f'full test set\nN = {int(n[-1])}', color=MUTED, fontsize=7.5, va='top', ha='right')
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.set_xlim(120, 2500)
@@ -75,6 +76,13 @@ def main():
     ax.set_yticks([0.015, 0.02, 0.03, 0.05, 0.08, 0.12])
     ax.set_yticklabels(['0.015', '0.02', '0.03', '0.05', '0.08', '0.12'])
     ax.minorticks_off()
+    top = ax.secondary_xaxis('top')                  # the test sets are whole years: the clusters behind each point
+    top.set_xticks(list(n))
+    top.set_xticklabels([str(int(y)) for y in years])
+    top.minorticks_off()
+    top.tick_params(colors=MUTED, labelsize=7.5)
+    top.spines['top'].set_color(MUTED)
+    top.set_xlabel('Independent clusters (test years) in the subset', fontsize=8, color=INK)
     ax.grid(color=GRID, lw=0.6, zorder=0)
     for s in ('top', 'right'):
         ax.spines[s].set_visible(False)
