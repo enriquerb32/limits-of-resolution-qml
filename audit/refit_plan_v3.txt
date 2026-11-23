@@ -20,12 +20,19 @@ circuit, its controls and the trees (point 5). Every deviation from this plan wi
   (tensor bases of 81, 625 and 6,561 functions of the four angles). Frozen circuits are not searched (they take the
   LSTM+QNN setting).
   * Optuna TPE, 30 trials per model, sampler seed 0; one training seed per trial (seed 100, outside the final 0-14).
-  * Selection metric: validation AUC of the trial (the metric used to tune the trees).
+  * Selection metric: validation AUC (the metric used to tune the trees).
+  * Re-evaluation: the 3 best configurations of the 30 trials are refitted with 3 seeds (101-103, outside the final
+    0-14); the configuration with the highest mean validation AUC over those 3 seeds is selected (ties: lower mean
+    validation loss). The same procedure for every model.
   * Search space, identical for every model: learning rate log-uniform [1e-3, 3e-2]; weight decay log-uniform
     [1e-5, 1e-2]; maximum epochs {25, 50, 100}; early-stopping patience {6, 15}; batch size {16, 32}. Dropout keeps the
     value of the shared LSTM backbone (not searched, since it is common to the circuit and its controls).
-  * Final fits: the selected setting, 15 seeds, each the best of 3 random starts by validation loss (restarts for
-    every model, not only the circuit).
+  * Declared exception: Full Fourier-4 maps 6,561 features to 4 outputs (about 26,000 parameters, for 2,332 training
+    rows), so its weight decay is searched on log-uniform [1e-4, 1e-1] instead; everything else as above. Without the
+    wider range the control would be handicapped by over-fitting rather than by its function class.
+  * Final fits: the selected setting, 15 seeds, each the best of 3 random starts (restarts for every model, not only
+    the circuit). Choice among the 3 starts: the highest validation AUC of the restored early-stopping checkpoint;
+    ties: lower validation loss; the test set is never used for this choice.
   * The range of the search space was informed by a pilot on planted signals (exp64_circuit_budget_pilot.py, circuit
     head only, results archived); the pilot did not use the panel labels.
   * Trees: Optuna TPE, 50 trials, validation AUC, on the causal pipeline, as in v2.
@@ -39,8 +46,9 @@ circuit, its controls and the trees (point 5). Every deviation from this plan wi
     within-station AUC difference uses its own influence values, summed by year.
   * A difference between two models is called resolved only if BOTH co-primary CR2 intervals exclude zero with the
     same sign (an intersection-union rule, valid at level 0.05 without a further correction). Holm is applied within
-    each of the two primary families, separately for each metric; resolved after Holm requires both metrics to pass.
-    If only one metric resolves, the difference is reported as metric-dependent, not resolved.
+    each metric, separately, within each of the two primary families; a difference is resolved after Holm only if it
+    passes the Holm step in BOTH metrics. If only one metric resolves, the difference is reported as metric-dependent,
+    not resolved.
   * Equivalence: TOST with CR2 and margin 0.01 AUC, on both metrics; equivalence is claimed only if both pass.
   * Floor of protocol item 1 and two- or three-year clusters: sensitivity analyses, as in v2.
 
@@ -52,7 +60,8 @@ circuit, its controls and the trees (point 5). Every deviation from this plan wi
     students, same angles; candidates 0-3, oracle test AUC 0.70 and 0.85, two nulls). The single teacher of exp38 uses
     a score WITHOUT LayerNorm and is not used as the main test. Heads: circuit, Linear-4D, Fourier-2, Full Fourier-1
     and Full Fourier-4, each with the setting selected in section 2, 5 seeds.
-  * A head 'recovers' the teacher in a configuration if its 5-seed mean test AUC is at least the oracle AUC - 0.03.
+  * A head 'recovers' the teacher in a configuration if its 5-seed mean test AUC satisfies
+    (AUC - 0.5) >= 0.9 x (oracle AUC - 0.5), i.e. it reaches 90 % of the oracle's discrimination above chance.
   * Circuit versus Full Fourier-4: paired CR2 difference of 5-seed means per configuration.
   * Interpretation rules, fixed now:
     - both recover: their performance is compared under the fixed budget, and nothing more;

@@ -34,7 +34,9 @@ Date and deposit identifier: ______
 
 ## 6. Resolution
 - MDE of each primary comparison from test size, prevalence, assumed AUC and correlation
-  (`qml_resolution.paired_mde_hanley_mcneil`), times the design effect 1 + (m − 1)ρ for clusters of m rows:
+  (`qml_resolution.paired_mde_hanley_mcneil`), times the square root of the design effect, √(1 + (m − 1)ρ), for
+  clusters of m rows (the design effect multiplies the variance, not the standard error; critical values kept, under
+  that approximation):
 - Expected uncertainty of the MDE (few clusters):
 
 ## 7. Equivalence
