@@ -98,3 +98,7 @@ data/external/
 
 # Internal revision notes (kept locally, not published)
 audit/private/
+
+# Local review copies and in-progress pilot output (not published)
+paper/Review.pdf
+results/local_exp64_*.json
