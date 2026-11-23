@@ -1232,6 +1232,41 @@ MLP $-$ RF & $+0.007$ & $[-0.036,+0.050]$ & 0.002 & 0.476 & 0.998 & 0.547 & $-0.
 
 \textbf{Corrected design (v2).} Because the reference of the recorded design shared its cells with the small tests, a semi-synthetic design was recorded before any model was fitted (\path{audit/prediction_external_v2.txt}, commit \texttt{b100bea}) and deposited on Zenodo as an independent timestamp (\href{https://doi.org/10.5281/zenodo.24459864}{doi:10.5281/zenodo.24459864}; SHA-256 of the deposited file in \path{audit/deposits.txt}). It keeps the observed covariates, unequal cell sizes and the predictions of four fixed fitted models; labels are simulated, and the reference and the small tests are drawn from the same population. The design recorded above is kept as recorded.
 
+\emph{v2 design} (\path{exp65_external_v2.py}). A generator $f$ (the logit of an XGBoost fit to the real target on the training rows) is frozen; labels are $y=\mathbb{1}[f(x)(1+v_c)+u_c+\varepsilon>0]$ with logistic $\varepsilon$, $u_c\sim N(0,s_u^2)$, $v_c\sim N(0,s_u^2/4)$, in three scenarios: S0 ($s_u=0$), S1 ($s_u=s^*/2$) and S2 ($s_u=s^*$). The four models (5 seeds) are refitted on one synthetic label draw of the training and validation cells. The population is the 39 test blocks with 10--60 rows, drawn with replacement, each appearance with its own cell effects; the true difference is the 5-seed mean AUC difference on 80{,}000 independent cells of that population, and each small test draws 19 cells (median 568 rows). The true differences and the a priori MDEs were committed (\texttt{6311f78}) and deposited (\href{https://doi.org/10.5281/zenodo.24461908}{doi:10.5281/zenodo.24461908}) before any small test was drawn.
+
+\emph{Deviations and clarifications} (also in \path{audit/truth_external_v2.json} and \path{results_exp65_external_v2_score.json}). (i)~The reference was enlarged from 20{,}000 to 80{,}000 cells because with 20{,}000 its Monte Carlo SE exceeded 0.001 in S2, as the record prescribes; with 80{,}000 it is at most 0.00096. (ii)~The null check C0 (Random Forest on label draw A against Random Forest on draw B) was recorded as having a true difference of zero by construction. That holds only in expectation over training draws: conditional on the two fitted models, which is what CR2 and the reference estimate, the difference is $-0.004$, $+0.007$ and $-0.029$ in S0--S2. C0 is therefore reported as a contrast like the others, and P4 (its rejection rates) cannot be evaluated as recorded; this was found when the truth was computed, before any small test. (iii)~$s^*=1.25$: the mean CR2/DeLong ratio over C1--C3 on the 182 test blocks was 6.26 at $s_u=1.25$ and 4.73 at $s_u=1.00$, at distances 0.76 and 0.77 from the target 5.5, equal within Monte Carlo error (one training draw and 200 test draws per grid value; the grid is non-monotonic by up to 1.0 between neighbouring values). The recorded rule (closest) gives 1.25, whose ratio lies inside the v1 range 4.4--6.6. (iv)~The record fixes no prevalence; the population of the 39 blocks has a prevalence of 0.365, 0.371 and 0.391 in S0--S2. (v)~The design effect of the a priori MDE is applied as $\sqrt{1+(m-1)\rho}$ to the MDE, with $\rho$ the intraclass correlation of the contrast's influence values on the validation cells. (vi)~Resolved means that the 95\,\% interval excludes zero; CR2 is applied without the floor rule, since the record names CR2 only.
+
+\begin{table}[htbp]
+\centering
+\caption{External benchmark v2: 2{,}000 small tests of 19 cells per scenario. True $\Delta$: on 80{,}000 reference cells. Coverage of the true difference, share resolved and share resolved with the wrong sign, for CR2 and DeLong; ratio: median SE$_\text{CR2}$/SE$_\text{DeLong}$ in the small tests; MDE a priori (step 5, deposited with the truth) and empirical ($2.80\times$ the SD of the small-test estimates). C0 is not a null (see text).}
+\label{tab:external-v2}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}llrcccccccc@{}}
+\toprule
+& & & \multicolumn{2}{c}{Coverage} & \multicolumn{2}{c}{Resolved} & \multicolumn{2}{c}{Wrong sign} & & MDE \\
+Sc. & Contrast & True $\Delta$ & CR2 & DeLong & CR2 & DeLong & CR2 & DeLong & Ratio & a priori / emp. \\
+\midrule
+S0 & C1 RF $-$ LR    & $+0.014$ & 0.958 & 0.828 & 0.137 & 0.336 & 0.001 & 0.011 & 1.33 & 0.036 / 0.043 \\
+   & C2 XGB $-$ RF   & $+0.013$ & 0.902 & 0.777 & 0.182 & 0.503 & 0.000 & 0.000 & 1.33 & 0.013 / 0.026 \\
+   & C3 MLP $-$ RF   & $-0.002$ & 0.963 & 0.892 & 0.041 & 0.118 & 0.006 & 0.035 & 1.13 & 0.032 / 0.034 \\
+   & C0 RF(A) $-$ RF(B) & $-0.004$ & 0.965 & 0.924 & 0.058 & 0.150 & 0.002 & 0.006 & 1.09 & -- / 0.014 \\
+\addlinespace
+S1 & C1 & $+0.015$ & 0.946 & 0.775 & 0.095 & 0.373 & 0.003 & 0.025 & 1.54 & 0.042 / 0.052 \\
+   & C2 & $+0.004$ & 0.976 & 0.789 & 0.042 & 0.236 & 0.004 & 0.048 & 1.41 & 0.023 / 0.033 \\
+   & C3 & $+0.002$ & 0.963 & 0.795 & 0.049 & 0.212 & 0.012 & 0.075 & 1.40 & 0.040 / 0.043 \\
+   & C0 & $+0.007$ & 0.937 & 0.742 & 0.073 & 0.311 & 0.006 & 0.034 & 1.59 & -- / 0.033 \\
+\addlinespace
+S2 & C1 & $-0.039$ & 0.902 & 0.510 & 0.126 & 0.619 & 0.007 & 0.066 & 2.53 & 0.073 / 0.129 \\
+   & C2 & $-0.001$ & 0.969 & 0.571 & 0.029 & 0.424 & 0.019 & 0.215 & 2.26 & 0.054 / 0.081 \\
+   & C3 & $+0.024$ & 0.941 & 0.553 & 0.110 & 0.568 & 0.002 & 0.068 & 2.22 & 0.065 / 0.096 \\
+   & C0 & $-0.029$ & 0.884 & 0.452 & 0.080 & 0.589 & 0.021 & 0.131 & 2.72 & -- / 0.133 \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\emph{v2 predictions.} P1 (true RF$-$LR difference above the margin in every scenario) held in S0 and S1 and failed in S2, where logistic regression is above Random Forest ($-0.039$). P2 (CR2 coverage 0.93--0.97 for every declared contrast and scenario) failed: 6 of 9 cases are in the band, one is above it (0.976) and two are below (0.902, XGBoost against Random Forest in S0 and Random Forest against logistic regression in S2); the Monte Carlo SE of each coverage is about 0.005, so 0.90 is a real shortfall of CR2 with 19 cells of unequal size. P3 (in S2 DeLong covers less often than CR2 for every contrast) held: 0.51--0.57 against 0.90--0.97. P4 is not evaluable (see (ii)); descriptively, C0 is resolved by CR2 in 6--8\,\% of draws and by DeLong in 15--59\,\%. P5 (CR2 resolves contrasts within the margin in at most 10\,\% of draws; wrong signs at most 2.5\,\%) held: at most 4.9\,\% and 1.9\,\%; DeLong reaches 42\,\% and 21.5\,\%. P6 (a priori MDE within a factor 0.7--1.4 of the empirical one) failed: the ratio is 0.51--0.93, within the range in 4 of 9 cases, and the a priori MDE underestimates in all of them, most where the intraclass correlation estimated on the 77 validation cells was small or negative (C2 in S0, design effect 0.61) and with strong cell effects (S2, 0.57--0.68). In the small tests the CR2/DeLong ratio is 1.1--2.7, below the 4.4--6.6 of the whole test set used for calibration, as expected with 19 cells of median 27 rows instead of 182 cells; the record required only that it be reported.
+
 % ============================================================
 \section{Published QML Comparisons: Screening}
 \label{app:literature}
