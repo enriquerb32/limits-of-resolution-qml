@@ -1,0 +1,347 @@
+{
+  "record": "audit/prediction_external_v2.txt (commit b100bea; doi:10.5281/zenodo.24459864)",
+  "interpretations": "(where it does not fix a detail; written to the output as well):\n  * Step 5, 'inflated by the design effect 1 + (m - 1) rho': the design effect multiplies the variance, so the MDE\n    is multiplied by sqrt(1 + (m - 1) rho); rho is the intraclass correlation of the influence values of the\n    contrast (one-way ANOVA estimator for unequal cluster sizes), not of the labels; m is the median size of the 39\n    blocks; the prevalence is that of the reference population.\n  * C0: the second RF fit uses an independent label draw of the training and validation cells with seed 2028.\n  * Calibration seeds (disjoint from steps 2-4): training labels 9000 + k, test-block draws 9500 + k for grid value k.\n  * 'Settings of v1': models fitted on the training rows, XGBoost early-stopped on the validation rows, as in exp53.",
+  "threshold_real": 1.608,
+  "calibration": {
+    "grid": [
+      {
+        "s_u": 0.25,
+        "median_ratio": {
+          "C1": 4.82088799404709,
+          "C2": 1.646042725425378,
+          "C3": 2.5737256433716578
+        },
+        "mean_over_contrasts": 3.0135521209480416
+      },
+      {
+        "s_u": 0.5,
+        "median_ratio": {
+          "C1": 4.44792053503846,
+          "C2": 2.3237013521477854,
+          "C3": 2.8627588372888755
+        },
+        "mean_over_contrasts": 3.211460241491707
+      },
+      {
+        "s_u": 0.75,
+        "median_ratio": {
+          "C1": 4.8039824183898805,
+          "C2": 3.13042673064689,
+          "C3": 2.7069929910399
+        },
+        "mean_over_contrasts": 3.5471340466922237
+      },
+      {
+        "s_u": 1.0,
+        "median_ratio": {
+          "C1": 6.934204640783301,
+          "C2": 3.223680138671271,
+          "C3": 4.036866009585893
+        },
+        "mean_over_contrasts": 4.731583596346822
+      },
+      {
+        "s_u": 1.25,
+        "median_ratio": {
+          "C1": 7.245574541566221,
+          "C2": 5.83698929850508,
+          "C3": 5.678363810325823
+        },
+        "mean_over_contrasts": 6.253642550132375
+      },
+      {
+        "s_u": 1.5,
+        "median_ratio": {
+          "C1": 9.279009036145343,
+          "C2": 4.836696742279759,
+          "C3": 5.665135281432124
+        },
+        "mean_over_contrasts": 6.593613686619076
+      },
+      {
+        "s_u": 1.75,
+        "median_ratio": {
+          "C1": 10.884732766200106,
+          "C2": 6.5875040410850865,
+          "C3": 7.361490385925279
+        },
+        "mean_over_contrasts": 8.27790906440349
+      },
+      {
+        "s_u": 2.0,
+        "median_ratio": {
+          "C1": 11.196952933201228,
+          "C2": 11.595862398746455,
+          "C3": 6.294405580789861
+        },
+        "mean_over_contrasts": 9.695740304245847
+      }
+    ],
+    "s_star": 1.25,
+    "note": "closest to 5.5"
+  },
+  "scenarios": {
+    "S0": {
+      "s_u": 0.0,
+      "s_v": 0.0,
+      "prevalence_reference": 0.36470626897137254,
+      "reference_rows": 2403951,
+      "reference_cells": 80000,
+      "truth": {
+        "C1": {
+          "contrast": "RF - LR",
+          "true_difference": 0.013927355418768328,
+          "mc_se": 0.00021621744452101174,
+          "mc_se_ok": true,
+          "within_margin": false
+        },
+        "C2": {
+          "contrast": "XGB - RF",
+          "true_difference": 0.01247348160624051,
+          "mc_se": 0.00014505970452288424,
+          "mc_se_ok": true,
+          "within_margin": false
+        },
+        "C3": {
+          "contrast": "MLP - RF",
+          "true_difference": -0.0021517076900885446,
+          "mc_se": 0.00018010130835620055,
+          "mc_se_ok": true,
+          "within_margin": true
+        },
+        "C0": {
+          "contrast": "RF - RF_B",
+          "true_difference": -0.0036042446098362158,
+          "mc_se": 8.361222129131874e-05,
+          "mc_se_ok": true,
+          "within_margin": true
+        }
+      },
+      "auc_reference": {
+        "LR": 0.8886931984218622,
+        "RF": 0.9026205538406306,
+        "XGB": 0.9150940354468711,
+        "MLP": 0.900468846150542,
+        "RF_B": 0.9062247984504668
+      },
+      "a_priori_mde": {
+        "C1": {
+          "mde_iid": 0.02995732021737046,
+          "icc_influence": 0.01650159101455792,
+          "auc_correlation": 0.7286061851284652,
+          "auc_mean": 0.9082344940684925,
+          "design_effect": 1.429041366378506,
+          "mde_a_priori": 0.03581173498083558
+        },
+        "C2": {
+          "mde_iid": 0.01705184325174222,
+          "icc_influence": -0.015073158574317359,
+          "auc_correlation": 0.897885924885514,
+          "auc_mean": 0.9217079298284407,
+          "design_effect": 0.6080978770677486,
+          "mde_a_priori": 0.013297134920580428
+        },
+        "C3": {
+          "mde_iid": 0.025819644680251788,
+          "icc_influence": 0.019979278542026215,
+          "auc_correlation": 0.7888478135034658,
+          "auc_mean": 0.912656608267143,
+          "design_effect": 1.5194612420926816,
+          "mde_a_priori": 0.03182695387573755
+        }
+      }
+    },
+    "S1": {
+      "s_u": 0.625,
+      "s_v": 0.3125,
+      "prevalence_reference": 0.3708949278938148,
+      "reference_rows": 2401389,
+      "reference_cells": 80000,
+      "truth": {
+        "C1": {
+          "contrast": "RF - LR",
+          "true_difference": 0.015428794147778313,
+          "mc_se": 0.0003346138687579003,
+          "mc_se_ok": true,
+          "within_margin": false
+        },
+        "C2": {
+          "contrast": "XGB - RF",
+          "true_difference": 0.003684460319353433,
+          "mc_se": 0.00016373093451555566,
+          "mc_se_ok": true,
+          "within_margin": true
+        },
+        "C3": {
+          "contrast": "MLP - RF",
+          "true_difference": 0.0023325623258476647,
+          "mc_se": 0.00017242266377071264,
+          "mc_se_ok": true,
+          "within_margin": true
+        },
+        "C0": {
+          "contrast": "RF - RF_B",
+          "true_difference": 0.007119233992903262,
+          "mc_se": 0.00019585115375557027,
+          "mc_se_ok": true,
+          "within_margin": true
+        }
+      },
+      "auc_reference": {
+        "LR": 0.8664734584537476,
+        "RF": 0.8819022526015259,
+        "XGB": 0.8855867129208793,
+        "MLP": 0.8842348149273735,
+        "RF_B": 0.8747830186086226
+      },
+      "a_priori_mde": {
+        "C1": {
+          "mde_iid": 0.031898869327692106,
+          "icc_influence": 0.02894573508939309,
+          "auc_correlation": 0.7071102696089184,
+          "auc_mean": 0.901755634966166,
+          "design_effect": 1.7525891123242203,
+          "mde_a_priori": 0.042229442128674854
+        },
+        "C2": {
+          "mde_iid": 0.01575570883113935,
+          "icc_influence": 0.04033475081992481,
+          "auc_correlation": 0.926912827264328,
+          "auc_mean": 0.9041097294893683,
+          "design_effect": 2.0487035213180453,
+          "mde_a_priori": 0.02255160745164673
+        },
+        "C3": {
+          "mde_iid": 0.026210265062713938,
+          "icc_influence": 0.04882427999757539,
+          "auc_correlation": 0.7954410903877014,
+          "auc_mean": 0.9052643129177409,
+          "design_effect": 2.26943127993696,
+          "mde_a_priori": 0.039484798970041646
+        }
+      }
+    },
+    "S2": {
+      "s_u": 1.25,
+      "s_v": 0.625,
+      "prevalence_reference": 0.3910041230304628,
+      "reference_rows": 2401389,
+      "reference_cells": 80000,
+      "truth": {
+        "C1": {
+          "contrast": "RF - LR",
+          "true_difference": -0.039326662153725156,
+          "mc_se": 0.0007090457838649097,
+          "mc_se_ok": true,
+          "within_margin": false
+        },
+        "C2": {
+          "contrast": "XGB - RF",
+          "true_difference": -0.0013902691401892486,
+          "mc_se": 0.0004257564773991829,
+          "mc_se_ok": true,
+          "within_margin": true
+        },
+        "C3": {
+          "contrast": "MLP - RF",
+          "true_difference": 0.024245327908339,
+          "mc_se": 0.0004615929100333077,
+          "mc_se_ok": true,
+          "within_margin": false
+        },
+        "C0": {
+          "contrast": "RF - RF_B",
+          "true_difference": -0.028586878808305904,
+          "mc_se": 0.0009600350039848488,
+          "mc_se_ok": true,
+          "within_margin": false
+        }
+      },
+      "auc_reference": {
+        "LR": 0.8039703254286363,
+        "RF": 0.7646436632749112,
+        "XGB": 0.7632533941347219,
+        "MLP": 0.7888889911832502,
+        "RF_B": 0.7932305420832171
+      },
+      "a_priori_mde": {
+        "C1": {
+          "mde_iid": 0.03696774958137447,
+          "icc_influence": 0.11262367661207649,
+          "auc_correlation": 0.7018220722852644,
+          "auc_mean": 0.8605652400231348,
+          "design_effect": 3.9282155919139887,
+          "mde_a_priori": 0.07326906866356735
+        },
+        "C2": {
+          "mde_iid": 0.02050756257493251,
+          "icc_influence": 0.2246862077575441,
+          "auc_correlation": 0.9200082119134598,
+          "auc_mean": 0.8368810294968191,
+          "design_effect": 6.841841401696147,
+          "mde_a_priori": 0.05364145467671841
+        },
+        "C3": {
+          "mde_iid": 0.03137285312744203,
+          "icc_influence": 0.12622637828531216,
+          "auc_correlation": 0.7908500527958441,
+          "auc_mean": 0.856351127819549,
+          "design_effect": 4.281885835418116,
+          "mde_a_priori": 0.06491896066501518
+        }
+      }
+    }
+  },
+  "population": {
+    "blocks": 39,
+    "block_rows": [
+      37,
+      60,
+      27,
+      48,
+      16,
+      42,
+      48,
+      10,
+      45,
+      18,
+      44,
+      23,
+      14,
+      23,
+      52,
+      11,
+      23,
+      34,
+      22,
+      11,
+      20,
+      21,
+      31,
+      18,
+      60,
+      53,
+      59,
+      27,
+      14,
+      14,
+      34,
+      10,
+      27,
+      55,
+      31,
+      29,
+      16,
+      18,
+      25
+    ],
+    "median_rows_per_cell": 27.0,
+    "median_small_test_rows": 570.0
+  },
+  "p1_true_c1_above_margin": {
+    "S0": true,
+    "S1": true,
+    "S2": false
+  },
+  "minutes": 6.246905227502187
+}
