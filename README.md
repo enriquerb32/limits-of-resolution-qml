@@ -1,0 +1,340 @@
+# Limits of Resolution in Small Machine-Learning Benchmarks
+
+Code, data and reproducibility package for **"Limits of Resolution in Small Machine-Learning Benchmarks: Calibrated Inference for Clustered Test Sets"** (Enrique Real, ORCID [0009-0006-3862-9797](https://orcid.org/0009-0006-3862-9797)).
+
+[![CI](https://github.com/enriquerb32/limits-of-resolution-qml/actions/workflows/ci.yml/badge.svg)](https://github.com/enriquerb32/limits-of-resolution-qml/actions/workflows/ci.yml)
+[![Reproducibility](https://github.com/enriquerb32/limits-of-resolution-qml/actions/workflows/reproducibility.yml/badge.svg)](https://github.com/enriquerb32/limits-of-resolution-qml/actions/workflows/reproducibility.yml)
+[![Coverage: 100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](pyproject.toml)
+[![Typed: mypy strict](https://img.shields.io/badge/types-mypy%20strict-blue.svg)](pyproject.toml)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![PennyLane 0.45](https://img.shields.io/badge/PennyLane-0.45-blueviolet.svg)](https://pennylane.ai/)
+[![Code: MIT](https://img.shields.io/badge/Code-MIT-yellow.svg)](LICENSE)
+[![Data and text: CC BY 4.0](https://img.shields.io/badge/Data%20%26%20Text-CC%20BY%204.0-lightgrey.svg)](LICENSE-DATA)
+
+> [!IMPORTANT]
+> This is **version 2** of the paper and code (corrected data pipeline, tuned baselines, pinned environment; see [What changed in v2](#2-what-changed-in-v2)). The archived results of the original version (v1) are kept unchanged in `results_v1/`.
+>
+> **Paper:** [`paper/main.pdf`](paper/main.pdf) · **Supplement:** [`paper/supp.pdf`](paper/supp.pdf)
+
+The repository has two parts:
+
+* **`qml_resolution`** (`src/`): a small, typed and fully tested Python library for the inference the paper relies on: rank AUC, seed-averaged paired DeLong tests, cluster bootstrap and jackknife for clustered test sets, and minimum detectable differences. It depends only on NumPy and SciPy and can be used in any benchmark that stores test-set scores.
+* **The research pipeline** (`code/`, `scripts/`, `results/`): data processing, the classical and hybrid quantum models (PennyLane + PyTorch), the 15-seed experiments, and every analysis behind the tables of the paper, with the archived per-seed test probabilities.
+
+---
+
+## 1. What the paper asks and finds
+
+How large an AUC difference can a small benchmark resolve, and how much does the verdict depend on the inferential procedure? The case study is a four-station Western Mediterranean precipitation panel (Alicante, Barcelona, San Javier, Valencia; 1938–2026), with a 1-month-ahead forecast of exceeding a regional 60th percentile and 529 test station-months grouped in 19 test years (2008–2026).
+
+* **Resolution.** The standard error of one AUC (about 0.024) is 3–21 times the seed standard deviation of the classical models. The minimum detectable difference between 15-seed means is 0.022–0.032 AUC and falls only as $N^{-1/2}$; near this limit DeLong and calendar-year cluster procedures disagree.
+* **Second panel.** A second four-station panel (same region and test years) matched the predicted resolution, while the model ranking did not replicate. The prediction was written before the analysis: [`audit/prediction_panel2.txt`](audit/prediction_panel2.txt).
+* **Quantum controls.** Two hybrid models scored 0.020–0.024 AUC below Random Forest and were not distinguished from classical controls at the same four-angle interface. Fourier surrogates matched the trained circuit, and the same controls detected a circuit-generated signal planted at the interface.
+* **References.** No model resolvably improved on a month × station climatology, not even the ECMWF SEAS5 forecast ($+0.043$ AUC, not resolved by the cluster procedures); none discriminated once seasonal and station base rates were removed, and none added information to SEAS5.
+* **Protocol.** A stated estimand, a minimum detectable difference computed in advance, separate seed and sampling error, base-rate and operational references, and classical controls at the same interface.
+
+---
+
+## 2. What changed in v2
+
+v2 changes the data pipeline and the environment, not the models or the statistics.
+
+| Issue (v1) | v2 |
+|---|---|
+| Daily inner join of five files: a missing pressure or wind day removed that day's rain; 23 % of the test months incomplete; Valencia and San Javier almost absent after 2012 | `code/etl_v2.py`: full calendar per station; the label is the monthly sum of the precipitation file alone, defined when at most `V2_MAX_MISSING` (3) days are missing |
+| Missing precipitation and sunshine set to 0; covariates forward/backward filled over any gap | missing stays missing; monthly means over observed days (>= 10); gaps of at most `V2_INTERP_MONTHS` (2) months interpolated; windows without features or lags are dropped, not filled |
+| Months with < 10 joined days dropped and the rest concatenated (windows could jump over gaps) | every calendar month kept; windows are calendar-contiguous |
+| ET0 with a constant wind (u2 = 2 m/s) | ET0 with the observed wind, u2 = 0.748 u10 (FAO-56 eq. 47) |
+| JJA ET0 total summed over whatever summer months were present | JJA total requires the three months |
+| Tree baselines with manual hyperparameters; XGBoost without search or early stopping | `exp40_v2_tune.py`: Optuna (TPE, 50 trials, declared spaces) for both; XGBoost stops early on the validation AUC |
+| Mixed environments (scikit-learn 1.6.1 on Colab, 1.9.1 locally; XGBoost version not recorded) | one environment, `requirements-v2.lock` (hashes), `results_v2_environment.txt`, fixed thread count |
+
+New analyses in v2: `QTL_TENSOR1` in `exp27_controls.py` (the 81-function tensor basis that spans the R_Y-embedding head exactly), the angle distribution and a random-weight R² reference in `exp34_circuit_spectrum.py --part A`, the teacher-circuit positive control `exp38_teacher_control.py`, the cancellation diagnostic `exp37_cancellation.py`, the SEAS5 reference `exp33_seas5_reference.py` and the second panel `exp32_second_panel.py`.
+
+**Switch.** Every script is selected by the environment variable `LOR_DATASET=v2`; without it the scripts behave as v1. The analyses read the v1 archive names (`..._fixet0_p60_28.1_...`); in v2 these files hold v2 results (the v2 $P_{60}$ is stored in the archive JSON as `threshold`). `results/` holds the v2 archives and `results_v1/` the unchanged v1 archives.
+
+---
+
+## 3. Using the library
+
+```bash
+pip install -e .            # library only: NumPy + SciPy
+pip install -e ".[dev]"     # + test, lint and type-check tools
+```
+
+```python
+import numpy as np
+from qml_resolution import paired_delong, cluster_bootstrap_delta, percentile_ci, jackknife_delta, mde
+
+z = np.load("results/json/results_hybrids_trainonly_fixet0_p60_28.1_probs.npz")
+y, years = z["y_te"], np.load("results/years_te.npy")
+rf, hybrid = z["RF_2273_probs"], z["LSTM_QNN_probs"]          # (15 seeds, 529 rows) each
+
+test = paired_delong(y, rf, hybrid)                              # seed-mean difference, iid rows
+print(f"delta={test.delta:+.4f}  se={test.se:.4f}  p={test.p_value:.3f}  MDE={mde(test.se):.3f}")
+
+block = cluster_bootstrap_delta(y, rf, hybrid, years, n_boot=2000, random_state=0)
+two_way = cluster_bootstrap_delta(y, rf, hybrid, years, n_boot=2000, resample_seeds=True)
+print("year-block CI", percentile_ci(block), "years x seeds CI", percentile_ci(two_way))
+print("jackknife", jackknife_delta(y, rf, hybrid, years).ci())
+```
+
+| Module | Contents |
+|---|---|
+| `qml_resolution.auc` | `rank_auc`, `delong_components`, `delong_covariance`, `paired_delong` (one run or S seeds per model) |
+| `qml_resolution.resampling` | `cluster_bootstrap_aucs`, `cluster_bootstrap_delta` (paired; optional seed resampling), `jackknife_delta`, `percentile_ci` |
+| `qml_resolution.power` | `mde`, `mde_factor`, `hanley_mcneil_se`, `paired_mde_hanley_mcneil`, `seed_share` |
+
+---
+
+## 4. Installation of the full pipeline
+
+Python 3.12 is the version used for the Docker image and the reported results.
+
+```bash
+git clone https://github.com/enriquerb32/limits-of-resolution-qml.git
+cd limits-of-resolution-qml
+
+# Option A: uv with the hashed lockfile (recommended, exact versions)
+uv venv .venv --python 3.12
+source .venv/bin/activate       # Windows: .venv\Scripts\activate
+uv pip install --require-hashes -r requirements-v2.lock     # v2 environment (v1: requirements.lock)
+uv pip install --no-deps -e .
+
+# Option B: pip with version ranges
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[pipeline,dev]"
+
+# Option C: conda
+conda env create -f environment.yml && conda activate qml-resolution
+```
+
+The lockfile fixes exact versions with SHA-256 hashes (`requirements-v2.lock` from `requirements-v2.in`; the versions used for the v2 results are recorded in `results_v2_environment.txt`). Hardware and BLAS threading can still change floating-point summation order in the last digits; for the closest match set `OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1`.
+
+---
+
+## 5. Reproducing the paper
+
+Everything except model training runs from the archived results in `results/` and needs no GPU.
+
+The headline v2 quantities and tables are computed from the archives, without training, by:
+
+```bash
+python code/local_experiments/exp42_v2_summary.py results   # AUCs, paired DeLong, cluster SEs, bootstraps, MDEs -> results/local_exp42_v2_summary.json
+python code/local_experiments/exp43_v2_tables.py results    # noise budget, Brier, within-station AUC, resolution curve -> results/local_exp43_v2_tables.json
+```
+
+To rerun any other script on the v2 data, set `LOR_DATASET=v2` first (PowerShell: `$env:LOR_DATASET = "v2"`; bash: `export LOR_DATASET=v2`).
+
+```bash
+make check       # figures, partition table, parameter counts, traceability audits and manuscript tables
+make manuscript  # every number in the main-text tables of paper/main.tex against the archived v2 results
+make test        # full test suite (library, quantum circuit and controls, manuscript, archived-result regressions)
+```
+
+How the claims of the manuscript are tied to the archives:
+
+* `tests/manuscript/test_v2_tables.py` reads the numbers **as printed** in the 13 numerical main-text tables, the abstract, Section 2 and the running text of `paper/main.tex` and checks that each one is the rounding of the archived value (`results/local_exp42_v2_summary.json`, `local_exp43_v2_tables.json`, `local_exp33_seas5_orig.json`, `local_exp32_panel2_med2v2.json`, `test_meta.csv`). Editing a number in the paper without changing the archive, or the reverse, fails the suite.
+* `tests/test_reproducibility.py` regenerates `local_exp42_v2_summary.json` and `local_exp43_v2_tables.json` from the archived per-seed probabilities and requires agreement to $10^{-12}$ (about 10 minutes).
+* `tests/regression/` checks the `qml_resolution` library against those archives (its DeLong, AUC and jackknife implementations are independent of the scripts).
+* `scripts/build_traceability_v2.py` writes `audit/03_traceability_v2.csv` (47 claims of the v2 text, including Section 2 and the Supplement). `scripts/build_traceability.py` writes `audit/01_traceability_v1.csv` for the v1 manuscript against `results_v1/` (98 claims).
+
+### Retraining (long-running, optional)
+
+```bash
+python code/main.py --use-checkpoints --output out         # statistics and figures from stored checkpoints
+python code/main.py --skip-qml --force-retrain             # classical baselines only
+python code/main.py --force-retrain                        # full canonical pipeline including the circuits
+python code/local_experiments/exp17_hybrids_multiseed.py --fix-et0 --p60 28.1 \
+    --models RF_2273 PureLSTM CTRL_LINEAR4D LSTM_QNN LSTM_PIQNN LBL_QNN LSTM_QTL   # core experiment (Table 5)
+```
+
+Noiseless circuit simulation is CPU-bound and the 15-seed core experiment takes hours on a workstation. Retrained results can differ slightly from the archived ones (hardware, library versions), so the statistics of the paper are computed from the archived probabilities.
+
+### Docker
+
+```bash
+docker build -t limits-qml .
+docker run --rm -v "$PWD/out:/app/out" limits-qml                                   # figures from results/
+docker run --rm -v "$PWD/audit:/app/audit" limits-qml python scripts/build_traceability.py
+docker run --rm limits-qml python -m pytest tests/unit tests/regression tests/quantum
+```
+
+The image contains `src/`, `code/`, `scripts/`, `results/` and `tests/`; checkpoints and raw data are not baked in.
+
+---
+
+## 6. Mapping paper items to code
+
+Commands run from the repository root. Table numbers refer to `paper/main.pdf`; `run_v2.ps1` runs the whole chain (training needs the raw AEMET records). Each row is checked by `tests/manuscript/test_v2_tables.py` unless stated.
+
+| Paper item | What it is | Archived output | Computed by (no training) | Predictions from (training) |
+|---|---|---|---|---|
+| **Table S1** | Test windows and prevalence by station | `results/test_meta.csv`, `results/panel_v2_monthly.csv` | `scripts/make_partition_table.py` | `export_test_meta.py` |
+| **Table 1** | Noise budget: SE of one AUC, seed SD, seed share | `results/local_exp43_v2_tables.json` (`noise_budget`) | `exp43_v2_tables.py results` | `exp17`, `exp41`, `exp27` |
+| **Table 2** | Paired comparisons of the classical models | `results/local_exp42_v2_summary.json` (`pairs`) | `exp42_v2_summary.py results` | `exp41_v2_classical.py` |
+| **Figure 1**, **Figure S1** | Inference map; hybrid and its interface controls | TikZ in `paper/main.tex` and `paper/supp.tex` | — | — |
+| **Figure 2** | Study design: windows per station and year, test-year clusters | `paper/figs/fig_design.pdf` | `scripts/make_design_plot.py` | — |
+| **Figure 3** | Forest plot of Tables 2, 3 and S24 | `paper/figs/fig_forest.pdf` | `scripts/make_forest_plot.py` | — |
+| **Figure 4** | Calibration of the candidate procedures | `paper/figs/fig_calibration.pdf` | `scripts/make_calibration_plot.py` | — |
+| **Figure S3** | Sensitivity of the resolved verdicts to the robustness checks | `paper/figs/fig_sensitivity.pdf` | `scripts/make_sensitivity_plot.py` | — |
+| **Figure 5**, §4.3 | Clusters against rows: true MDE by number of clusters and rows per cluster | `results/local_exp54_power_clusters_rows.json` | `exp54_power_clusters_rows.py`; figure: `scripts/make_clusters_rows_plot.py` | — |
+| **Tables S32**, **S34** | References under the primary procedure: models against the climatology (Table S32); SEAS5 at both leads, incremental and replacement combinations (Table S34) | `results/local_exp55_review_closing.json` (`seas5`), `local_exp42_v2_summary.json`, `local_exp49_review_minor.json` | `exp55_review_closing.py` | — |
+| **Table S36**, MDE CR2 column | CR2 resolution of the second panel against the scaled first-panel value | `results/local_exp55_review_closing.json` (`panel2_mde`) | `exp55_review_closing.py` | — |
+| **Table S3**, Linear-4D row of **Table S4** | Primary families on the causal refits (529 common and 533 own rows), Holm, 1–3-year clusters | `results/local_exp55_review_closing.json` (`causal`) | `exp55_review_closing.py` | `run_v2.ps1` steps `03b_core_causal`, `03c_linear4d_causal` |
+| **S-panel2, Lookahead**; §4.6 | Truncation test of the second panel; Table S36 without the two windows eligible only with later data | `results/local_exp56_panel2_truncation.json`, `results/exp56_panel2_truncation_rows.csv` | `LOR_DATASET=v2 exp56_panel2_truncation.py` (~1.5 h) | — |
+| **Table 4** | Summary of the verdicts: evidence, robustness and status | — (compiled from the tables and figures it cites) | — | — |
+| **§4.3, Tables S13, S14** | Uncertainty of the CR2 MDE ($\chi^2_\nu$ and year bootstrap); TOST at $\pm0.01$ of the circuits against their interface controls | `results/local_exp57_mde_ci_equivalence.json` | `exp57_mde_ci_equivalence.py` (~1 min) | — |
+| **Table S19** | Hanley–McNeil MDE by test size and prevalence | — | `qml_resolution.paired_mde_hanley_mcneil` | — |
+| **Figure S5**, **Table S20** | Empirical resolution curve (supplement) | `results/local_exp43_v2_tables.json` (`resolution_curve`) | `exp43_v2_tables.py results`; figure: `scripts/make_resolution_plot.py` | as Table S23 |
+| **Table S23** | 15-seed AUC of every model and control | `results/local_exp42_v2_summary.json` (`models`) | `exp42_v2_summary.py results` | `exp17`, `exp27_controls.py`, `exp30_fourier_full.py` |
+| **Table 3**, **Tables S21, S24** | `LSTM+QNN` against Random Forest, the LSTM, Linear-4D, Fourier surrogates and frozen circuits (Table S24); `LSTM+QTL` and its controls (Table S21) | `results/local_exp42_v2_summary.json` (`pairs`) | `exp42_v2_summary.py results` | as Table S23 |
+| **Table S26** | Positive control: heads given the angles of a teacher circuit | `results/local_exp38_teacher_control_interface.json` | — | `exp38_teacher_control.py --mode interface --seeds 5` |
+| **Table S15** | Brier score, skill and calibration, raw and Platt | `results/local_exp43_v2_tables.json` (`brier_raw`, `recal_orig`) | `exp43_v2_tables.py results` | `exp28_labels_recalibration.py --label orig` |
+| **Table S30** | Pooled and within-station AUC | `results/local_exp43_v2_tables.json` (`within_station`) | `exp43_v2_tables.py results` | as Table S23 |
+| **Table S31** | Station × month label | `results/local_exp43_v2_tables.json` (`recal_stationmonth`) | `exp43_v2_tables.py results` | `exp28_labels_recalibration.py --label stationmonth` |
+| **Table S33**; inputs of Tables S32 and S34 | SEAS5 scores, DeLong and block intervals | `results/local_exp33_seas5_orig.json` | `exp33_seas5_reference.py --label orig --step analyze` | `--step score` (members in `data/seas5/`) |
+| **Table S36** | Second panel | `results/local_exp32_panel2_med2v2.json` (`pooled`), `results/panel2/med2v2/panel_monthly.csv` | `exp32_second_panel.py --tag med2v2 --step analyze` | `--step etl`, `--step train` |
+| **Tables 2, 3, S24: primary column** | CR2 interval and $p$ with Bell–McCaffrey df (rows rewritten from the archive by `scripts/fill_paired_tables.py`) | `results/local_exp42_v2_summary.json` (`ci_cr2`, `p_cr2`) | `exp42_v2_summary.py results` | — |
+| **S1, Lookahead audit; Table S4** | Truncation test, interpolation reach, label completeness, causal refits | `results/local_exp47_truncation_audit.json`, `results/exp47_truncation_rows.csv` | `exp47_truncation_audit.py` (~1.5 h), then `exp51_review_extras.py` | causal neural runs: `exp17 ... --out-dir results/causal` with `V2_CAUSAL=1` |
+| **Table S11** | Calibration of the primary procedure; two-year clusters | `results/local_exp48_primary_calibration.json`, `..._2yr.json` | `exp48_primary_calibration.py --reps 600 --B 299` (~2.5 h) | — |
+| **§4.5, S-base rates, S-SEAS5 and S-estimators** | Within station×month AUC, SEAS5 + climatology increments, analytic population AUC | `results/local_exp49_review_minor.json` | `exp49_review_minor.py` | — |
+| **§4.4, Table S27 (repeated control)** | Teachers × strengths × draws, null | `results/local_exp50_teacher_grid.json` | `exp50_teacher_grid.py --seeds 5` (~3 h) | — |
+| **§4.5, §4.6 and S-fewclusters additions** | CR2 for the SEAS5 contrasts and for the second panel; clusters of 1–3 consecutive years | `results/local_seas5_cr2.json`, `results/local_panel2_cr2.json`, `results/local_cr2_block_sensitivity.json` | `exp51_review_extras.py` | — |
+| **§4.4, S-emulation; Table S22** | Exact emulation of the 15 trained circuits from a 9⁴ grid; heads trained on the frozen angles of each seed | `results/local_exp52_emulation_substitution.json`, `results/json/results_exp52_common_angles_probs.npz` | `exp52_emulation_substitution.py --part E S` (~2.5 h; needs `checkpoints/exp31/`) | — |
+| **§4.7, S-external; Table S37** | External benchmark (California Housing, spatial cells); design recorded in `audit/prediction_external.txt` before any fit | `results/local_exp53_external_benchmark.json` | `exp53_external_benchmark.py` (~10 min; data downloaded to `data/external/`, not redistributed) | — |
+| **Leave-one-year-out; Table S36 primary column** | Influential years for the primary verdicts; CR2 on the second panel | `results/local_cr2_leave_one_year.json`, `results/local_panel2_cr2.json` | `exp51_review_extras.py` | — |
+| **Table S16** | CR2 inference on the Brier score, as trained and after Platt recalibration; Holm within the primary families | `results/local_exp58_brier_inference.json` | `exp58_brier_inference.py` (`qml_resolution.cluster_robust_brier_delta`) | — |
+| **Table 5**, §5.2; **S8**, **Table S38** | Published QML-versus-classical AUC comparisons: approximate 95 % interval, smallest equivalence margin and MDE (paired Hanley–McNeil at the printed test size); search, inclusion and studies screened but not usable | `results/local_exp60_literature_reanalysis.json` | `exp60_literature_reanalysis.py` (values transcribed from the arXiv versions and search queries, listed in the script) | — |
+| **Limitations** (pressure records) | AEMET OpenData against the datosclima-based panel: daily pressure of San Javier and Valencia, 2008–2026 | `results/local_exp59_aemet_opendata_pressure.csv` | — | `exp59_aemet_opendata_check.py` (needs an AEMET OpenData key in `~/.aemet_key` and network access) |
+| **§4.1, S-cancellation (simulation)** | Cancellation mechanisms between stations; coverage of DeLong, CR1, CR2 and floored CR2 conditional on the observed cluster/iid ratio | `results/local_exp61_cancellation_calibration.json` | `exp61_cancellation_calibration.py --reps-search 1000 --reps 20000` (~20 min) | — |
+| **§4.1, Table 4** | Floored CR2, SE = max(SE_CR2, SE_iid), on every contrast of the paper (sensitivity) | `results/local_exp62_floored_cr2_observed.json` | `exp62_floored_cr2_observed.py` | — |
+| **§3.3, §4.1, Tables 2–4 and 6, S-cancellation, Table S13** | Trigger of the floor of protocol item 1 (5th percentile of the cluster/iid ratio with independent cases, 0.71), coverage of the triggered rule, verdicts and MDE of the deciding procedure on the AUC and Brier contrasts | `results/local_exp63_floor_threshold.json` | `exp63_floor_threshold.py` (~25 min) | — |
+| **S-pre-analysis plan** | Template of a pre-analysis plan | `docs/pre_analysis_plan_template.md` | — | — |
+| **Table 10 as a tool** | Protocol report from archived predictions | — | `python -m qml_resolution.report scores.npz --clusters years --pair A:B ...` | — |
+| **Supplement** | Tuning (`exp40_v2_tune.py` → `results/json/v2_tuned_params.json`), shot noise (`exp31`), circuit spectrum (`exp34`), few-cluster inference (`exp35`), cancellation (`exp37`), teacher-circuit control (`exp38`), panel-matched simulation (`exp15` → `results/json/results_exp15_panel_sim.json`), known-truth simulation figure (`scripts/make_paper_figs.py --results results_v1 --only sim`); checks added in revision: XGBoost trees per seed (`exp44_xgb_iterations.py` → `results/json/xgb_best_iterations.json`; needs the daily data), cluster/iid by period and without 2026 (`exp45_cluster_periods.py` → `results/local_exp45_cluster_periods.json`), empirical AUC correlations and validation resolution (`exp46_auc_correlation.py` → `results/local_exp46_auc_correlation.json`) | `results/local_exp3*.json` | see the script names | — (checked by `scripts/build_traceability_v2.py`, not by the table tests) |
+
+The lookahead, calibration and primary-procedure rows are checked by `tests/manuscript/test_lookahead_calibration_primary.py`. `V2_CAUSAL=1` switches `dataset_v2.py` to the causal imputation (default 0 reproduces the archived results).
+
+### v1 manuscript
+
+The table and figure numbers below refer to the **v1** manuscript and its archives, now in `results_v1/` (the commands write to `results/`; pass the `results_v1/` inputs to reproduce v1).
+
+| Paper item | What it is | Command | Output |
+|---|---|---|---|
+| **Table 1** | Windows by station and partition | `python scripts/make_partition_table.py` | `results/json/partition_counts.json` |
+| **Table 3, Table S1** | Noise budget, seed variance, MDEs | `python code/local_experiments/exp7_noise_budget.py` | `results/local_exp7_noise_budget.json` |
+| **Table 4, Figure 1** | Paired DeLong and bootstrap CIs, classical models | `python code/local_experiments/exp10_paired_ci.py --probs results/json/results_rerun_train_only_canonical_probs.npz --prefix train_only` | `out/results_exp10_paired_ci.json` (archived: `results/json/results_exp10_paired_ci.json`) |
+| **Table 5, Figure 2, Table S4** | Known-truth simulation, scenarios B–E | `python code/local_experiments/exp11_simulation_known_truth.py --reps 500 --B 300` | `results/json/sim*.json` |
+| **Supplement, panel-matched simulation** | Simulation with the real year sizes | `python code/local_experiments/exp15_panel_matched_simulation.py --probs results/json/results_rerun_train_only_canonical_probs.npz --meta results/test_meta.csv` | `results/json/results_exp15_panel_sim.json` |
+| **Table 6** | Matched 15-seed core experiment, seven models (long-running; RF needs scikit-learn 1.6.1) | `python code/local_experiments/exp17_hybrids_multiseed.py --fix-et0 --p60 28.1 --models RF_2273 PureLSTM CTRL_LINEAR4D LSTM_QNN LSTM_PIQNN LBL_QNN LSTM_QTL` | `results/json/results_hybrids_trainonly_fixet0_p60_28.1.json`, `..._probs.npz` |
+| **Table 7** | Paired comparisons with `LSTM+QNN` | `python code/local_experiments/exp10_paired_ci.py --probs results/json/results_rerun_train_only_canonical_probs.npz --prefix train_only --extra results/json/results_hybrids_trainonly_fixet0_p60_28.1_probs.npz --out results/json/results_exp10_paired_ci_fixet0.json` | `results/json/results_exp10_paired_ci_fixet0.json` |
+| **Table 8** | Paired comparisons with the other three hybrids | `python code/local_experiments/exp10_paired_ci.py --extra results/json/results_hybrids_trainonly_fixet0_p60_28.1_probs.npz --pairs RF_2273-LSTM_PIQNN RF_2273-LBL_QNN RF_2273-LSTM_QTL CTRL_LINEAR4D-LSTM_PIQNN CTRL_LINEAR4D-LBL_QNN CTRL_LINEAR4D-LSTM_QTL PureLSTM-LSTM_PIQNN PureLSTM-LBL_QNN QTL_EXTRACTOR-LSTM_QTL --out results/json/results_exp10_hybrids_fixet0.json` | `results/json/results_exp10_hybrids_fixet0.json` |
+| **Table 9** | 15-seed Brier score, skill against climatology, ECE | `python code/local_experiments/exp21_brier_trainonly.py` | `results/local_exp21_brier_trainonly.json` |
+| **Table 10** | Pooled and within-station AUC | `python code/local_experiments/exp23_within_station_auc.py` | `results/local_exp23_within_station_auc.json` |
+| **Table 11** | Hanley–McNeil MDE by test size and prevalence | `qml_resolution.paired_mde_hanley_mcneil` (checked in `tests/unit/test_power.py`) | — |
+| **Table 12** | Empirical resolution curve from subsets of test years (~15 min) | `python code/local_experiments/exp24_resolution_curve.py` | `results/local_exp24_resolution_curve.json` |
+| **Section 4 seed shares, jackknife** | Seed shares of differences, year jackknife, extra climatologies | `python code/local_experiments/exp16_block_c.py --core results/json/results_hybrids_trainonly_fixet0_p60_28.1_probs.npz --out results/local_exp16_block_c_fixet0.json` | `results/local_exp16_block_c_fixet0.json` |
+| **Limitations (block length)** | Circular moving-block bootstrap, blocks of 1–4 years | `python code/local_experiments/exp19_block_length.py --core results/json/results_hybrids_trainonly_fixet0_p60_28.1_probs.npz --out results/local_exp19_block_length_fixet0.json` | `results/local_exp19_block_length_fixet0.json` |
+| **Table S2, Figure S1** | Positive control (imposed AUC reduction) | `python code/local_experiments/exp8_positive_control.py` | `results/local_exp8_positive_control.json` |
+| **Table S10** | Parameter accounting (2,613 vs 2,609) | `python scripts/verify_parameter_counts.py` | `results/json/results_wp3_accounting.json` |
+| **Table S14** | Monthly coverage audit | `python code/local_experiments/exp12_monthly_coverage_audit.py --csv code/local_experiments/datos_limpios_multiestacion.csv --out results/json/results_exp12_coverage.json` | `results/json/results_exp12_coverage.json` |
+| **Tables S15–S17** | Fixed predictors under label scenarios S0–S7 | `python code/local_experiments/exp13_label_sensitivity.py --probs results/json/results_rerun_train_only_canonical_probs.npz --prefix train_only --extra results/json/results_hybrids_trainonly_fixet0_p60_28.1_probs.npz --rows code/local_experiments/month_rows_raw.csv --pairs RF-XGB RF-LSTM XGB-LSTM RF_2273-LSTM_QNN CTRL_LINEAR4D-LSTM_QNN PureLSTM-LSTM_QNN --out results/json/results_exp13_label_sensitivity_fixet0.json` | `results/json/results_exp13_label_sensitivity_fixet0.json` |
+| **Table S20** (historical) | Single-run Brier score and reliability (canonical, seed 42) | `python code/local_experiments/exp3_brier_and_reliability.py` | `results/local_exp3_brier_reliability.json` |
+| **Inner-join audit** | Effect of the five-file inner join on the test partition | `python code/local_experiments/exp14_innerjoin_audit.py --csv code/local_experiments/datos_limpios_multiestacion.csv --precip_raw code/local_experiments/precip_raw.csv --rows code/local_experiments/month_rows.csv --out results/json/results_exp14_innerjoin.json` | `results/json/results_exp14_innerjoin.json` |
+| **Single-seed pairings** | Same-architecture seed pairs of the core models | `python code/local_experiments/exp22_same_arch_core.py` | `results/local_exp22_same_arch_core.json` |
+| **Section 2.2, leakage appendix** | Random Forest by pipeline and fitting rows | `python code/local_experiments/exp20_rf_fitting_rows.py` | `results/local_exp20_rf_fitting_rows.json` |
+
+> [!NOTE]
+> `exp12`, `exp13` and `exp14` need the raw daily station records (`datos_limpios_multiestacion.csv`, `precip_raw.csv`, `month_rows*.csv`), which are not redistributed (AEMET Open Data via datosclima.es; see `LICENSE-DATA`). The v2 test partition metadata (`results/test_meta.csv`, `results/years_te.npy`) and the per-seed validation and test probabilities of every model are tracked; the v1 monthly panel is in `results_v1/panel_checkpoint.csv`.
+
+---
+
+## 7. Architecture
+
+```
+.
+├── src/qml_resolution/      reusable inference library (typed, 100 % test coverage)
+│   ├── auc.py               rank AUC, DeLong components, (seed-averaged) paired DeLong
+│   ├── resampling.py        cluster bootstrap (one- and two-way), jackknife, percentile CIs
+│   └── power.py             MDE, Hanley-McNeil, seed share
+├── code/                    research pipeline (frozen; see below)
+│   ├── main.py              orchestrator of the canonical pipeline
+│   ├── etl.py, fisica.py, features.py              ingestion, physical features, windows, split
+│   ├── modelos_clasicos.py, modelos_cuanticos.py   RF / XGBoost / LSTM; variational circuits (PennyLane)
+│   └── local_experiments/   one script per analysis; statistics delegate to qml_resolution
+├── tests/
+│   ├── unit/                library vs independent oracles (scikit-learn AUC, O(mn) DeLong, paper values)
+│   ├── regression/          library vs archived results of the paper (DeLong, bootstrap, jackknife)
+│   ├── quantum/             circuit physics: bounds, parameter-shift = backprop, Fourier spectrum
+│   └── test_*.py            end-to-end reproduction checks (slow)
+├── results/                 archived v2 results (JSON, CSV, NPZ) and the v2 monthly panels
+├── results_v1/              archived v1 results, unchanged
+├── checkpoints/             model weights and preprocessed dataset (checksums in CHECKSUMS.sha256)
+├── scripts/                 figures, traceability audit, parameter-count check
+├── paper/                   main.tex, supp.tex, compiled PDFs and figures
+└── audit/                   traceability matrices and the predictions recorded before the analyses
+```
+
+**Why `code/` is frozen.** The checkpoints in `checkpoints/` are PyTorch pickles that reference the module names of `code/` (Spanish names such as `modelos_cuanticos`, matching the feature glossary of the Supplement). Renaming or restructuring those modules would break the archived checkpoints, so new, reusable functionality lives in `src/qml_resolution` and the pipeline calls into it. The refactor of the statistical scripts was checked against the archived outputs: `exp7`, `exp8`, `exp10`, `exp13`, `exp16` and `exp22` reproduce their archived JSON files to within $5 \times 10^{-14}$.
+
+---
+
+## 8. Quality checks
+
+| Check | Command | Scope |
+|---|---|---|
+| Lint and format | `make lint` (ruff) | whole repository; strict rules for `src/` and `tests/` |
+| Static types | `make typecheck` (mypy `--strict`) | `src/` |
+| Library tests | `make test-fast` | unit + regression, 100 % line and branch coverage |
+| Quantum tests | `make test-quantum` | circuits of the hybrid models and their classical controls |
+| Manuscript | `make manuscript` | every number in the main-text tables of `paper/main.tex` against the archives |
+| Reproduction | `make check`, `make test` | figures, traceability audits, end-to-end scripts, regeneration of the v2 tables |
+
+The quantum tests check properties that follow from quantum mechanics rather than from the implementation: Pauli-Z expectations lie in $[-1, 1]$; batched and per-sample evaluation agree; backpropagated gradients equal the exact parameter-shift rule; each model output is a truncated Fourier series in every input angle with frequencies up to $2L$ for $L$ re-uploading layers (Schuld, Sweke & Meyer, 2021), and the top frequency 4 of the two-layer circuit is actually reached; and the hybrid has the 2,613 trainable parameters (24 quantum) stated in the paper. For the v2 controls (`tests/quantum/test_controls_v2.py`): the $R_Y$-embedding head of `LSTM+QTL` lies exactly (residual below $10^{-10}$, for arbitrary weights) in the span of the 81-function tensor basis $\prod_j\{1,\cos q_j,\sin q_j\}$ used by `QTL tensor-81` and `Full Fourier-1`, while the separable basis does not span it; and the parameter counts of the Linear-4D, Fourier and frozen-circuit controls equal the sizes printed in Table 4.
+
+Continuous integration (`.github/workflows/`) runs lint, type checks and the library tests on Linux and Windows with Python 3.11 and 3.12, and a separate reproducibility job that installs the hashed lockfile and runs the full suite. Pre-commit hooks are in `.pre-commit-config.yaml` (`make dev` installs them).
+
+---
+
+## 9. Checkpoints
+
+`checkpoints/*.pt` are PyTorch pickles. Load them only from this repository's verified release (`sha256sum -c checkpoints/CHECKSUMS.sha256`) and with `torch.load(..., weights_only=True)` where the file contains only tensors.
+
+---
+
+## 10. Compiling the manuscript
+
+```bash
+cd paper
+pdflatex main && pdflatex supp && pdflatex main && pdflatex supp
+```
+
+`main.tex` and `supp.tex` reference each other through `xr`, so the first pass of each reports undefined cross-references until both have been compiled once.
+
+---
+
+## 11. Data provenance
+
+Meteorological observations are from the historical archives of the Spanish State Meteorological Agency (AEMET), obtained through *datosclima.es* under AEMET's open-data reuse framework. Only aggregated monthly data are redistributed, with attribution to AEMET (CC BY 4.0, see `LICENSE-DATA`); the daily records are not part of the repository.
+
+| File | Content |
+|---|---|
+| `results/panel_v2_monthly.csv` | v2 monthly panel of the first panel (4 stations, 4,325 station-months, 1924-03 to 2026-05): label (monthly precipitation sum), lag value, the nine monthly covariates, completeness counts and window flags |
+| `results/panel2/med2v2/panel_monthly.csv` | the same for the second panel (3,661 station-months) |
+| `results_v1/panel_checkpoint.csv` | v1 monthly panel (3,363 station-months, 1938-03 to 2026-02) |
+| `data/seas5/seas5_station_members.csv` | ECMWF SEAS5 monthly precipitation, 25 members interpolated to the four stations, leads 1–2 (Copernicus Climate Change Service, [doi:10.24381/cds.68dd14c3](https://doi.org/10.24381/cds.68dd14c3)) |
+
+The SEAS5 file and the SEAS5 archives derived from it (`results/json/results_exp33_seas5_*`) are distributed under the [Licence to Use Copernicus Products](https://apps.ecmwf.int/datasets/licences/copernicus/), not CC BY 4.0. Generated using Copernicus Climate Change Service information 2026; neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.
+
+Both v2 panels are written by `scripts/export_monthly_panel.py` from the daily files of `code/etl_v2.py` with the aggregation of the pipeline (`dataset_v2.agregar_mensual_v2`). `tests/manuscript` rebuilds from them the partitions (2,332 / 516 / 529 windows; second panel 1,694 / 528 / 884), the thresholds ($P_{60}$ = 29.9 mm and 28.2 mm) and every test label of the archived predictions.
+
+---
+
+## 12. Citation and licenses
+
+Cite the manuscript and the archived release (DOI to be added on release); see `CITATION.cff`.
+
+* **Code:** [MIT License](LICENSE)
+* **Data and text:** [CC BY 4.0](LICENSE-DATA), subject to the AEMET attribution above
+* **SEAS5 data** (`data/seas5/`, `results/json/results_exp33_seas5_*`): Licence to Use Copernicus Products (see `LICENSE-DATA`)

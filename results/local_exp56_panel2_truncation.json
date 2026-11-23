@@ -1,0 +1,88 @@
+{
+  "n_test_rows_archived": 884,
+  "archived": {
+    "test_rows_full": 884,
+    "test_rows_cut": 882,
+    "eligible_full_only": 2,
+    "eligible_cut_only": 0,
+    "rows_with_changed_inputs": 0,
+    "rows_unchanged": 882,
+    "changed_by_feature": {},
+    "changed_by_station": {}
+  },
+  "causal": {
+    "test_rows_full": 884,
+    "test_rows_cut": 884,
+    "eligible_full_only": 0,
+    "eligible_cut_only": 0,
+    "rows_with_changed_inputs": 0,
+    "rows_unchanged": 884,
+    "changed_by_feature": {},
+    "changed_by_station": {}
+  },
+  "impact": {
+    "late_windows": [
+      "Almeria_2020-05-01",
+      "Almeria_2020-06-01"
+    ],
+    "n_dropped": 2,
+    "pairs": {
+      "RF_2273-XGB": {
+        "delta_all": 0.004080599604453727,
+        "p_all": 0.5769619134071329,
+        "resolved_all": false,
+        "delta_kept": 0.00405967049048761,
+        "p_kept": 0.580267467851396,
+        "resolved_kept": false
+      },
+      "RF_2273-PureLSTM": {
+        "delta_all": -0.010147210194630718,
+        "p_all": 0.25061734962314053,
+        "resolved_all": false,
+        "delta_kept": -0.010131520558938845,
+        "p_kept": 0.2529432821282623,
+        "resolved_kept": false
+      },
+      "RF_2273-LSTM_QNN": {
+        "delta_all": 0.000824211494927618,
+        "p_all": 0.9392503310153292,
+        "resolved_all": false,
+        "delta_kept": 0.0008206580748713055,
+        "p_kept": 0.9397260322616462,
+        "resolved_kept": false
+      },
+      "XGB-LSTM_QNN": {
+        "delta_all": -0.0032563881095261094,
+        "p_all": 0.7885366321954704,
+        "resolved_all": false,
+        "delta_kept": -0.0032390124156163047,
+        "p_kept": 0.7903611607026082,
+        "resolved_kept": false
+      },
+      "PureLSTM-LSTM_QNN": {
+        "delta_all": 0.010971421689558336,
+        "p_all": 0.10672099960223869,
+        "resolved_all": false,
+        "delta_kept": 0.01095217863381015,
+        "p_kept": 0.10840681040405857,
+        "resolved_kept": false
+      },
+      "CTRL_LINEAR4D-LSTM_QNN": {
+        "delta_all": 0.006846600692111737,
+        "p_all": 0.3302937481199341,
+        "resolved_all": false,
+        "delta_kept": 0.0068707926167209665,
+        "p_kept": 0.3297395182267269,
+        "resolved_kept": false
+      },
+      "FOURIER2-LSTM_QNN": {
+        "delta_all": 0.0031289928624789187,
+        "p_all": 0.14465179848776866,
+        "resolved_all": false,
+        "delta_kept": 0.0030998442147004424,
+        "p_kept": 0.15020564929643399,
+        "resolved_kept": false
+      }
+    }
+  }
+}

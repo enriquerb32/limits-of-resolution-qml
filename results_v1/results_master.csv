@@ -1,0 +1,912 @@
+run_type,model,seed,metric,value,details
+single_run,Logistic Regression,-1,acc,0.6231060606060606,threshold=0.5000
+single_run,Logistic Regression,-1,f1,0.47214854111405835,threshold=0.5000
+single_run,Logistic Regression,-1,auc,0.6549261339220888,threshold=0.5000
+single_run,Logistic Regression,-1,pr_auc,0.5456070771068384,threshold=0.5000
+single_run,Logistic Regression,-1,rc_p90,0.5714285714285714,threshold=0.5000
+single_run,Logistic Regression,-1,rc_p90_ci_lo,0.432704929846029,threshold=0.5000
+single_run,Logistic Regression,-1,rc_p90_ci_hi,0.6997668101134018,threshold=0.5000
+single_run,Logistic Regression,-1,rc_dana_n20,0.65,threshold=0.5000
+single_run,Logistic Regression,-1,rc_dana_n20_ci_lo,0.4328542750684442,threshold=0.5000
+single_run,Logistic Regression,-1,rc_dana_n20_ci_hi,0.818808176876017,threshold=0.5000
+single_run,Logistic Regression,-1,rc_dana_n25,0.6,threshold=0.5000
+single_run,Logistic Regression,-1,rc_dana_n25_ci_lo,0.40739457217494224,threshold=0.5000
+single_run,Logistic Regression,-1,rc_dana_n25_ci_hi,0.7659669772729795,threshold=0.5000
+single_run,Logistic Regression,-1,fpr,0.2282958199356913,threshold=0.5000
+single_run,Logistic Regression,-1,threshold,0.5,threshold=0.5000
+single_run,Random Forest,-1,acc,0.6382575757575758,threshold=0.5000
+single_run,Random Forest,-1,f1,0.6029106029106029,threshold=0.5000
+single_run,Random Forest,-1,auc,0.6875842754900945,threshold=0.5000
+single_run,Random Forest,-1,pr_auc,0.5913614747613178,threshold=0.5000
+single_run,Random Forest,-1,rc_p90,0.7551020408163265,threshold=0.5000
+single_run,Random Forest,-1,rc_p90_ci_lo,0.6191368089723774,threshold=0.5000
+single_run,Random Forest,-1,rc_p90_ci_hi,0.8539765480255896,threshold=0.5000
+single_run,Random Forest,-1,rc_dana_n20,0.9,threshold=0.5000
+single_run,Random Forest,-1,rc_dana_n20_ci_lo,0.6989663528135878,threshold=0.5000
+single_run,Random Forest,-1,rc_dana_n20_ci_hi,0.9721335190383086,threshold=0.5000
+single_run,Random Forest,-1,rc_dana_n25,0.88,threshold=0.5000
+single_run,Random Forest,-1,rc_dana_n25_ci_lo,0.7004420590811532,threshold=0.5000
+single_run,Random Forest,-1,rc_dana_n25_ci_hi,0.9583318288209496,threshold=0.5000
+single_run,Random Forest,-1,fpr,0.38263665594855306,threshold=0.5000
+single_run,Random Forest,-1,threshold,0.5,threshold=0.5000
+single_run,Gradient Boosting,-1,acc,0.615530303030303,threshold=0.5000
+single_run,Gradient Boosting,-1,f1,0.5223529411764706,threshold=0.5000
+single_run,Gradient Boosting,-1,auc,0.6714774697349118,threshold=0.5000
+single_run,Gradient Boosting,-1,pr_auc,0.5768339195650996,threshold=0.5000
+single_run,Gradient Boosting,-1,rc_p90,0.5918367346938775,threshold=0.5000
+single_run,Gradient Boosting,-1,rc_p90_ci_lo,0.45247319284781423,threshold=0.5000
+single_run,Gradient Boosting,-1,rc_p90_ci_hi,0.7178476156714539,threshold=0.5000
+single_run,Gradient Boosting,-1,rc_dana_n20,0.7,threshold=0.5000
+single_run,Gradient Boosting,-1,rc_dana_n20_ci_lo,0.4810271799475211,threshold=0.5000
+single_run,Gradient Boosting,-1,rc_dana_n20_ci_hi,0.8545227559784271,threshold=0.5000
+single_run,Gradient Boosting,-1,rc_dana_n25,0.68,threshold=0.5000
+single_run,Gradient Boosting,-1,rc_dana_n25_ci_lo,0.4841026912048403,threshold=0.5000
+single_run,Gradient Boosting,-1,rc_dana_n25_ci_hi,0.8279480978014191,threshold=0.5000
+single_run,Gradient Boosting,-1,fpr,0.31189710610932475,threshold=0.5000
+single_run,Gradient Boosting,-1,threshold,0.5,threshold=0.5000
+single_run,XGBoost,-1,acc,0.5909090909090909,threshold=0.5000
+single_run,XGBoost,-1,f1,0.5481171548117155,threshold=0.5000
+single_run,XGBoost,-1,auc,0.6495176848874598,threshold=0.5000
+single_run,XGBoost,-1,pr_auc,0.5453141521491307,threshold=0.5000
+single_run,XGBoost,-1,rc_p90,0.6938775510204082,threshold=0.5000
+single_run,XGBoost,-1,rc_p90_ci_lo,0.5547210632783299,threshold=0.5000
+single_run,XGBoost,-1,rc_p90_ci_hi,0.8048450880401252,threshold=0.5000
+single_run,XGBoost,-1,rc_dana_n20,0.85,threshold=0.5000
+single_run,XGBoost,-1,rc_dana_n20_ci_lo,0.6395811333571357,threshold=0.5000
+single_run,XGBoost,-1,rc_dana_n20_ci_hi,0.9476312545132735,threshold=0.5000
+single_run,XGBoost,-1,rc_dana_n25,0.84,threshold=0.5000
+single_run,XGBoost,-1,rc_dana_n25_ci_lo,0.6534637822439173,threshold=0.5000
+single_run,XGBoost,-1,rc_dana_n25_ci_hi,0.9359654858790167,threshold=0.5000
+single_run,XGBoost,-1,fpr,0.4180064308681672,threshold=0.5000
+single_run,XGBoost,-1,threshold,0.5,threshold=0.5000
+single_run,Standalone LSTM,-1,acc,0.5454545454545454,threshold=0.5000
+single_run,Standalone LSTM,-1,f1,0.5847750865051903,threshold=0.5000
+single_run,Standalone LSTM,-1,auc,0.652599759953769,threshold=0.5000
+single_run,Standalone LSTM,-1,pr_auc,0.5867835652334269,threshold=0.5000
+single_run,Standalone LSTM,-1,rc_p90,0.8163265306122449,threshold=0.5000
+single_run,Standalone LSTM,-1,rc_p90_ci_lo,0.68642397281645,threshold=0.5000
+single_run,Standalone LSTM,-1,rc_p90_ci_hi,0.9002365898610293,threshold=0.5000
+single_run,Standalone LSTM,-1,rc_dana_n20,0.95,threshold=0.5000
+single_run,Standalone LSTM,-1,rc_dana_n20_ci_lo,0.7638688045357189,threshold=0.5000
+single_run,Standalone LSTM,-1,rc_dana_n20_ci_hi,0.9911185512976646,threshold=0.5000
+single_run,Standalone LSTM,-1,rc_dana_n25,0.96,threshold=0.5000
+single_run,Standalone LSTM,-1,rc_dana_n25_ci_lo,0.8045593608838223,threshold=0.5000
+single_run,Standalone LSTM,-1,rc_dana_n25_ci_hi,0.9929037665766179,threshold=0.5000
+single_run,Standalone LSTM,-1,fpr,0.617363344051447,threshold=0.5000
+single_run,Standalone LSTM,-1,threshold,0.5,threshold=0.5000
+single_run,Matched LSTM,-1,acc,0.571969696969697,threshold=0.5315
+single_run,Matched LSTM,-1,f1,0.5653846153846154,threshold=0.5315
+single_run,Matched LSTM,-1,auc,0.652599759953769,threshold=0.5315
+single_run,Matched LSTM,-1,pr_auc,0.5867835652334269,threshold=0.5315
+single_run,Matched LSTM,-1,rc_p90,0.7755102040816326,threshold=0.5315
+single_run,Matched LSTM,-1,rc_p90_ci_lo,0.6412121264859051,threshold=0.5315
+single_run,Matched LSTM,-1,rc_p90_ci_hi,0.8697502990718994,threshold=0.5315
+single_run,Matched LSTM,-1,rc_dana_n20,0.95,threshold=0.5315
+single_run,Matched LSTM,-1,rc_dana_n20_ci_lo,0.7638688045357189,threshold=0.5315
+single_run,Matched LSTM,-1,rc_dana_n20_ci_hi,0.9911185512976646,threshold=0.5315
+single_run,Matched LSTM,-1,rc_dana_n25,0.96,threshold=0.5315
+single_run,Matched LSTM,-1,rc_dana_n25_ci_lo,0.8045593608838223,threshold=0.5315
+single_run,Matched LSTM,-1,rc_dana_n25_ci_hi,0.9929037665766179,threshold=0.5315
+single_run,Matched LSTM,-1,fpr,0.5016077170418006,threshold=0.5315
+single_run,Matched LSTM,-1,threshold,0.5314945757331246,threshold=0.5315
+single_run,LSTM+QNN,-1,acc,0.5795454545454546,threshold=0.5000
+single_run,LSTM+QNN,-1,f1,0.5992779783393501,threshold=0.5000
+single_run,LSTM+QNN,-1,auc,0.6385526101323219,threshold=0.5000
+single_run,LSTM+QNN,-1,pr_auc,0.5043004445356999,threshold=0.5000
+single_run,LSTM+QNN,-1,rc_p90,0.7959183673469388,threshold=0.5000
+single_run,LSTM+QNN,-1,rc_p90_ci_lo,0.6636299896493482,threshold=0.5000
+single_run,LSTM+QNN,-1,rc_p90_ci_hi,0.8851815044682937,threshold=0.5000
+single_run,LSTM+QNN,-1,rc_dana_n20,0.95,threshold=0.5000
+single_run,LSTM+QNN,-1,rc_dana_n20_ci_lo,0.7638688045357189,threshold=0.5000
+single_run,LSTM+QNN,-1,rc_dana_n20_ci_hi,0.9911185512976646,threshold=0.5000
+single_run,LSTM+QNN,-1,rc_dana_n25,0.92,threshold=0.5000
+single_run,LSTM+QNN,-1,rc_dana_n25_ci_lo,0.7503389087653979,threshold=0.5000
+single_run,LSTM+QNN,-1,rc_dana_n25_ci_hi,0.9777795989158738,threshold=0.5000
+single_run,LSTM+QNN,-1,fpr,0.5498392282958199,threshold=0.5000
+single_run,LSTM+QNN,-1,threshold,0.5,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,acc,0.5890151515151515,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,f1,0.5834932821497121,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,auc,0.6622756975417488,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,pr_auc,0.5583577057460261,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,rc_p90,0.7551020408163265,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,rc_p90_ci_lo,0.6191368089723774,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,rc_p90_ci_hi,0.8539765480255896,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,rc_dana_n20,0.95,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,rc_dana_n20_ci_lo,0.7638688045357189,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,rc_dana_n20_ci_hi,0.9911185512976646,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,rc_dana_n25,0.96,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,rc_dana_n25_ci_lo,0.8045593608838223,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,rc_dana_n25_ci_hi,0.9929037665766179,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,fpr,0.4887459807073955,threshold=0.5000
+single_run,LSTM+PI-QNN,-1,threshold,0.5,threshold=0.5000
+single_run,LSTM+QTL,-1,acc,0.5871212121212122,threshold=0.5000
+single_run,LSTM+QTL,-1,f1,0.6036363636363636,threshold=0.5000
+single_run,LSTM+QTL,-1,auc,0.6509401810719102,threshold=0.5000
+single_run,LSTM+QTL,-1,pr_auc,0.5178794592400776,threshold=0.5000
+single_run,LSTM+QTL,-1,rc_p90,0.8367346938775511,threshold=0.5000
+single_run,LSTM+QTL,-1,rc_p90_ci_lo,0.7096366145094091,threshold=0.5000
+single_run,LSTM+QTL,-1,rc_p90_ci_hi,0.9148730167279078,threshold=0.5000
+single_run,LSTM+QTL,-1,rc_dana_n20,0.85,threshold=0.5000
+single_run,LSTM+QTL,-1,rc_dana_n20_ci_lo,0.6395811333571357,threshold=0.5000
+single_run,LSTM+QTL,-1,rc_dana_n20_ci_hi,0.9476312545132735,threshold=0.5000
+single_run,LSTM+QTL,-1,rc_dana_n25,0.84,threshold=0.5000
+single_run,LSTM+QTL,-1,rc_dana_n25_ci_lo,0.6534637822439173,threshold=0.5000
+single_run,LSTM+QTL,-1,rc_dana_n25_ci_hi,0.9359654858790167,threshold=0.5000
+single_run,LSTM+QTL,-1,fpr,0.5369774919614148,threshold=0.5000
+single_run,LSTM+QTL,-1,threshold,0.5,threshold=0.5000
+single_run,PI-QNN-LbL,-1,acc,0.5909090909090909,threshold=0.5000
+single_run,PI-QNN-LbL,-1,f1,0.5893536121673004,threshold=0.5000
+single_run,PI-QNN-LbL,-1,auc,0.6724554358617214,threshold=0.5000
+single_run,PI-QNN-LbL,-1,pr_auc,0.5806006873909288,threshold=0.5000
+single_run,PI-QNN-LbL,-1,rc_p90,0.7959183673469388,threshold=0.5000
+single_run,PI-QNN-LbL,-1,rc_p90_ci_lo,0.6636299896493482,threshold=0.5000
+single_run,PI-QNN-LbL,-1,rc_p90_ci_hi,0.8851815044682937,threshold=0.5000
+single_run,PI-QNN-LbL,-1,rc_dana_n20,0.9,threshold=0.5000
+single_run,PI-QNN-LbL,-1,rc_dana_n20_ci_lo,0.6989663528135878,threshold=0.5000
+single_run,PI-QNN-LbL,-1,rc_dana_n20_ci_hi,0.9721335190383086,threshold=0.5000
+single_run,PI-QNN-LbL,-1,rc_dana_n25,0.92,threshold=0.5000
+single_run,PI-QNN-LbL,-1,rc_dana_n25_ci_lo,0.7503389087653979,threshold=0.5000
+single_run,PI-QNN-LbL,-1,rc_dana_n25_ci_hi,0.9777795989158738,threshold=0.5000
+single_run,PI-QNN-LbL,-1,fpr,0.49517684887459806,threshold=0.5000
+single_run,PI-QNN-LbL,-1,threshold,0.5,threshold=0.5000
+single_run,QKSVM,-1,acc,0.5984848484848485,threshold=0.5000
+single_run,QKSVM,-1,f1,0.4752475247524752,threshold=0.5000
+single_run,QKSVM,-1,auc,0.6390267755271386,threshold=0.5000
+single_run,QKSVM,-1,pr_auc,0.5097566568951135,threshold=0.5000
+single_run,QKSVM,-1,rc_p90,0.6122448979591837,threshold=0.5000
+single_run,QKSVM,-1,rc_p90_ci_lo,0.4724599933493704,threshold=0.5000
+single_run,QKSVM,-1,rc_p90_ci_hi,0.7357098837297352,threshold=0.5000
+single_run,QKSVM,-1,rc_dana_n20,0.6,threshold=0.5000
+single_run,QKSVM,-1,rc_dana_n20_ci_lo,0.3865814992347542,threshold=0.5000
+single_run,QKSVM,-1,rc_dana_n20_ci_hi,0.7811934687282198,threshold=0.5000
+single_run,QKSVM,-1,rc_dana_n25,0.52,threshold=0.5000
+single_run,QKSVM,-1,rc_dana_n25_ci_lo,0.33498516822009217,threshold=0.5000
+single_run,QKSVM,-1,rc_dana_n25_ci_hi,0.6996871416694923,threshold=0.5000
+single_run,QKSVM,-1,fpr,0.29260450160771706,threshold=0.5000
+single_run,QKSVM,-1,threshold,0.5,threshold=0.5000
+single_run,Persistence,-1,acc,0.6458333333333334,no probabilities
+single_run,Persistence,-1,f1,0.5217391304347826,no probabilities
+multi_seed,LSTM+QNN,0,acc,0.6098484848484849,15 training seeds
+multi_seed,LSTM+QNN,1,acc,0.5700757575757576,15 training seeds
+multi_seed,LSTM+QNN,2,acc,0.5568181818181818,15 training seeds
+multi_seed,LSTM+QNN,3,acc,0.5890151515151515,15 training seeds
+multi_seed,LSTM+QNN,4,acc,0.5473484848484849,15 training seeds
+multi_seed,LSTM+QNN,5,acc,0.6060606060606061,15 training seeds
+multi_seed,LSTM+QNN,6,acc,0.5700757575757576,15 training seeds
+multi_seed,LSTM+QNN,7,acc,0.5700757575757576,15 training seeds
+multi_seed,LSTM+QNN,8,acc,0.5965909090909091,15 training seeds
+multi_seed,LSTM+QNN,9,acc,0.5700757575757576,15 training seeds
+multi_seed,LSTM+QNN,10,acc,0.6136363636363636,15 training seeds
+multi_seed,LSTM+QNN,11,acc,0.6003787878787878,15 training seeds
+multi_seed,LSTM+QNN,12,acc,0.5208333333333334,15 training seeds
+multi_seed,LSTM+QNN,13,acc,0.5928030303030303,15 training seeds
+multi_seed,LSTM+QNN,14,acc,0.625,15 training seeds
+multi_seed,LSTM+QNN,0,f1,0.5863453815261044,15 training seeds
+multi_seed,LSTM+QNN,1,f1,0.6038394415357766,15 training seeds
+multi_seed,LSTM+QNN,2,f1,0.596551724137931,15 training seeds
+multi_seed,LSTM+QNN,3,f1,0.5769980506822612,15 training seeds
+multi_seed,LSTM+QNN,4,f1,0.5814360770577933,15 training seeds
+multi_seed,LSTM+QNN,5,f1,0.6190476190476191,15 training seeds
+multi_seed,LSTM+QNN,6,f1,0.590990990990991,15 training seeds
+multi_seed,LSTM+QNN,7,f1,0.6052173913043478,15 training seeds
+multi_seed,LSTM+QNN,8,f1,0.5696969696969697,15 training seeds
+multi_seed,LSTM+QNN,9,f1,0.5895117540687161,15 training seeds
+multi_seed,LSTM+QNN,10,f1,0.6015625,15 training seeds
+multi_seed,LSTM+QNN,11,f1,0.5870841487279843,15 training seeds
+multi_seed,LSTM+QNN,12,f1,0.5990491283676703,15 training seeds
+multi_seed,LSTM+QNN,13,f1,0.5951035781544256,15 training seeds
+multi_seed,LSTM+QNN,14,f1,0.61328125,15 training seeds
+multi_seed,LSTM+QNN,0,auc,0.6717441877694963,15 training seeds
+multi_seed,LSTM+QNN,1,auc,0.6639204587550194,15 training seeds
+multi_seed,LSTM+QNN,2,auc,0.663594470046083,15 training seeds
+multi_seed,LSTM+QNN,3,auc,0.6448204839450561,15 training seeds
+multi_seed,LSTM+QNN,4,auc,0.654496421533036,15 training seeds
+multi_seed,LSTM+QNN,5,auc,0.6807977832767792,15 training seeds
+multi_seed,LSTM+QNN,6,auc,0.6483174537318299,15 training seeds
+multi_seed,LSTM+QNN,7,auc,0.6731074132795944,15 training seeds
+multi_seed,LSTM+QNN,8,auc,0.6596233348644924,15 training seeds
+multi_seed,LSTM+QNN,9,auc,0.627735712063064,15 training seeds
+multi_seed,LSTM+QNN,10,auc,0.6761005823343755,15 training seeds
+multi_seed,LSTM+QNN,11,auc,0.6530442900114095,15 training seeds
+multi_seed,LSTM+QNN,12,auc,0.6368782135818751,15 training seeds
+multi_seed,LSTM+QNN,13,auc,0.6543926978529199,15 training seeds
+multi_seed,LSTM+QNN,14,auc,0.6749892571902738,15 training seeds
+multi_seed,LSTM+QNN,0,fpr,0.4340836012861736,15 training seeds
+multi_seed,LSTM+QNN,1,fpr,0.5884244372990354,15 training seeds
+multi_seed,LSTM+QNN,2,fpr,0.6109324758842444,15 training seeds
+multi_seed,LSTM+QNN,3,fpr,0.4758842443729904,15 training seeds
+multi_seed,LSTM+QNN,4,fpr,0.6045016077170418,15 training seeds
+multi_seed,LSTM+QNN,5,fpr,0.5144694533762058,15 training seeds
+multi_seed,LSTM+QNN,6,fpr,0.5594855305466238,15 training seeds
+multi_seed,LSTM+QNN,7,fpr,0.5916398713826366,15 training seeds
+multi_seed,LSTM+QNN,8,fpr,0.4405144694533762,15 training seeds
+multi_seed,LSTM+QNN,9,fpr,0.5562700964630225,15 training seeds
+multi_seed,LSTM+QNN,10,fpr,0.4533762057877814,15 training seeds
+multi_seed,LSTM+QNN,11,fpr,0.4630225080385852,15 training seeds
+multi_seed,LSTM+QNN,12,fpr,0.7234726688102894,15 training seeds
+multi_seed,LSTM+QNN,13,fpr,0.5016077170418006,15 training seeds
+multi_seed,LSTM+QNN,14,fpr,0.4437299035369775,15 training seeds
+multi_seed,LSTM+QNN,0,rc_dana,0.8,15 training seeds
+multi_seed,LSTM+QNN,1,rc_dana,0.9,15 training seeds
+multi_seed,LSTM+QNN,2,rc_dana,0.9,15 training seeds
+multi_seed,LSTM+QNN,3,rc_dana,0.85,15 training seeds
+multi_seed,LSTM+QNN,4,rc_dana,0.8,15 training seeds
+multi_seed,LSTM+QNN,5,rc_dana,0.8,15 training seeds
+multi_seed,LSTM+QNN,6,rc_dana,1.0,15 training seeds
+multi_seed,LSTM+QNN,7,rc_dana,0.95,15 training seeds
+multi_seed,LSTM+QNN,8,rc_dana,0.8,15 training seeds
+multi_seed,LSTM+QNN,9,rc_dana,0.8,15 training seeds
+multi_seed,LSTM+QNN,10,rc_dana,0.95,15 training seeds
+multi_seed,LSTM+QNN,11,rc_dana,0.9,15 training seeds
+multi_seed,LSTM+QNN,12,rc_dana,0.95,15 training seeds
+multi_seed,LSTM+QNN,13,rc_dana,0.9,15 training seeds
+multi_seed,LSTM+QNN,14,rc_dana,0.85,15 training seeds
+multi_seed,LSTM+QNN,0,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,LSTM+QNN,1,rc_p90,0.8571428571428571,15 training seeds
+multi_seed,LSTM+QNN,2,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,LSTM+QNN,3,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,LSTM+QNN,4,rc_p90,0.7959183673469388,15 training seeds
+multi_seed,LSTM+QNN,5,rc_p90,0.7959183673469388,15 training seeds
+multi_seed,LSTM+QNN,6,rc_p90,0.8163265306122449,15 training seeds
+multi_seed,LSTM+QNN,7,rc_p90,0.8367346938775511,15 training seeds
+multi_seed,LSTM+QNN,8,rc_p90,0.6938775510204082,15 training seeds
+multi_seed,LSTM+QNN,9,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,LSTM+QNN,10,rc_p90,0.7346938775510204,15 training seeds
+multi_seed,LSTM+QNN,11,rc_p90,0.7346938775510204,15 training seeds
+multi_seed,LSTM+QNN,12,rc_p90,0.8571428571428571,15 training seeds
+multi_seed,LSTM+QNN,13,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,LSTM+QNN,14,rc_p90,0.8163265306122449,15 training seeds
+multi_seed,LSTM+PI-QNN,0,acc,0.5738636363636364,15 training seeds
+multi_seed,LSTM+PI-QNN,1,acc,0.5321969696969697,15 training seeds
+multi_seed,LSTM+PI-QNN,2,acc,0.615530303030303,15 training seeds
+multi_seed,LSTM+PI-QNN,3,acc,0.5946969696969697,15 training seeds
+multi_seed,LSTM+PI-QNN,4,acc,0.5473484848484849,15 training seeds
+multi_seed,LSTM+PI-QNN,5,acc,0.5814393939393939,15 training seeds
+multi_seed,LSTM+PI-QNN,6,acc,0.5700757575757576,15 training seeds
+multi_seed,LSTM+PI-QNN,7,acc,0.5700757575757576,15 training seeds
+multi_seed,LSTM+PI-QNN,8,acc,0.5700757575757576,15 training seeds
+multi_seed,LSTM+PI-QNN,9,acc,0.6117424242424242,15 training seeds
+multi_seed,LSTM+PI-QNN,10,acc,0.5871212121212122,15 training seeds
+multi_seed,LSTM+PI-QNN,11,acc,0.5890151515151515,15 training seeds
+multi_seed,LSTM+PI-QNN,12,acc,0.5776515151515151,15 training seeds
+multi_seed,LSTM+PI-QNN,13,acc,0.5757575757575758,15 training seeds
+multi_seed,LSTM+PI-QNN,14,acc,0.5700757575757576,15 training seeds
+multi_seed,LSTM+PI-QNN,0,f1,0.585635359116022,15 training seeds
+multi_seed,LSTM+PI-QNN,1,f1,0.5108910891089109,15 training seeds
+multi_seed,LSTM+PI-QNN,2,f1,0.598019801980198,15 training seeds
+multi_seed,LSTM+PI-QNN,3,f1,0.5916030534351145,15 training seeds
+multi_seed,LSTM+PI-QNN,4,f1,0.5956006768189509,15 training seeds
+multi_seed,LSTM+PI-QNN,5,f1,0.5806451612903226,15 training seeds
+multi_seed,LSTM+PI-QNN,6,f1,0.574108818011257,15 training seeds
+multi_seed,LSTM+PI-QNN,7,f1,0.58195211786372,15 training seeds
+multi_seed,LSTM+PI-QNN,8,f1,0.6065857885615251,15 training seeds
+multi_seed,LSTM+PI-QNN,9,f1,0.616822429906542,15 training seeds
+multi_seed,LSTM+PI-QNN,10,f1,0.6079136690647482,15 training seeds
+multi_seed,LSTM+PI-QNN,11,f1,0.594392523364486,15 training seeds
+multi_seed,LSTM+PI-QNN,12,f1,0.5878003696857671,15 training seeds
+multi_seed,LSTM+PI-QNN,13,f1,0.5773584905660377,15 training seeds
+multi_seed,LSTM+PI-QNN,14,f1,0.6038394415357766,15 training seeds
+multi_seed,LSTM+PI-QNN,0,auc,0.6611940077348228,15 training seeds
+multi_seed,LSTM+PI-QNN,1,auc,0.6053610324951473,15 training seeds
+multi_seed,LSTM+PI-QNN,2,auc,0.6694178138011766,15 training seeds
+multi_seed,LSTM+PI-QNN,3,auc,0.6727073362277178,15 training seeds
+multi_seed,LSTM+PI-QNN,4,auc,0.6544075155215078,15 training seeds
+multi_seed,LSTM+PI-QNN,5,auc,0.6552076696252611,15 training seeds
+multi_seed,LSTM+PI-QNN,6,auc,0.644746395602116,15 training seeds
+multi_seed,LSTM+PI-QNN,7,auc,0.655103945945145,15 training seeds
+multi_seed,LSTM+PI-QNN,8,auc,0.6620237971757524,15 training seeds
+multi_seed,LSTM+PI-QNN,9,auc,0.6707514039740987,15 training seeds
+multi_seed,LSTM+PI-QNN,10,auc,0.6677434172507297,15 training seeds
+multi_seed,LSTM+PI-QNN,11,auc,0.6405085423859411,15 training seeds
+multi_seed,LSTM+PI-QNN,12,auc,0.6668691748040363,15 training seeds
+multi_seed,LSTM+PI-QNN,13,auc,0.6622460622045727,15 training seeds
+multi_seed,LSTM+PI-QNN,14,auc,0.6436202527894263,15 training seeds
+multi_seed,LSTM+PI-QNN,0,fpr,0.5369774919614148,15 training seeds
+multi_seed,LSTM+PI-QNN,1,fpr,0.5112540192926045,15 training seeds
+multi_seed,LSTM+PI-QNN,2,fpr,0.4405144694533762,15 training seeds
+multi_seed,LSTM+PI-QNN,3,fpr,0.4887459807073955,15 training seeds
+multi_seed,LSTM+PI-QNN,4,fpr,0.6366559485530546,15 training seeds
+multi_seed,LSTM+PI-QNN,5,fpr,0.5048231511254019,15 training seeds
+multi_seed,LSTM+PI-QNN,6,fpr,0.5241157556270096,15 training seeds
+multi_seed,LSTM+PI-QNN,7,fpr,0.5401929260450161,15 training seeds
+multi_seed,LSTM+PI-QNN,8,fpr,0.594855305466238,15 training seeds
+multi_seed,LSTM+PI-QNN,9,fpr,0.4919614147909968,15 training seeds
+multi_seed,LSTM+PI-QNN,10,fpr,0.5466237942122186,15 training seeds
+multi_seed,LSTM+PI-QNN,11,fpr,0.5112540192926045,15 training seeds
+multi_seed,LSTM+PI-QNN,12,fpr,0.5305466237942122,15 training seeds
+multi_seed,LSTM+PI-QNN,13,fpr,0.5144694533762058,15 training seeds
+multi_seed,LSTM+PI-QNN,14,fpr,0.5884244372990354,15 training seeds
+multi_seed,LSTM+PI-QNN,0,rc_dana,0.95,15 training seeds
+multi_seed,LSTM+PI-QNN,1,rc_dana,0.7,15 training seeds
+multi_seed,LSTM+PI-QNN,2,rc_dana,0.95,15 training seeds
+multi_seed,LSTM+PI-QNN,3,rc_dana,0.95,15 training seeds
+multi_seed,LSTM+PI-QNN,4,rc_dana,1.0,15 training seeds
+multi_seed,LSTM+PI-QNN,5,rc_dana,0.9,15 training seeds
+multi_seed,LSTM+PI-QNN,6,rc_dana,0.85,15 training seeds
+multi_seed,LSTM+PI-QNN,7,rc_dana,0.85,15 training seeds
+multi_seed,LSTM+PI-QNN,8,rc_dana,1.0,15 training seeds
+multi_seed,LSTM+PI-QNN,9,rc_dana,0.9,15 training seeds
+multi_seed,LSTM+PI-QNN,10,rc_dana,0.9,15 training seeds
+multi_seed,LSTM+PI-QNN,11,rc_dana,0.85,15 training seeds
+multi_seed,LSTM+PI-QNN,12,rc_dana,0.95,15 training seeds
+multi_seed,LSTM+PI-QNN,13,rc_dana,0.9,15 training seeds
+multi_seed,LSTM+PI-QNN,14,rc_dana,0.8,15 training seeds
+multi_seed,LSTM+PI-QNN,0,rc_p90,0.8163265306122449,15 training seeds
+multi_seed,LSTM+PI-QNN,1,rc_p90,0.6530612244897959,15 training seeds
+multi_seed,LSTM+PI-QNN,2,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,LSTM+PI-QNN,3,rc_p90,0.8163265306122449,15 training seeds
+multi_seed,LSTM+PI-QNN,4,rc_p90,0.8571428571428571,15 training seeds
+multi_seed,LSTM+PI-QNN,5,rc_p90,0.8163265306122449,15 training seeds
+multi_seed,LSTM+PI-QNN,6,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,LSTM+PI-QNN,7,rc_p90,0.7959183673469388,15 training seeds
+multi_seed,LSTM+PI-QNN,8,rc_p90,0.8367346938775511,15 training seeds
+multi_seed,LSTM+PI-QNN,9,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,LSTM+PI-QNN,10,rc_p90,0.8571428571428571,15 training seeds
+multi_seed,LSTM+PI-QNN,11,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,LSTM+PI-QNN,12,rc_p90,0.8163265306122449,15 training seeds
+multi_seed,LSTM+PI-QNN,13,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,LSTM+PI-QNN,14,rc_p90,0.8367346938775511,15 training seeds
+multi_seed,LSTM+QTL,0,acc,0.5946969696969697,15 training seeds
+multi_seed,LSTM+QTL,1,acc,0.6060606060606061,15 training seeds
+multi_seed,LSTM+QTL,2,acc,0.6022727272727273,15 training seeds
+multi_seed,LSTM+QTL,3,acc,0.6231060606060606,15 training seeds
+multi_seed,LSTM+QTL,4,acc,0.5662878787878788,15 training seeds
+multi_seed,LSTM+QTL,5,acc,0.6174242424242424,15 training seeds
+multi_seed,LSTM+QTL,6,acc,0.5928030303030303,15 training seeds
+multi_seed,LSTM+QTL,7,acc,0.6022727272727273,15 training seeds
+multi_seed,LSTM+QTL,8,acc,0.5681818181818182,15 training seeds
+multi_seed,LSTM+QTL,9,acc,0.5909090909090909,15 training seeds
+multi_seed,LSTM+QTL,10,acc,0.553030303030303,15 training seeds
+multi_seed,LSTM+QTL,11,acc,0.5946969696969697,15 training seeds
+multi_seed,LSTM+QTL,12,acc,0.5946969696969697,15 training seeds
+multi_seed,LSTM+QTL,13,acc,0.5965909090909091,15 training seeds
+multi_seed,LSTM+QTL,14,acc,0.5397727272727273,15 training seeds
+multi_seed,LSTM+QTL,0,f1,0.5787401574803149,15 training seeds
+multi_seed,LSTM+QTL,1,f1,0.5478260869565217,15 training seeds
+multi_seed,LSTM+QTL,2,f1,0.5783132530120482,15 training seeds
+multi_seed,LSTM+QTL,3,f1,0.5862785862785863,15 training seeds
+multi_seed,LSTM+QTL,4,f1,0.5918003565062389,15 training seeds
+multi_seed,LSTM+QTL,5,f1,0.6130268199233716,15 training seeds
+multi_seed,LSTM+QTL,6,f1,0.5873320537428023,15 training seeds
+multi_seed,LSTM+QTL,7,f1,0.5783132530120482,15 training seeds
+multi_seed,LSTM+QTL,8,f1,0.5899280575539568,15 training seeds
+multi_seed,LSTM+QTL,9,f1,0.6014760147601476,15 training seeds
+multi_seed,LSTM+QTL,10,f1,0.5693430656934306,15 training seeds
+multi_seed,LSTM+QTL,11,f1,0.6022304832713755,15 training seeds
+multi_seed,LSTM+QTL,12,f1,0.5946969696969697,15 training seeds
+multi_seed,LSTM+QTL,13,f1,0.5458422174840085,15 training seeds
+multi_seed,LSTM+QTL,14,f1,0.5902192242833052,15 training seeds
+multi_seed,LSTM+QTL,0,auc,0.652733118971061,15 training seeds
+multi_seed,LSTM+QTL,1,auc,0.6530887430171737,15 training seeds
+multi_seed,LSTM+QTL,2,auc,0.6735371256686473,15 training seeds
+multi_seed,LSTM+QTL,3,auc,0.6561708180834828,15 training seeds
+multi_seed,LSTM+QTL,4,auc,0.6683805770000147,15 training seeds
+multi_seed,LSTM+QTL,5,auc,0.6786492213315157,15 training seeds
+multi_seed,LSTM+QTL,6,auc,0.6405678130602932,15 training seeds
+multi_seed,LSTM+QTL,7,auc,0.631914294604887,15 training seeds
+multi_seed,LSTM+QTL,8,auc,0.6453242846770488,15 training seeds
+multi_seed,LSTM+QTL,9,auc,0.6517996058500155,15 training seeds
+multi_seed,LSTM+QTL,10,auc,0.64239038629662,15 training seeds
+multi_seed,LSTM+QTL,11,auc,0.647843288337013,15 training seeds
+multi_seed,LSTM+QTL,12,auc,0.6475172996280765,15 training seeds
+multi_seed,LSTM+QTL,13,auc,0.6449834782995245,15 training seeds
+multi_seed,LSTM+QTL,14,auc,0.6437387941381304,15 training seeds
+multi_seed,LSTM+QTL,0,fpr,0.4630225080385852,15 training seeds
+multi_seed,LSTM+QTL,1,fpr,0.3762057877813505,15 training seeds
+multi_seed,LSTM+QTL,2,fpr,0.4405144694533762,15 training seeds
+multi_seed,LSTM+QTL,3,fpr,0.3954983922829582,15 training seeds
+multi_seed,LSTM+QTL,4,fpr,0.572347266881029,15 training seeds
+multi_seed,LSTM+QTL,5,fpr,0.4662379421221865,15 training seeds
+multi_seed,LSTM+QTL,6,fpr,0.4855305466237942,15 training seeds
+multi_seed,LSTM+QTL,7,fpr,0.4405144694533762,15 training seeds
+multi_seed,LSTM+QTL,8,fpr,0.5627009646302251,15 training seeds
+multi_seed,LSTM+QTL,9,fpr,0.5209003215434084,15 training seeds
+multi_seed,LSTM+QTL,10,fpr,0.5627009646302251,15 training seeds
+multi_seed,LSTM+QTL,11,fpr,0.5112540192926045,15 training seeds
+multi_seed,LSTM+QTL,12,fpr,0.49517684887459806,15 training seeds
+multi_seed,LSTM+QTL,13,fpr,0.3987138263665595,15 training seeds
+multi_seed,LSTM+QTL,14,fpr,0.6463022508038585,15 training seeds
+multi_seed,LSTM+QTL,0,rc_dana,1.0,15 training seeds
+multi_seed,LSTM+QTL,1,rc_dana,0.95,15 training seeds
+multi_seed,LSTM+QTL,2,rc_dana,0.8,15 training seeds
+multi_seed,LSTM+QTL,3,rc_dana,0.8,15 training seeds
+multi_seed,LSTM+QTL,4,rc_dana,0.8,15 training seeds
+multi_seed,LSTM+QTL,5,rc_dana,0.9,15 training seeds
+multi_seed,LSTM+QTL,6,rc_dana,0.85,15 training seeds
+multi_seed,LSTM+QTL,7,rc_dana,0.85,15 training seeds
+multi_seed,LSTM+QTL,8,rc_dana,0.85,15 training seeds
+multi_seed,LSTM+QTL,9,rc_dana,0.85,15 training seeds
+multi_seed,LSTM+QTL,10,rc_dana,0.95,15 training seeds
+multi_seed,LSTM+QTL,11,rc_dana,0.9,15 training seeds
+multi_seed,LSTM+QTL,12,rc_dana,0.75,15 training seeds
+multi_seed,LSTM+QTL,13,rc_dana,0.8,15 training seeds
+multi_seed,LSTM+QTL,14,rc_dana,0.85,15 training seeds
+multi_seed,LSTM+QTL,0,rc_p90,0.8367346938775511,15 training seeds
+multi_seed,LSTM+QTL,1,rc_p90,0.673469387755102,15 training seeds
+multi_seed,LSTM+QTL,2,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,LSTM+QTL,3,rc_p90,0.7346938775510204,15 training seeds
+multi_seed,LSTM+QTL,4,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,LSTM+QTL,5,rc_p90,0.7346938775510204,15 training seeds
+multi_seed,LSTM+QTL,6,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,LSTM+QTL,7,rc_p90,0.7346938775510204,15 training seeds
+multi_seed,LSTM+QTL,8,rc_p90,0.8163265306122449,15 training seeds
+multi_seed,LSTM+QTL,9,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,LSTM+QTL,10,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,LSTM+QTL,11,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,LSTM+QTL,12,rc_p90,0.8163265306122449,15 training seeds
+multi_seed,LSTM+QTL,13,rc_p90,0.6530612244897959,15 training seeds
+multi_seed,LSTM+QTL,14,rc_p90,0.7959183673469388,15 training seeds
+multi_seed,PI-QNN-LbL,0,acc,0.5359848484848485,15 training seeds
+multi_seed,PI-QNN-LbL,1,acc,0.5890151515151515,15 training seeds
+multi_seed,PI-QNN-LbL,2,acc,0.5473484848484849,15 training seeds
+multi_seed,PI-QNN-LbL,3,acc,0.5738636363636364,15 training seeds
+multi_seed,PI-QNN-LbL,4,acc,0.5454545454545454,15 training seeds
+multi_seed,PI-QNN-LbL,5,acc,0.5984848484848485,15 training seeds
+multi_seed,PI-QNN-LbL,6,acc,0.6079545454545454,15 training seeds
+multi_seed,PI-QNN-LbL,7,acc,0.5965909090909091,15 training seeds
+multi_seed,PI-QNN-LbL,8,acc,0.6003787878787878,15 training seeds
+multi_seed,PI-QNN-LbL,9,acc,0.5511363636363636,15 training seeds
+multi_seed,PI-QNN-LbL,10,acc,0.5738636363636364,15 training seeds
+multi_seed,PI-QNN-LbL,11,acc,0.5700757575757576,15 training seeds
+multi_seed,PI-QNN-LbL,12,acc,0.5359848484848485,15 training seeds
+multi_seed,PI-QNN-LbL,13,acc,0.6060606060606061,15 training seeds
+multi_seed,PI-QNN-LbL,14,acc,0.5890151515151515,15 training seeds
+multi_seed,PI-QNN-LbL,0,f1,0.5648312611012434,15 training seeds
+multi_seed,PI-QNN-LbL,1,f1,0.5769980506822612,15 training seeds
+multi_seed,PI-QNN-LbL,2,f1,0.6049586776859505,15 training seeds
+multi_seed,PI-QNN-LbL,3,f1,0.5871559633027523,15 training seeds
+multi_seed,PI-QNN-LbL,4,f1,0.5945945945945946,15 training seeds
+multi_seed,PI-QNN-LbL,5,f1,0.5907335907335908,15 training seeds
+multi_seed,PI-QNN-LbL,6,f1,0.5980582524271845,15 training seeds
+multi_seed,PI-QNN-LbL,7,f1,0.5831702544031311,15 training seeds
+multi_seed,PI-QNN-LbL,8,f1,0.5902912621359223,15 training seeds
+multi_seed,PI-QNN-LbL,9,f1,0.6056572379367721,15 training seeds
+multi_seed,PI-QNN-LbL,10,f1,0.5810055865921788,15 training seeds
+multi_seed,PI-QNN-LbL,11,f1,0.5850091407678245,15 training seeds
+multi_seed,PI-QNN-LbL,12,f1,0.5840407470288624,15 training seeds
+multi_seed,PI-QNN-LbL,13,f1,0.5823293172690763,15 training seeds
+multi_seed,PI-QNN-LbL,14,f1,0.595903165735568,15 training seeds
+multi_seed,PI-QNN-LbL,0,auc,0.6487027131151186,15 training seeds
+multi_seed,PI-QNN-LbL,1,auc,0.6600382295849571,15 training seeds
+multi_seed,PI-QNN-LbL,2,auc,0.6644094418184243,15 training seeds
+multi_seed,PI-QNN-LbL,3,auc,0.6537555381036347,15 training seeds
+multi_seed,PI-QNN-LbL,4,auc,0.6454428260257532,15 training seeds
+multi_seed,PI-QNN-LbL,5,auc,0.6655207669625262,15 training seeds
+multi_seed,PI-QNN-LbL,6,auc,0.6811978603286558,15 training seeds
+multi_seed,PI-QNN-LbL,7,auc,0.6706773156311586,15 training seeds
+multi_seed,PI-QNN-LbL,8,auc,0.6658615733400507,15 training seeds
+multi_seed,PI-QNN-LbL,9,auc,0.6597418762131966,15 training seeds
+multi_seed,PI-QNN-LbL,10,auc,0.6583490153659224,15 training seeds
+multi_seed,PI-QNN-LbL,11,auc,0.6517847881814275,15 training seeds
+multi_seed,PI-QNN-LbL,12,auc,0.6618163498155201,15 training seeds
+multi_seed,PI-QNN-LbL,13,auc,0.6586009157319186,15 training seeds
+multi_seed,PI-QNN-LbL,14,auc,0.6620978855186924,15 training seeds
+multi_seed,PI-QNN-LbL,0,fpr,0.6012861736334405,15 training seeds
+multi_seed,PI-QNN-LbL,1,fpr,0.4758842443729904,15 training seeds
+multi_seed,PI-QNN-LbL,2,fpr,0.6591639871382636,15 training seeds
+multi_seed,PI-QNN-LbL,3,fpr,0.5401929260450161,15 training seeds
+multi_seed,PI-QNN-LbL,4,fpr,0.639871382636656,15 training seeds
+multi_seed,PI-QNN-LbL,5,fpr,0.4758842443729904,15 training seeds
+multi_seed,PI-QNN-LbL,6,fpr,0.4630225080385852,15 training seeds
+multi_seed,PI-QNN-LbL,7,fpr,0.4662379421221865,15 training seeds
+multi_seed,PI-QNN-LbL,8,fpr,0.4694533762057878,15 training seeds
+multi_seed,PI-QNN-LbL,9,fpr,0.6495176848874598,15 training seeds
+multi_seed,PI-QNN-LbL,10,fpr,0.5273311897106109,15 training seeds
+multi_seed,PI-QNN-LbL,11,fpr,0.5466237942122186,15 training seeds
+multi_seed,PI-QNN-LbL,12,fpr,0.6430868167202572,15 training seeds
+multi_seed,PI-QNN-LbL,13,fpr,0.43729903536977494,15 training seeds
+multi_seed,PI-QNN-LbL,14,fpr,0.5144694533762058,15 training seeds
+multi_seed,PI-QNN-LbL,0,rc_dana,0.85,15 training seeds
+multi_seed,PI-QNN-LbL,1,rc_dana,0.95,15 training seeds
+multi_seed,PI-QNN-LbL,2,rc_dana,0.9,15 training seeds
+multi_seed,PI-QNN-LbL,3,rc_dana,0.8,15 training seeds
+multi_seed,PI-QNN-LbL,4,rc_dana,0.95,15 training seeds
+multi_seed,PI-QNN-LbL,5,rc_dana,0.8,15 training seeds
+multi_seed,PI-QNN-LbL,6,rc_dana,0.9,15 training seeds
+multi_seed,PI-QNN-LbL,7,rc_dana,0.75,15 training seeds
+multi_seed,PI-QNN-LbL,8,rc_dana,0.8,15 training seeds
+multi_seed,PI-QNN-LbL,9,rc_dana,0.9,15 training seeds
+multi_seed,PI-QNN-LbL,10,rc_dana,0.95,15 training seeds
+multi_seed,PI-QNN-LbL,11,rc_dana,0.8,15 training seeds
+multi_seed,PI-QNN-LbL,12,rc_dana,0.9,15 training seeds
+multi_seed,PI-QNN-LbL,13,rc_dana,0.8,15 training seeds
+multi_seed,PI-QNN-LbL,14,rc_dana,0.95,15 training seeds
+multi_seed,PI-QNN-LbL,0,rc_p90,0.6938775510204082,15 training seeds
+multi_seed,PI-QNN-LbL,1,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,PI-QNN-LbL,2,rc_p90,0.7959183673469388,15 training seeds
+multi_seed,PI-QNN-LbL,3,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,PI-QNN-LbL,4,rc_p90,0.8367346938775511,15 training seeds
+multi_seed,PI-QNN-LbL,5,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,PI-QNN-LbL,6,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,PI-QNN-LbL,7,rc_p90,0.7142857142857143,15 training seeds
+multi_seed,PI-QNN-LbL,8,rc_p90,0.8367346938775511,15 training seeds
+multi_seed,PI-QNN-LbL,9,rc_p90,0.8367346938775511,15 training seeds
+multi_seed,PI-QNN-LbL,10,rc_p90,0.8163265306122449,15 training seeds
+multi_seed,PI-QNN-LbL,11,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,PI-QNN-LbL,12,rc_p90,0.8367346938775511,15 training seeds
+multi_seed,PI-QNN-LbL,13,rc_p90,0.7959183673469388,15 training seeds
+multi_seed,PI-QNN-LbL,14,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,Random Forest,0,auc,0.6836131403085038,15 training seeds
+multi_seed,Random Forest,1,auc,0.686146961637056,15 training seeds
+multi_seed,Random Forest,2,auc,0.687273104449746,15 training seeds
+multi_seed,Random Forest,3,auc,0.6834945989597996,15 training seeds
+multi_seed,Random Forest,4,auc,0.6839687643546164,15 training seeds
+multi_seed,Random Forest,5,auc,0.6899106494584142,15 training seeds
+multi_seed,Random Forest,6,auc,0.6876583638330346,15 training seeds
+multi_seed,Random Forest,7,auc,0.6836131403085038,15 training seeds
+multi_seed,Random Forest,8,auc,0.684279935394965,15 training seeds
+multi_seed,Random Forest,9,auc,0.6851838131788345,15 training seeds
+multi_seed,Random Forest,10,auc,0.685494984219183,15 training seeds
+multi_seed,Random Forest,11,auc,0.6809904129684236,15 training seeds
+multi_seed,Random Forest,12,auc,0.6826499918502822,15 training seeds
+multi_seed,Random Forest,13,auc,0.683005615896395,15 training seeds
+multi_seed,Random Forest,14,auc,0.6896291137552417,15 training seeds
+multi_seed,Random Forest,0,fpr,0.3954983922829582,15 training seeds
+multi_seed,Random Forest,1,fpr,0.38263665594855306,15 training seeds
+multi_seed,Random Forest,2,fpr,0.38263665594855306,15 training seeds
+multi_seed,Random Forest,3,fpr,0.3858520900321543,15 training seeds
+multi_seed,Random Forest,4,fpr,0.37942122186495175,15 training seeds
+multi_seed,Random Forest,5,fpr,0.3890675241157556,15 training seeds
+multi_seed,Random Forest,6,fpr,0.3536977491961415,15 training seeds
+multi_seed,Random Forest,7,fpr,0.3858520900321543,15 training seeds
+multi_seed,Random Forest,8,fpr,0.36977491961414793,15 training seeds
+multi_seed,Random Forest,9,fpr,0.39228295819935693,15 training seeds
+multi_seed,Random Forest,10,fpr,0.38263665594855306,15 training seeds
+multi_seed,Random Forest,11,fpr,0.38263665594855306,15 training seeds
+multi_seed,Random Forest,12,fpr,0.40192926045016075,15 training seeds
+multi_seed,Random Forest,13,fpr,0.37942122186495175,15 training seeds
+multi_seed,Random Forest,14,fpr,0.3762057877813505,15 training seeds
+multi_seed,Random Forest,0,rc_dana,0.9,15 training seeds
+multi_seed,Random Forest,1,rc_dana,0.85,15 training seeds
+multi_seed,Random Forest,2,rc_dana,0.95,15 training seeds
+multi_seed,Random Forest,3,rc_dana,0.85,15 training seeds
+multi_seed,Random Forest,4,rc_dana,0.9,15 training seeds
+multi_seed,Random Forest,5,rc_dana,0.85,15 training seeds
+multi_seed,Random Forest,6,rc_dana,0.9,15 training seeds
+multi_seed,Random Forest,7,rc_dana,0.8,15 training seeds
+multi_seed,Random Forest,8,rc_dana,0.8,15 training seeds
+multi_seed,Random Forest,9,rc_dana,0.85,15 training seeds
+multi_seed,Random Forest,10,rc_dana,0.85,15 training seeds
+multi_seed,Random Forest,11,rc_dana,0.85,15 training seeds
+multi_seed,Random Forest,12,rc_dana,0.9,15 training seeds
+multi_seed,Random Forest,13,rc_dana,0.85,15 training seeds
+multi_seed,Random Forest,14,rc_dana,0.9,15 training seeds
+multi_seed,Random Forest,0,rc_p90,0.7142857142857143,15 training seeds
+multi_seed,Random Forest,1,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,Random Forest,2,rc_p90,0.7959183673469388,15 training seeds
+multi_seed,Random Forest,3,rc_p90,0.7346938775510204,15 training seeds
+multi_seed,Random Forest,4,rc_p90,0.7346938775510204,15 training seeds
+multi_seed,Random Forest,5,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,Random Forest,6,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,Random Forest,7,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,Random Forest,8,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,Random Forest,9,rc_p90,0.7346938775510204,15 training seeds
+multi_seed,Random Forest,10,rc_p90,0.7142857142857143,15 training seeds
+multi_seed,Random Forest,11,rc_p90,0.7346938775510204,15 training seeds
+multi_seed,Random Forest,12,rc_p90,0.7346938775510204,15 training seeds
+multi_seed,Random Forest,13,rc_p90,0.7346938775510204,15 training seeds
+multi_seed,Random Forest,14,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,Gradient Boosting,0,auc,0.666676545112392,15 training seeds
+multi_seed,Gradient Boosting,1,auc,0.6677582349193179,15 training seeds
+multi_seed,Gradient Boosting,2,auc,0.6709292159971549,15 training seeds
+multi_seed,Gradient Boosting,3,auc,0.6695956258242328,15 training seeds
+multi_seed,Gradient Boosting,4,auc,0.6695215374812927,15 training seeds
+multi_seed,Gradient Boosting,5,auc,0.6677878702564939,15 training seeds
+multi_seed,Gradient Boosting,6,auc,0.6702031502363417,15 training seeds
+multi_seed,Gradient Boosting,7,auc,0.6666024567694517,15 training seeds
+multi_seed,Gradient Boosting,8,auc,0.6663061033976915,15 training seeds
+multi_seed,Gradient Boosting,9,auc,0.6674322462103812,15 training seeds
+multi_seed,Gradient Boosting,10,auc,0.6732407722968867,15 training seeds
+multi_seed,Gradient Boosting,11,auc,0.6715960110836161,15 training seeds
+multi_seed,Gradient Boosting,12,auc,0.672159082489961,15 training seeds
+multi_seed,Gradient Boosting,13,auc,0.670277238579282,15 training seeds
+multi_seed,Gradient Boosting,14,auc,0.6674174285417933,15 training seeds
+multi_seed,Gradient Boosting,0,fpr,0.2990353697749196,15 training seeds
+multi_seed,Gradient Boosting,1,fpr,0.2990353697749196,15 training seeds
+multi_seed,Gradient Boosting,2,fpr,0.31189710610932475,15 training seeds
+multi_seed,Gradient Boosting,3,fpr,0.3183279742765273,15 training seeds
+multi_seed,Gradient Boosting,4,fpr,0.31511254019292606,15 training seeds
+multi_seed,Gradient Boosting,5,fpr,0.3086816720257235,15 training seeds
+multi_seed,Gradient Boosting,6,fpr,0.31511254019292606,15 training seeds
+multi_seed,Gradient Boosting,7,fpr,0.3022508038585209,15 training seeds
+multi_seed,Gradient Boosting,8,fpr,0.3054662379421222,15 training seeds
+multi_seed,Gradient Boosting,9,fpr,0.3054662379421222,15 training seeds
+multi_seed,Gradient Boosting,10,fpr,0.3054662379421222,15 training seeds
+multi_seed,Gradient Boosting,11,fpr,0.31511254019292606,15 training seeds
+multi_seed,Gradient Boosting,12,fpr,0.31189710610932475,15 training seeds
+multi_seed,Gradient Boosting,13,fpr,0.3183279742765273,15 training seeds
+multi_seed,Gradient Boosting,14,fpr,0.31189710610932475,15 training seeds
+multi_seed,Gradient Boosting,0,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,1,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,2,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,3,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,4,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,5,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,6,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,7,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,8,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,9,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,10,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,11,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,12,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,13,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,14,rc_dana,0.7,15 training seeds
+multi_seed,Gradient Boosting,0,rc_p90,0.5918367346938775,15 training seeds
+multi_seed,Gradient Boosting,1,rc_p90,0.5918367346938775,15 training seeds
+multi_seed,Gradient Boosting,2,rc_p90,0.5918367346938775,15 training seeds
+multi_seed,Gradient Boosting,3,rc_p90,0.5918367346938775,15 training seeds
+multi_seed,Gradient Boosting,4,rc_p90,0.6122448979591837,15 training seeds
+multi_seed,Gradient Boosting,5,rc_p90,0.5918367346938775,15 training seeds
+multi_seed,Gradient Boosting,6,rc_p90,0.5918367346938775,15 training seeds
+multi_seed,Gradient Boosting,7,rc_p90,0.5918367346938775,15 training seeds
+multi_seed,Gradient Boosting,8,rc_p90,0.5918367346938775,15 training seeds
+multi_seed,Gradient Boosting,9,rc_p90,0.5918367346938775,15 training seeds
+multi_seed,Gradient Boosting,10,rc_p90,0.5918367346938775,15 training seeds
+multi_seed,Gradient Boosting,11,rc_p90,0.6122448979591837,15 training seeds
+multi_seed,Gradient Boosting,12,rc_p90,0.5918367346938775,15 training seeds
+multi_seed,Gradient Boosting,13,rc_p90,0.5918367346938775,15 training seeds
+multi_seed,Gradient Boosting,14,rc_p90,0.5918367346938775,15 training seeds
+multi_seed,XGBoost,0,auc,0.6515032524782551,15 training seeds
+multi_seed,XGBoost,1,auc,0.658230474017218,15 training seeds
+multi_seed,XGBoost,2,auc,0.669669714167173,15 training seeds
+multi_seed,XGBoost,3,auc,0.6593121638241438,15 training seeds
+multi_seed,XGBoost,4,auc,0.6622905152103368,15 training seeds
+multi_seed,XGBoost,5,auc,0.6603197652881295,15 training seeds
+multi_seed,XGBoost,6,auc,0.6567338894898277,15 training seeds
+multi_seed,XGBoost,7,auc,0.6581267503371019,15 training seeds
+multi_seed,XGBoost,8,auc,0.6561708180834827,15 training seeds
+multi_seed,XGBoost,9,auc,0.6606902070028302,15 training seeds
+multi_seed,XGBoost,10,auc,0.6579637559826338,15 training seeds
+multi_seed,XGBoost,11,auc,0.654526056870212,15 training seeds
+multi_seed,XGBoost,12,auc,0.6548964985849127,15 training seeds
+multi_seed,XGBoost,13,auc,0.646583786507031,15 training seeds
+multi_seed,XGBoost,14,auc,0.6558596470431343,15 training seeds
+multi_seed,XGBoost,0,fpr,0.42765273311897106,15 training seeds
+multi_seed,XGBoost,1,fpr,0.3987138263665595,15 training seeds
+multi_seed,XGBoost,2,fpr,0.3890675241157556,15 training seeds
+multi_seed,XGBoost,3,fpr,0.41479099678456594,15 training seeds
+multi_seed,XGBoost,4,fpr,0.39228295819935693,15 training seeds
+multi_seed,XGBoost,5,fpr,0.40192926045016075,15 training seeds
+multi_seed,XGBoost,6,fpr,0.40836012861736337,15 training seeds
+multi_seed,XGBoost,7,fpr,0.40836012861736337,15 training seeds
+multi_seed,XGBoost,8,fpr,0.40836012861736337,15 training seeds
+multi_seed,XGBoost,9,fpr,0.39228295819935693,15 training seeds
+multi_seed,XGBoost,10,fpr,0.40192926045016075,15 training seeds
+multi_seed,XGBoost,11,fpr,0.4180064308681672,15 training seeds
+multi_seed,XGBoost,12,fpr,0.43086816720257237,15 training seeds
+multi_seed,XGBoost,13,fpr,0.40192926045016075,15 training seeds
+multi_seed,XGBoost,14,fpr,0.4180064308681672,15 training seeds
+multi_seed,XGBoost,0,rc_dana,0.9,15 training seeds
+multi_seed,XGBoost,1,rc_dana,0.95,15 training seeds
+multi_seed,XGBoost,2,rc_dana,0.9,15 training seeds
+multi_seed,XGBoost,3,rc_dana,0.9,15 training seeds
+multi_seed,XGBoost,4,rc_dana,0.9,15 training seeds
+multi_seed,XGBoost,5,rc_dana,0.95,15 training seeds
+multi_seed,XGBoost,6,rc_dana,0.95,15 training seeds
+multi_seed,XGBoost,7,rc_dana,0.9,15 training seeds
+multi_seed,XGBoost,8,rc_dana,0.9,15 training seeds
+multi_seed,XGBoost,9,rc_dana,0.9,15 training seeds
+multi_seed,XGBoost,10,rc_dana,0.85,15 training seeds
+multi_seed,XGBoost,11,rc_dana,0.9,15 training seeds
+multi_seed,XGBoost,12,rc_dana,0.8,15 training seeds
+multi_seed,XGBoost,13,rc_dana,0.85,15 training seeds
+multi_seed,XGBoost,14,rc_dana,0.8,15 training seeds
+multi_seed,XGBoost,0,rc_p90,0.6938775510204082,15 training seeds
+multi_seed,XGBoost,1,rc_p90,0.7142857142857143,15 training seeds
+multi_seed,XGBoost,2,rc_p90,0.6938775510204082,15 training seeds
+multi_seed,XGBoost,3,rc_p90,0.7346938775510204,15 training seeds
+multi_seed,XGBoost,4,rc_p90,0.673469387755102,15 training seeds
+multi_seed,XGBoost,5,rc_p90,0.7346938775510204,15 training seeds
+multi_seed,XGBoost,6,rc_p90,0.6938775510204082,15 training seeds
+multi_seed,XGBoost,7,rc_p90,0.7142857142857143,15 training seeds
+multi_seed,XGBoost,8,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,XGBoost,9,rc_p90,0.7142857142857143,15 training seeds
+multi_seed,XGBoost,10,rc_p90,0.7142857142857143,15 training seeds
+multi_seed,XGBoost,11,rc_p90,0.6938775510204082,15 training seeds
+multi_seed,XGBoost,12,rc_p90,0.7142857142857143,15 training seeds
+multi_seed,XGBoost,13,rc_p90,0.673469387755102,15 training seeds
+multi_seed,XGBoost,14,rc_p90,0.673469387755102,15 training seeds
+multi_seed,Standalone LSTM,0,auc,0.6506882807059138,15 training seeds
+multi_seed,Standalone LSTM,1,auc,0.6697734378472892,15 training seeds
+multi_seed,Standalone LSTM,2,auc,0.6722331708329011,15 training seeds
+multi_seed,Standalone LSTM,3,auc,0.6671655281757969,15 training seeds
+multi_seed,Standalone LSTM,4,auc,0.6837168639886201,15 training seeds
+multi_seed,Standalone LSTM,5,auc,0.6631351223198543,15 training seeds
+multi_seed,Standalone LSTM,6,auc,0.6559781883918383,15 training seeds
+multi_seed,Standalone LSTM,7,auc,0.6615940847866998,15 training seeds
+multi_seed,Standalone LSTM,8,auc,0.657578496599345,15 training seeds
+multi_seed,Standalone LSTM,9,auc,0.6618459851526961,15 training seeds
+multi_seed,Standalone LSTM,10,auc,0.6775823491931781,15 training seeds
+multi_seed,Standalone LSTM,11,auc,0.6640093647665477,15 training seeds
+multi_seed,Standalone LSTM,12,auc,0.6643205358068962,15 training seeds
+multi_seed,Standalone LSTM,13,auc,0.6580378443255739,15 training seeds
+multi_seed,Standalone LSTM,14,auc,0.6772859958214176,15 training seeds
+multi_seed,Standalone LSTM,0,fpr,0.4855305466237942,15 training seeds
+multi_seed,Standalone LSTM,1,fpr,0.4919614147909968,15 training seeds
+multi_seed,Standalone LSTM,2,fpr,0.3890675241157556,15 training seeds
+multi_seed,Standalone LSTM,3,fpr,0.5209003215434084,15 training seeds
+multi_seed,Standalone LSTM,4,fpr,0.4887459807073955,15 training seeds
+multi_seed,Standalone LSTM,5,fpr,0.4694533762057878,15 training seeds
+multi_seed,Standalone LSTM,6,fpr,0.5401929260450161,15 training seeds
+multi_seed,Standalone LSTM,7,fpr,0.4694533762057878,15 training seeds
+multi_seed,Standalone LSTM,8,fpr,0.6077170418006431,15 training seeds
+multi_seed,Standalone LSTM,9,fpr,0.4919614147909968,15 training seeds
+multi_seed,Standalone LSTM,10,fpr,0.48231511254019294,15 training seeds
+multi_seed,Standalone LSTM,11,fpr,0.639871382636656,15 training seeds
+multi_seed,Standalone LSTM,12,fpr,0.45980707395498394,15 training seeds
+multi_seed,Standalone LSTM,13,fpr,0.6012861736334405,15 training seeds
+multi_seed,Standalone LSTM,14,fpr,0.5627009646302251,15 training seeds
+multi_seed,Standalone LSTM,0,rc_dana,1.0,15 training seeds
+multi_seed,Standalone LSTM,1,rc_dana,0.95,15 training seeds
+multi_seed,Standalone LSTM,2,rc_dana,0.85,15 training seeds
+multi_seed,Standalone LSTM,3,rc_dana,0.9,15 training seeds
+multi_seed,Standalone LSTM,4,rc_dana,1.0,15 training seeds
+multi_seed,Standalone LSTM,5,rc_dana,0.9,15 training seeds
+multi_seed,Standalone LSTM,6,rc_dana,1.0,15 training seeds
+multi_seed,Standalone LSTM,7,rc_dana,0.8,15 training seeds
+multi_seed,Standalone LSTM,8,rc_dana,1.0,15 training seeds
+multi_seed,Standalone LSTM,9,rc_dana,0.85,15 training seeds
+multi_seed,Standalone LSTM,10,rc_dana,0.95,15 training seeds
+multi_seed,Standalone LSTM,11,rc_dana,0.8,15 training seeds
+multi_seed,Standalone LSTM,12,rc_dana,0.85,15 training seeds
+multi_seed,Standalone LSTM,13,rc_dana,0.8,15 training seeds
+multi_seed,Standalone LSTM,14,rc_dana,1.0,15 training seeds
+multi_seed,Standalone LSTM,0,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,Standalone LSTM,1,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,Standalone LSTM,2,rc_p90,0.7142857142857143,15 training seeds
+multi_seed,Standalone LSTM,3,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,Standalone LSTM,4,rc_p90,0.8163265306122449,15 training seeds
+multi_seed,Standalone LSTM,5,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,Standalone LSTM,6,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,Standalone LSTM,7,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,Standalone LSTM,8,rc_p90,0.8367346938775511,15 training seeds
+multi_seed,Standalone LSTM,9,rc_p90,0.7551020408163265,15 training seeds
+multi_seed,Standalone LSTM,10,rc_p90,0.7959183673469388,15 training seeds
+multi_seed,Standalone LSTM,11,rc_p90,0.7959183673469388,15 training seeds
+multi_seed,Standalone LSTM,12,rc_p90,0.7755102040816326,15 training seeds
+multi_seed,Standalone LSTM,13,rc_p90,0.8163265306122449,15 training seeds
+multi_seed,Standalone LSTM,14,rc_p90,0.8163265306122449,15 training seeds
+ia_racha_ablation,XGBoost_with_ia_racha,0,auc,0.6515032524782551,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,1,auc,0.658230474017218,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,2,auc,0.669669714167173,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,3,auc,0.6593121638241438,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,4,auc,0.6622905152103368,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,5,auc,0.6603197652881295,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,6,auc,0.6567338894898277,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,7,auc,0.6581267503371019,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,8,auc,0.6561708180834827,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,9,auc,0.6606902070028302,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,10,auc,0.6579637559826338,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,11,auc,0.654526056870212,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,12,auc,0.6548964985849127,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,13,auc,0.646583786507031,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,14,auc,0.6558596470431343,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,0,fpr,0.42765273311897106,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,1,fpr,0.3987138263665595,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,2,fpr,0.3890675241157556,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,3,fpr,0.41479099678456594,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,4,fpr,0.39228295819935693,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,5,fpr,0.40192926045016075,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,6,fpr,0.40836012861736337,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,7,fpr,0.40836012861736337,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,8,fpr,0.40836012861736337,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,9,fpr,0.39228295819935693,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,10,fpr,0.40192926045016075,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,11,fpr,0.4180064308681672,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,12,fpr,0.43086816720257237,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,13,fpr,0.40192926045016075,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,14,fpr,0.4180064308681672,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,0,rc_dana,0.9,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,1,rc_dana,0.95,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,2,rc_dana,0.9,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,3,rc_dana,0.9,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,4,rc_dana,0.9,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,5,rc_dana,0.95,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,6,rc_dana,0.95,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,7,rc_dana,0.9,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,8,rc_dana,0.9,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,9,rc_dana,0.9,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,10,rc_dana,0.85,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,11,rc_dana,0.9,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,12,rc_dana,0.8,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,13,rc_dana,0.85,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,14,rc_dana,0.8,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,0,rc_p90,0.6938775510204082,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,1,rc_p90,0.7142857142857143,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,2,rc_p90,0.6938775510204082,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,3,rc_p90,0.7346938775510204,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,4,rc_p90,0.673469387755102,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,5,rc_p90,0.7346938775510204,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,6,rc_p90,0.6938775510204082,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,7,rc_p90,0.7142857142857143,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,8,rc_p90,0.7551020408163265,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,9,rc_p90,0.7142857142857143,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,10,rc_p90,0.7142857142857143,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,11,rc_p90,0.6938775510204082,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,12,rc_p90,0.7142857142857143,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,13,rc_p90,0.673469387755102,ia_racha_con
+ia_racha_ablation,XGBoost_with_ia_racha,14,rc_p90,0.673469387755102,ia_racha_con
+ia_racha_ablation,XGBoost_without_ia_racha,0,auc,0.6632388459999703,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,1,auc,0.6556966526886661,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,2,auc,0.66421681212678,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,3,auc,0.6494732318816957,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,4,auc,0.6548520455791487,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,5,auc,0.655148398950909,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,6,auc,0.6525256716108288,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,7,auc,0.6601864062708374,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,8,auc,0.6653429549394698,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,9,auc,0.6604679419740097,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,10,auc,0.6532295108687598,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,11,auc,0.6582452916858061,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,12,auc,0.6637278290633751,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,13,auc,0.6615644494495235,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,14,auc,0.6590158104523836,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,0,fpr,0.40836012861736337,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,1,fpr,0.39228295819935693,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,2,fpr,0.40192926045016075,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,3,fpr,0.41479099678456594,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,4,fpr,0.4115755627009646,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,5,fpr,0.3954983922829582,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,6,fpr,0.41479099678456594,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,7,fpr,0.40514469453376206,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,8,fpr,0.36012861736334406,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,9,fpr,0.39228295819935693,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,10,fpr,0.40836012861736337,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,11,fpr,0.4212218649517685,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,12,fpr,0.39228295819935693,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,13,fpr,0.3954983922829582,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,14,fpr,0.40514469453376206,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,0,rc_dana,0.95,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,1,rc_dana,0.95,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,2,rc_dana,0.9,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,3,rc_dana,0.8,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,4,rc_dana,0.95,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,5,rc_dana,0.95,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,6,rc_dana,0.9,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,7,rc_dana,0.9,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,8,rc_dana,0.8,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,9,rc_dana,0.9,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,10,rc_dana,0.85,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,11,rc_dana,0.95,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,12,rc_dana,0.95,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,13,rc_dana,0.9,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,14,rc_dana,0.85,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,0,rc_p90,0.7346938775510204,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,1,rc_p90,0.6530612244897959,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,2,rc_p90,0.7142857142857143,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,3,rc_p90,0.6938775510204082,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,4,rc_p90,0.673469387755102,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,5,rc_p90,0.7346938775510204,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,6,rc_p90,0.6938775510204082,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,7,rc_p90,0.673469387755102,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,8,rc_p90,0.6938775510204082,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,9,rc_p90,0.6938775510204082,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,10,rc_p90,0.7346938775510204,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,11,rc_p90,0.7959183673469388,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,12,rc_p90,0.7346938775510204,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,13,rc_p90,0.7346938775510204,ia_racha_sin
+ia_racha_ablation,XGBoost_without_ia_racha,14,rc_p90,0.673469387755102,ia_racha_sin
+noise_evaluation,LSTM+QNN,-1,noisy_acc,0.5781565656565657,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,LSTM+QNN,-1,noisy_acc_std,0.006650098021345299,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,LSTM+QNN,-1,noisy_f1,0.5951749467732069,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,LSTM+QNN,-1,noisy_f1_std,0.006128999149104644,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,LSTM+QNN,-1,noisy_auc,0.639505880144818,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,LSTM+QNN,-1,noisy_auc_std,0.003974118481972408,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,LSTM+QNN,-1,noisy_rc_p90,0.7931972789115647,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,LSTM+QNN,-1,noisy_rc_p90_std,0.025670696957977163,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,LSTM+QNN,-1,noisy_rc_dana,0.9333333333333332,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,LSTM+QNN,-1,noisy_rc_dana_std,0.023570226039551553,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,LSTM+QNN,-1,noisy_fpr,0.544908896034298,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,LSTM+QNN,-1,noisy_fpr_std,0.008536895070413667,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,PI-QNN-LbL,-1,noisy_acc,0.5931818181818183,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,PI-QNN-LbL,-1,noisy_acc_std,0.009785149883837147,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,PI-QNN-LbL,-1,noisy_f1,0.5925931316015078,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,PI-QNN-LbL,-1,noisy_f1_std,0.0069691446111128375,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,PI-QNN-LbL,-1,noisy_auc,0.6701616607642954,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,PI-QNN-LbL,-1,noisy_auc_std,0.005144849308924537,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,PI-QNN-LbL,-1,noisy_rc_p90,0.7836734693877552,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,PI-QNN-LbL,-1,noisy_rc_p90_std,0.019432458308960142,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,PI-QNN-LbL,-1,noisy_rc_dana,0.8866666666666667,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,PI-QNN-LbL,-1,noisy_rc_dana_std,0.03858612300930075,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,PI-QNN-LbL,-1,noisy_fpr,0.495176848874598,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"
+noise_evaluation,PI-QNN-LbL,-1,noisy_fpr_std,0.017135578899645305,"depolarizing noise p=0.01, 15 MC noise draws on clean weights"

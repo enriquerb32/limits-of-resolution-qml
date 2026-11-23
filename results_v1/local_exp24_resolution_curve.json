@@ -1,0 +1,436 @@
+{
+  "meta": {
+    "Ks": [
+      5,
+      8,
+      10,
+      13,
+      16,
+      19
+    ],
+    "R": 300,
+    "seed": 7,
+    "pairs": [
+      "RF-XGB",
+      "RF-LSTM",
+      "RF-LSTM_QNN",
+      "CTRL_LINEAR4D-LSTM_QNN",
+      "LSTM-LSTM_QNN"
+    ]
+  },
+  "by_K": {
+    "5": {
+      "n_subsets": 300,
+      "N_median": 144.0,
+      "N_range": [
+        106,
+        194
+      ],
+      "hanley_mcneil_mde_single": 0.09133342928625297,
+      "pairs": {
+        "RF-XGB": {
+          "se_single": 0.02577243913663004,
+          "se_mean_delong": 0.021955564929668173,
+          "se_mean_jk": 0.02242840044060729,
+          "mde_single": 0.0721628295825641,
+          "mde_mean_delong": 0.06147558180307088,
+          "mde_mean_jk": 0.06279952123370042,
+          "gap_median": 0.01972322099026136
+        },
+        "RF-LSTM": {
+          "se_single": 0.02733693105932023,
+          "se_mean_delong": 0.021830742261727983,
+          "se_mean_jk": 0.011703898004771302,
+          "mde_single": 0.07654340696609664,
+          "mde_mean_delong": 0.06112607833283835,
+          "mde_mean_jk": 0.03277091441335964,
+          "gap_median": 0.014916971916971888
+        },
+        "RF-LSTM_QNN": {
+          "se_single": 0.03014159944908089,
+          "se_mean_delong": 0.02131121189938335,
+          "se_mean_jk": 0.012355825668699444,
+          "mde_single": 0.08439647845742648,
+          "mde_mean_delong": 0.059671393318273376,
+          "mde_mean_jk": 0.03459631187235844,
+          "gap_median": 0.018171569552449696
+        },
+        "CTRL_LINEAR4D-LSTM_QNN": {
+          "se_single": 0.025912892019224552,
+          "se_mean_delong": 0.015451278822026463,
+          "se_mean_jk": 0.015800999769524482,
+          "mde_single": 0.07255609765382874,
+          "mde_mean_delong": 0.0432635807016741,
+          "mde_mean_jk": 0.044242799354668544,
+          "gap_median": -0.007802538858046548
+        },
+        "LSTM-LSTM_QNN": {
+          "se_single": 0.02717183234102617,
+          "se_mean_delong": 0.010003684066910361,
+          "se_mean_jk": 0.008200542665220103,
+          "mde_single": 0.07608113055487327,
+          "mde_mean_delong": 0.02801031538734901,
+          "mde_mean_jk": 0.022961519462616285,
+          "gap_median": 0.004224579941596529
+        }
+      }
+    },
+    "8": {
+      "n_subsets": 300,
+      "N_median": 218.0,
+      "N_range": [
+        178,
+        278
+      ],
+      "hanley_mcneil_mde_single": 0.0741398945834152,
+      "pairs": {
+        "RF-XGB": {
+          "se_single": 0.020073767140643742,
+          "se_mean_delong": 0.017135201992808116,
+          "se_mean_jk": 0.018966455588155143,
+          "mde_single": 0.05620654799380247,
+          "mde_mean_delong": 0.04797856557986272,
+          "mde_mean_jk": 0.053106075646834394,
+          "gap_median": 0.020329084068088643
+        },
+        "RF-LSTM": {
+          "se_single": 0.021460966994458833,
+          "se_mean_delong": 0.017325795823951076,
+          "se_mean_jk": 0.009239674581454822,
+          "mde_single": 0.060090707584484725,
+          "mde_mean_delong": 0.04851222830706301,
+          "mde_mean_jk": 0.0258710888280735,
+          "gap_median": 0.01420332839017957
+        },
+        "RF-LSTM_QNN": {
+          "se_single": 0.02382049779370405,
+          "se_mean_delong": 0.016917093725623458,
+          "se_mean_jk": 0.009561105999190547,
+          "mde_single": 0.06669739382237133,
+          "mde_mean_delong": 0.04736786243174568,
+          "mde_mean_jk": 0.02677109679773353,
+          "gap_median": 0.018601422217055352
+        },
+        "CTRL_LINEAR4D-LSTM_QNN": {
+          "se_single": 0.020486405057221657,
+          "se_mean_delong": 0.012113898923444322,
+          "se_mean_jk": 0.013255003718344885,
+          "mde_single": 0.05736193416022064,
+          "mde_mean_delong": 0.0339189169856441,
+          "mde_mean_jk": 0.037114010411365674,
+          "gap_median": -0.008198638980849715
+        },
+        "LSTM-LSTM_QNN": {
+          "se_single": 0.021349871338483553,
+          "se_mean_delong": 0.007831881918225429,
+          "se_mean_jk": 0.006856125969144618,
+          "mde_single": 0.059779639747753945,
+          "mde_mean_delong": 0.0219292693710312,
+          "mde_mean_jk": 0.01919715271360493,
+          "gap_median": 0.004871314571150032
+        }
+      }
+    },
+    "10": {
+      "n_subsets": 300,
+      "N_median": 282.0,
+      "N_range": [
+        226,
+        326
+      ],
+      "hanley_mcneil_mde_single": 0.06515096076824953,
+      "pairs": {
+        "RF-XGB": {
+          "se_single": 0.017708475313382748,
+          "se_mean_delong": 0.015166032339030064,
+          "se_mean_jk": 0.01673389056317467,
+          "mde_single": 0.04958373087747169,
+          "mde_mean_delong": 0.04246489054928418,
+          "mde_mean_jk": 0.04685489357688908,
+          "gap_median": 0.02118916388335157
+        },
+        "RF-LSTM": {
+          "se_single": 0.0189800093705859,
+          "se_mean_delong": 0.015427226489234735,
+          "se_mean_jk": 0.008441043650791919,
+          "mde_single": 0.05314402623764052,
+          "mde_mean_delong": 0.04319623416985725,
+          "mde_mean_jk": 0.023634922222217372,
+          "gap_median": 0.01433257758224088
+        },
+        "RF-LSTM_QNN": {
+          "se_single": 0.02098633634994882,
+          "se_mean_delong": 0.014992104905298523,
+          "se_mean_jk": 0.008650672667868268,
+          "mde_single": 0.05876174177985669,
+          "mde_mean_delong": 0.04197789373483586,
+          "mde_mean_jk": 0.02422188347003115,
+          "gap_median": 0.01950158525127116
+        },
+        "CTRL_LINEAR4D-LSTM_QNN": {
+          "se_single": 0.01799417950641618,
+          "se_mean_delong": 0.010662143949835718,
+          "se_mean_jk": 0.011647974111704006,
+          "mde_single": 0.0503837026179653,
+          "mde_mean_delong": 0.02985400305954001,
+          "mde_mean_jk": 0.03261432751277121,
+          "gap_median": -0.009076540000631683
+        },
+        "LSTM-LSTM_QNN": {
+          "se_single": 0.018684049957665348,
+          "se_mean_delong": 0.0069329146624903925,
+          "se_mean_jk": 0.006058284704779422,
+          "mde_single": 0.05231533988146297,
+          "mde_mean_delong": 0.019412161054973096,
+          "mde_mean_jk": 0.01696319717338238,
+          "gap_median": 0.004796001671523831
+        }
+      }
+    },
+    "13": {
+      "n_subsets": 300,
+      "N_median": 360.0,
+      "N_range": [
+        310,
+        398
+      ],
+      "hanley_mcneil_mde_single": 0.057639559639793884,
+      "pairs": {
+        "RF-XGB": {
+          "se_single": 0.015599011902020312,
+          "se_mean_delong": 0.013398311580224358,
+          "se_mean_jk": 0.014990174469088211,
+          "mde_single": 0.04367723332565687,
+          "mde_mean_delong": 0.037515272424628196,
+          "mde_mean_jk": 0.04197248851344699,
+          "gap_median": 0.02065006005697928
+        },
+        "RF-LSTM": {
+          "se_single": 0.01658397208664491,
+          "se_mean_delong": 0.013469122661829518,
+          "se_mean_jk": 0.00777555473949473,
+          "mde_single": 0.046435121842605745,
+          "mde_mean_delong": 0.037713543453122646,
+          "mde_mean_jk": 0.02177155327058524,
+          "gap_median": 0.014088830587986212
+        },
+        "RF-LSTM_QNN": {
+          "se_single": 0.018442723769995846,
+          "se_mean_delong": 0.013197166914545571,
+          "se_mean_jk": 0.007551681863980647,
+          "mde_single": 0.05163962655598837,
+          "mde_mean_delong": 0.0369520673607276,
+          "mde_mean_jk": 0.02114470921914581,
+          "gap_median": 0.018934644582470572
+        },
+        "CTRL_LINEAR4D-LSTM_QNN": {
+          "se_single": 0.01582562132726613,
+          "se_mean_delong": 0.009375708659166235,
+          "se_mean_jk": 0.010648890036827674,
+          "mde_single": 0.04431173971634516,
+          "mde_mean_delong": 0.02625198424566546,
+          "mde_mean_jk": 0.029816892103117484,
+          "gap_median": -0.009077265386688294
+        },
+        "LSTM-LSTM_QNN": {
+          "se_single": 0.016417401548795493,
+          "se_mean_delong": 0.006087196090207712,
+          "se_mean_jk": 0.005199024126941931,
+          "mde_single": 0.04596872433662738,
+          "mde_mean_delong": 0.017044149052581593,
+          "mde_mean_jk": 0.014557267555437405,
+          "gap_median": 0.004810247792201017
+        }
+      }
+    },
+    "16": {
+      "n_subsets": 300,
+      "N_median": 444.0,
+      "N_range": [
+        384,
+        470
+      ],
+      "hanley_mcneil_mde_single": 0.0518873731650673,
+      "pairs": {
+        "RF-XGB": {
+          "se_single": 0.014039889381720912,
+          "se_mean_delong": 0.012043479688201505,
+          "se_mean_jk": 0.013340329351189634,
+          "mde_single": 0.03931169026881855,
+          "mde_mean_delong": 0.033721743126964215,
+          "mde_mean_jk": 0.03735292218333097,
+          "gap_median": 0.021391289759358723
+        },
+        "RF-LSTM": {
+          "se_single": 0.014977128038245174,
+          "se_mean_delong": 0.012199538501839937,
+          "se_mean_jk": 0.00706786008841352,
+          "mde_single": 0.041935958507086486,
+          "mde_mean_delong": 0.034158707805151824,
+          "mde_mean_jk": 0.019790008247557854,
+          "gap_median": 0.014294357056398033
+        },
+        "RF-LSTM_QNN": {
+          "se_single": 0.016621323642666642,
+          "se_mean_delong": 0.011927253944210913,
+          "se_mean_jk": 0.0069242688330273024,
+          "mde_single": 0.046539706199466596,
+          "mde_mean_delong": 0.03339631104379055,
+          "mde_mean_jk": 0.019387952732476444,
+          "gap_median": 0.019533277534379112
+        },
+        "CTRL_LINEAR4D-LSTM_QNN": {
+          "se_single": 0.014242384576389147,
+          "se_mean_delong": 0.008464642066435601,
+          "se_mean_jk": 0.00956791186270363,
+          "mde_single": 0.03987867681388961,
+          "mde_mean_delong": 0.02370099778601968,
+          "mde_mean_jk": 0.02679015321557016,
+          "gap_median": -0.009909829273782866
+        },
+        "LSTM-LSTM_QNN": {
+          "se_single": 0.014789519551538918,
+          "se_mean_delong": 0.005479736211104078,
+          "se_mean_jk": 0.004747705751550787,
+          "mde_single": 0.04141065474430897,
+          "mde_mean_delong": 0.015343261391091417,
+          "mde_mean_jk": 0.013293576104342205,
+          "gap_median": 0.004925354992460329
+        }
+      }
+    },
+    "19": {
+      "n_subsets": 1,
+      "N_median": 528.0,
+      "N_range": [
+        528,
+        528
+      ],
+      "hanley_mcneil_mde_single": 0.04757241686491047,
+      "pairs": {
+        "RF-XGB": {
+          "se_single": 0.012846627373694694,
+          "se_mean_delong": 0.011031907053726133,
+          "se_mean_jk": 0.012105780138099625,
+          "mde_single": 0.035970556646345145,
+          "mde_mean_delong": 0.030889339750433172,
+          "mde_mean_jk": 0.03389618438667895,
+          "gap_median": 0.021291057654620027
+        },
+        "RF-LSTM": {
+          "se_single": 0.013711490651232427,
+          "se_mean_delong": 0.011177884883966349,
+          "se_mean_jk": 0.006204731201441848,
+          "mde_single": 0.038392173823450795,
+          "mde_mean_delong": 0.03129807767510578,
+          "mde_mean_jk": 0.017373247364037173,
+          "gap_median": 0.014680358192442067
+        },
+        "RF-LSTM_QNN": {
+          "se_single": 0.015242852273402888,
+          "se_mean_delong": 0.010921528460802271,
+          "se_mean_jk": 0.006192296183010703,
+          "mde_single": 0.04267998636552808,
+          "mde_mean_delong": 0.03058027969024636,
+          "mde_mean_jk": 0.017338429312429966,
+          "gap_median": 0.019524747976153667
+        },
+        "CTRL_LINEAR4D-LSTM_QNN": {
+          "se_single": 0.013048267209892491,
+          "se_mean_delong": 0.007741397737663705,
+          "se_mean_jk": 0.008675652220211844,
+          "mde_single": 0.03653514818769897,
+          "mde_mean_delong": 0.021675913665458374,
+          "mde_mean_jk": 0.024291826216593163,
+          "gap_median": -0.009431939978563841
+        },
+        "LSTM-LSTM_QNN": {
+          "se_single": 0.013555668164289195,
+          "se_mean_delong": 0.005012001261774426,
+          "se_mean_jk": 0.004319093800956527,
+          "mde_single": 0.03795587086000975,
+          "mde_mean_delong": 0.014033603532968392,
+          "mde_mean_jk": 0.012093462642678276,
+          "gap_median": 0.0048443897837116
+        }
+      }
+    }
+  },
+  "fit": {
+    "RF-XGB": {
+      "gap_full": 0.021291057654620027,
+      "se_single": {
+        "exponent": 0.5302842786959922,
+        "N_for_mde_equal_gap": 1507.071190194594
+      },
+      "se_mean_delong": {
+        "exponent": 0.5236541548244003,
+        "N_for_mde_equal_gap": 1111.364964276291
+      },
+      "se_mean_jk": {
+        "exponent": 0.47433061804170246,
+        "N_for_mde_equal_gap": 1338.2617877904981
+      }
+    },
+    "RF-LSTM": {
+      "gap_full": 0.014680358192442067,
+      "se_single": {
+        "exponent": 0.5277912888855016,
+        "N_for_mde_equal_gap": 3611.1541239243625
+      },
+      "se_mean_delong": {
+        "exponent": 0.5125182156741015,
+        "N_for_mde_equal_gap": 2399.9154749071536
+      },
+      "se_mean_jk": {
+        "exponent": 0.457642208279578,
+        "N_for_mde_equal_gap": 739.4735161504611
+      }
+    },
+    "RF-LSTM_QNN": {
+      "gap_full": 0.019524747976153667,
+      "se_single": {
+        "exponent": 0.52230073093279,
+        "N_for_mde_equal_gap": 2522.9671336832885
+      },
+      "se_mean_delong": {
+        "exponent": 0.5108062583502639,
+        "N_for_mde_equal_gap": 1295.2271979870238
+      },
+      "se_mean_jk": {
+        "exponent": 0.5158395652494466,
+        "N_for_mde_equal_gap": 416.37299407942584
+      }
+    },
+    "CTRL_LINEAR4D-LSTM_QNN": {
+      "gap_full": -0.009431939978563841,
+      "se_single": {
+        "exponent": 0.5257492534950318,
+        "N_for_mde_equal_gap": 7922.342466364397
+      },
+      "se_mean_delong": {
+        "exponent": 0.52759392259211,
+        "N_for_mde_equal_gap": 2788.6030038493436
+      },
+      "se_mean_jk": {
+        "exponent": 0.4557313542227838,
+        "N_for_mde_equal_gap": 3502.2907473051987
+      }
+    },
+    "LSTM-LSTM_QNN": {
+      "gap_full": 0.0048443897837116,
+      "se_single": {
+        "exponent": 0.5329332819299092,
+        "N_for_mde_equal_gap": 32412.586145973226
+      },
+      "se_mean_delong": {
+        "exponent": 0.5270491996814833,
+        "N_for_mde_equal_gap": 4430.922657062244
+      },
+      "se_mean_jk": {
+        "exponent": 0.4997907466428693,
+        "N_for_mde_equal_gap": 3290.463655077469
+      }
+    }
+  }
+}

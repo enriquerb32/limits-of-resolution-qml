@@ -1,0 +1,1454 @@
+{
+  "pooled": {
+    "n_test": 884,
+    "prevalence": 0.34728506787330315,
+    "K_years": 19,
+    "climatology_auc": 0.7157458267236463,
+    "models": {
+      "RF_2273": {
+        "auc_seed_mean": 0.7063850046197241,
+        "auc_seed_sd": 0.0025633557227254895,
+        "auc_of_mean_prob": 0.7072468513427308,
+        "within_station_auc": {
+          "Alcantarilla": 0.5834567378887243,
+          "Almeria": 0.7242547425474255,
+          "Mallorca": 0.662775293922835,
+          "Tortosa": 0.6238532110091742
+        },
+        "within_station_mean": 0.6485849963420397
+      },
+      "XGB": {
+        "auc_seed_mean": 0.7023044050152705,
+        "auc_seed_sd": 0.002778250952303855,
+        "auc_of_mean_prob": 0.7043677563946956,
+        "within_station_auc": {
+          "Alcantarilla": 0.5806008038925323,
+          "Almeria": 0.7074525745257453,
+          "Mallorca": 0.6707236297400232,
+          "Tortosa": 0.6128768020969857
+        },
+        "within_station_mean": 0.6429134525638216
+      },
+      "PureLSTM": {
+        "auc_seed_mean": 0.7165322148143548,
+        "auc_seed_sd": 0.004750841339571769,
+        "auc_of_mean_prob": 0.7222858884830557,
+        "within_station_auc": {
+          "Alcantarilla": 0.6455468584726042,
+          "Almeria": 0.7199186991869919,
+          "Mallorca": 0.6963901308163604,
+          "Tortosa": 0.6123034076015729
+        },
+        "within_station_mean": 0.6685397740193824
+      },
+      "CTRL_LINEAR4D": {
+        "auc_seed_mean": 0.7124073938169083,
+        "auc_seed_sd": 0.004020127497181303,
+        "auc_of_mean_prob": 0.7159236531763192,
+        "within_station_auc": {
+          "Alcantarilla": 0.6225936111698751,
+          "Almeria": 0.7219512195121951,
+          "Mallorca": 0.6901804934591821,
+          "Tortosa": 0.6019003931847969
+        },
+        "within_station_mean": 0.6591564293315123
+      },
+      "LSTM_QNN": {
+        "auc_seed_mean": 0.7055607931247966,
+        "auc_seed_sd": 0.011382031145106308,
+        "auc_of_mean_prob": 0.7220995941040651,
+        "within_station_auc": {
+          "Alcantarilla": 0.622170509837106,
+          "Almeria": 0.732520325203252,
+          "Mallorca": 0.6928299387315779,
+          "Tortosa": 0.6227883355176933
+        },
+        "within_station_mean": 0.6675772773224073
+      },
+      "FOURIER2": {
+        "auc_seed_mean": 0.7086897859872755,
+        "auc_seed_sd": 0.0030481553649122973,
+        "auc_of_mean_prob": 0.7146647547970802,
+        "within_station_auc": {
+          "Alcantarilla": 0.618997249841337,
+          "Almeria": 0.7330623306233062,
+          "Mallorca": 0.6804934591819838,
+          "Tortosa": 0.6035386631716907
+        },
+        "within_station_mean": 0.6590229257045794
+      }
+    },
+    "pairs": {
+      "RF_2273-PureLSTM": {
+        "S_A": 15,
+        "S_B": 15,
+        "delta": -0.010147210194630718,
+        "se_delong": 0.009354464317523768,
+        "z": -1.0847451922631097,
+        "p_delong": 0.27803452605190404,
+        "ci_delong": [
+          -0.0284819602569773,
+          0.008187539867715865
+        ],
+        "ci_block": [
+          -0.026787181183038303,
+          0.005523163544796987
+        ],
+        "se_block": 0.00841463051154405,
+        "ci_two_way": [
+          -0.027934702034545313,
+          0.005893740289492733
+        ],
+        "se_two_way": 0.008534986825990324,
+        "mde_delong": 0.026192500089066546,
+        "mde_block": 0.023560965432323337,
+        "se_iid": 0.009341640180536539,
+        "se_cluster": 0.008534923160010697,
+        "ratio": 0.9136428930107316,
+        "perm_ratio_q025": 0.6717654323819415,
+        "perm_ratio_q975": 1.321644780785816,
+        "phases_excluding_zero": 0,
+        "phases": [
+          {
+            "start": 1,
+            "se": 0.008534923160010699,
+            "excludes_zero": false
+          },
+          {
+            "start": 2,
+            "se": 0.009982497529256788,
+            "excludes_zero": false
+          },
+          {
+            "start": 3,
+            "se": 0.01028092963667598,
+            "excludes_zero": false
+          },
+          {
+            "start": 4,
+            "se": 0.011183744099305283,
+            "excludes_zero": false
+          },
+          {
+            "start": 5,
+            "se": 0.011442657574470137,
+            "excludes_zero": false
+          },
+          {
+            "start": 6,
+            "se": 0.010519767666865625,
+            "excludes_zero": false
+          },
+          {
+            "start": 7,
+            "se": 0.00957763594730741,
+            "excludes_zero": false
+          },
+          {
+            "start": 8,
+            "se": 0.009538265083657583,
+            "excludes_zero": false
+          },
+          {
+            "start": 9,
+            "se": 0.010253442170019044,
+            "excludes_zero": false
+          },
+          {
+            "start": 10,
+            "se": 0.008421939430406193,
+            "excludes_zero": false
+          },
+          {
+            "start": 11,
+            "se": 0.009068965710264557,
+            "excludes_zero": false
+          },
+          {
+            "start": 12,
+            "se": 0.009671857520202796,
+            "excludes_zero": false
+          }
+        ]
+      },
+      "RF_2273-LSTM_QNN": {
+        "S_A": 15,
+        "S_B": 15,
+        "delta": 0.000824211494927618,
+        "se_delong": 0.009821188168068897,
+        "z": 0.08392177003667771,
+        "p_delong": 0.933118630629655,
+        "ci_delong": [
+          -0.01842531731448742,
+          0.020073740304342655
+        ],
+        "ci_block": [
+          -0.020421915736575705,
+          0.019920291942531834
+        ],
+        "se_block": 0.010231837784606755,
+        "ci_two_way": [
+          -0.021496284863922674,
+          0.020470907175938885
+        ],
+        "se_two_way": 0.010814812338728694,
+        "mde_delong": 0.02749932687059291,
+        "mde_block": 0.028649145796898912,
+        "se_iid": 0.009807753777151554,
+        "se_cluster": 0.010652517107246668,
+        "ratio": 1.0861321918646756,
+        "perm_ratio_q025": 0.6761086778605115,
+        "perm_ratio_q975": 1.3331535268857602,
+        "phases_excluding_zero": 0,
+        "phases": [
+          {
+            "start": 1,
+            "se": 0.010652517107246668,
+            "excludes_zero": false
+          },
+          {
+            "start": 2,
+            "se": 0.011149743456473753,
+            "excludes_zero": false
+          },
+          {
+            "start": 3,
+            "se": 0.011046364578785934,
+            "excludes_zero": false
+          },
+          {
+            "start": 4,
+            "se": 0.012468532932661189,
+            "excludes_zero": false
+          },
+          {
+            "start": 5,
+            "se": 0.0127632750347566,
+            "excludes_zero": false
+          },
+          {
+            "start": 6,
+            "se": 0.012268751355970216,
+            "excludes_zero": false
+          },
+          {
+            "start": 7,
+            "se": 0.011016073341058369,
+            "excludes_zero": false
+          },
+          {
+            "start": 8,
+            "se": 0.01098697534376238,
+            "excludes_zero": false
+          },
+          {
+            "start": 9,
+            "se": 0.011829246315318334,
+            "excludes_zero": false
+          },
+          {
+            "start": 10,
+            "se": 0.010502705091945867,
+            "excludes_zero": false
+          },
+          {
+            "start": 11,
+            "se": 0.012069612192585151,
+            "excludes_zero": false
+          },
+          {
+            "start": 12,
+            "se": 0.012278014288296791,
+            "excludes_zero": false
+          }
+        ]
+      },
+      "XGB-LSTM_QNN": {
+        "S_A": 15,
+        "S_B": 15,
+        "delta": -0.0032563881095261094,
+        "se_delong": 0.010782196682736762,
+        "z": -0.3020152762321495,
+        "p_delong": 0.762640417652531,
+        "ci_delong": [
+          -0.024389493607690164,
+          0.017876717388637945
+        ],
+        "ci_block": [
+          -0.02587953834115799,
+          0.019236622919234843
+        ],
+        "se_block": 0.011670965737426195,
+        "ci_two_way": [
+          -0.026252096478836657,
+          0.020709703959122736
+        ],
+        "se_two_way": 0.011907418296476815,
+        "mde_delong": 0.030190150711662932,
+        "mde_block": 0.03267870406479335,
+        "se_iid": 0.010767330076930924,
+        "se_cluster": 0.011949073749982277,
+        "ratio": 1.1097527116386305,
+        "perm_ratio_q025": 0.679766937280828,
+        "perm_ratio_q975": 1.3302996682556358,
+        "phases_excluding_zero": 0,
+        "phases": [
+          {
+            "start": 1,
+            "se": 0.011949073749982277,
+            "excludes_zero": false
+          },
+          {
+            "start": 2,
+            "se": 0.01187007224776383,
+            "excludes_zero": false
+          },
+          {
+            "start": 3,
+            "se": 0.011408584820843965,
+            "excludes_zero": false
+          },
+          {
+            "start": 4,
+            "se": 0.013615133081897515,
+            "excludes_zero": false
+          },
+          {
+            "start": 5,
+            "se": 0.013198447169807302,
+            "excludes_zero": false
+          },
+          {
+            "start": 6,
+            "se": 0.012435029566276097,
+            "excludes_zero": false
+          },
+          {
+            "start": 7,
+            "se": 0.01009120867205365,
+            "excludes_zero": false
+          },
+          {
+            "start": 8,
+            "se": 0.010138107102624984,
+            "excludes_zero": false
+          },
+          {
+            "start": 9,
+            "se": 0.010609180176085427,
+            "excludes_zero": false
+          },
+          {
+            "start": 10,
+            "se": 0.010198178445976584,
+            "excludes_zero": false
+          },
+          {
+            "start": 11,
+            "se": 0.01145901086462999,
+            "excludes_zero": false
+          },
+          {
+            "start": 12,
+            "se": 0.012868918423100307,
+            "excludes_zero": false
+          }
+        ]
+      },
+      "CTRL_LINEAR4D-LSTM_QNN": {
+        "S_A": 15,
+        "S_B": 15,
+        "delta": 0.006846600692111737,
+        "se_delong": 0.005754066329435497,
+        "z": 1.1898717011806543,
+        "p_delong": 0.2340968225917004,
+        "ci_delong": [
+          -0.004431369313581835,
+          0.01812457069780531
+        ],
+        "ci_block": [
+          -0.006651415139455372,
+          0.01995519532599673
+        ],
+        "se_block": 0.006820061832896993,
+        "ci_two_way": [
+          -0.008314101209795682,
+          0.021276618322492252
+        ],
+        "se_two_way": 0.007598525859781155,
+        "mde_delong": 0.01611138572241939,
+        "mde_block": 0.01909617313211158,
+        "se_iid": 0.005746245226748273,
+        "se_cluster": 0.006833243888060772,
+        "ratio": 1.1891667721127903,
+        "perm_ratio_q025": 0.687102468357705,
+        "perm_ratio_q975": 1.3183839649151705,
+        "phases_excluding_zero": 0,
+        "phases": [
+          {
+            "start": 1,
+            "se": 0.006833243888060772,
+            "excludes_zero": false
+          },
+          {
+            "start": 2,
+            "se": 0.005958635484684848,
+            "excludes_zero": false
+          },
+          {
+            "start": 3,
+            "se": 0.006185192592773971,
+            "excludes_zero": false
+          },
+          {
+            "start": 4,
+            "se": 0.0064417819754968055,
+            "excludes_zero": false
+          },
+          {
+            "start": 5,
+            "se": 0.006231302996710387,
+            "excludes_zero": false
+          },
+          {
+            "start": 6,
+            "se": 0.0056437439630134464,
+            "excludes_zero": false
+          },
+          {
+            "start": 7,
+            "se": 0.00588040829600204,
+            "excludes_zero": false
+          },
+          {
+            "start": 8,
+            "se": 0.005489952537573219,
+            "excludes_zero": false
+          },
+          {
+            "start": 9,
+            "se": 0.005131271027499768,
+            "excludes_zero": false
+          },
+          {
+            "start": 10,
+            "se": 0.005105795461340033,
+            "excludes_zero": false
+          },
+          {
+            "start": 11,
+            "se": 0.006325665795430626,
+            "excludes_zero": false
+          },
+          {
+            "start": 12,
+            "se": 0.006144849805323567,
+            "excludes_zero": false
+          }
+        ]
+      },
+      "PureLSTM-LSTM_QNN": {
+        "S_A": 15,
+        "S_B": 15,
+        "delta": 0.010971421689558336,
+        "se_delong": 0.00480020156432137,
+        "z": 2.285616873071751,
+        "p_delong": 0.022276682180107484,
+        "ci_delong": [
+          0.0015630266234884522,
+          0.02037981675562822
+        ],
+        "ci_block": [
+          -0.0016527196983518089,
+          0.023413338070797516
+        ],
+        "se_block": 0.0063337546596564055,
+        "ci_two_way": [
+          -0.0028709715458297615,
+          0.025295206005457177
+        ],
+        "se_two_way": 0.007248463072514844,
+        "mde_delong": 0.013440564380099834,
+        "mde_block": 0.017734513047037933,
+        "se_iid": 0.004793742858128309,
+        "se_cluster": 0.0064490784342805,
+        "ratio": 1.3453117167820945,
+        "perm_ratio_q025": 0.6726926248110653,
+        "perm_ratio_q975": 1.332825329358288,
+        "phases_excluding_zero": 0,
+        "phases": [
+          {
+            "start": 1,
+            "se": 0.006449078434280501,
+            "excludes_zero": false
+          },
+          {
+            "start": 2,
+            "se": 0.006136850148615421,
+            "excludes_zero": false
+          },
+          {
+            "start": 3,
+            "se": 0.006574936494963068,
+            "excludes_zero": false
+          },
+          {
+            "start": 4,
+            "se": 0.006178379785120841,
+            "excludes_zero": false
+          },
+          {
+            "start": 5,
+            "se": 0.006287032709666734,
+            "excludes_zero": false
+          },
+          {
+            "start": 6,
+            "se": 0.007087677582483695,
+            "excludes_zero": false
+          },
+          {
+            "start": 7,
+            "se": 0.006963597994344699,
+            "excludes_zero": false
+          },
+          {
+            "start": 8,
+            "se": 0.006616150196498501,
+            "excludes_zero": false
+          },
+          {
+            "start": 9,
+            "se": 0.006282374666940085,
+            "excludes_zero": false
+          },
+          {
+            "start": 10,
+            "se": 0.006520154850561008,
+            "excludes_zero": false
+          },
+          {
+            "start": 11,
+            "se": 0.007168696598689534,
+            "excludes_zero": false
+          },
+          {
+            "start": 12,
+            "se": 0.006437130316797013,
+            "excludes_zero": false
+          }
+        ]
+      },
+      "FOURIER2-LSTM_QNN": {
+        "S_A": 15,
+        "S_B": 15,
+        "delta": 0.0031289928624789187,
+        "se_delong": 0.0027717754728350166,
+        "z": 1.1288767409715674,
+        "p_delong": 0.25894983378523406,
+        "ci_delong": [
+          -0.002303687064277714,
+          0.008561672789235551
+        ],
+        "ci_block": [
+          -0.0007961088492747291,
+          0.007327811707405356
+        ],
+        "se_block": 0.0020496037251355272,
+        "ci_two_way": [
+          -0.005954780515138441,
+          0.01115508399294168
+        ],
+        "se_two_way": 0.004307769004440145,
+        "mde_delong": 0.007760971323938046,
+        "mde_block": 0.005738890430379476,
+        "se_iid": 0.002768211109578832,
+        "se_cluster": 0.0020493463112751234,
+        "ratio": 0.7403143149681672,
+        "perm_ratio_q025": 0.6824506316114173,
+        "perm_ratio_q975": 1.3098918035770057,
+        "phases_excluding_zero": 0,
+        "phases": [
+          {
+            "start": 1,
+            "se": 0.002049346311275124,
+            "excludes_zero": false
+          },
+          {
+            "start": 2,
+            "se": 0.0019379603517449989,
+            "excludes_zero": false
+          },
+          {
+            "start": 3,
+            "se": 0.0021323196254390974,
+            "excludes_zero": false
+          },
+          {
+            "start": 4,
+            "se": 0.0023000273450945233,
+            "excludes_zero": false
+          },
+          {
+            "start": 5,
+            "se": 0.002486235889002024,
+            "excludes_zero": false
+          },
+          {
+            "start": 6,
+            "se": 0.0020440154951646395,
+            "excludes_zero": false
+          },
+          {
+            "start": 7,
+            "se": 0.002281059870084708,
+            "excludes_zero": false
+          },
+          {
+            "start": 8,
+            "se": 0.0024846510607532783,
+            "excludes_zero": false
+          },
+          {
+            "start": 9,
+            "se": 0.00259680195275381,
+            "excludes_zero": false
+          },
+          {
+            "start": 10,
+            "se": 0.0030437433097708524,
+            "excludes_zero": false
+          },
+          {
+            "start": 11,
+            "se": 0.0027091898732225428,
+            "excludes_zero": false
+          },
+          {
+            "start": 12,
+            "se": 0.002267754244181159,
+            "excludes_zero": false
+          }
+        ]
+      },
+      "RF_2273-XGB": {
+        "S_A": 15,
+        "S_B": 15,
+        "delta": 0.004080599604453727,
+        "se_delong": 0.005389465976345731,
+        "z": 0.7571435875768406,
+        "p_delong": 0.4489638428778584,
+        "ci_delong": [
+          -0.006482753709183905,
+          0.01464395291809136
+        ],
+        "ci_block": [
+          -0.009325641969913099,
+          0.017448320937641027
+        ],
+        "se_block": 0.006852909094332264,
+        "ci_two_way": [
+          -0.010304985583100855,
+          0.017719774464343346
+        ],
+        "se_two_way": 0.007102720403498738,
+        "mde_delong": 0.015090504733768046,
+        "mde_block": 0.01918814546413034,
+        "se_iid": 0.005382081993559399,
+        "se_cluster": 0.007175753117774785,
+        "ratio": 1.3332671494714918,
+        "perm_ratio_q025": 0.6781180012785387,
+        "perm_ratio_q975": 1.3225244990818663,
+        "phases_excluding_zero": 0,
+        "phases": [
+          {
+            "start": 1,
+            "se": 0.007175753117774786,
+            "excludes_zero": false
+          },
+          {
+            "start": 2,
+            "se": 0.00657092218152918,
+            "excludes_zero": false
+          },
+          {
+            "start": 3,
+            "se": 0.005203689159483502,
+            "excludes_zero": false
+          },
+          {
+            "start": 4,
+            "se": 0.004725711833147236,
+            "excludes_zero": false
+          },
+          {
+            "start": 5,
+            "se": 0.00500309622289276,
+            "excludes_zero": false
+          },
+          {
+            "start": 6,
+            "se": 0.005342471250654789,
+            "excludes_zero": false
+          },
+          {
+            "start": 7,
+            "se": 0.005274986330438822,
+            "excludes_zero": false
+          },
+          {
+            "start": 8,
+            "se": 0.005663250022600751,
+            "excludes_zero": false
+          },
+          {
+            "start": 9,
+            "se": 0.006176547783223057,
+            "excludes_zero": false
+          },
+          {
+            "start": 10,
+            "se": 0.006939149551006899,
+            "excludes_zero": false
+          },
+          {
+            "start": 11,
+            "se": 0.00687658986989904,
+            "excludes_zero": false
+          },
+          {
+            "start": 12,
+            "se": 0.007389686935337245,
+            "excludes_zero": false
+          }
+        ]
+      }
+    }
+  },
+  "stationmonth": {
+    "n_test": 884,
+    "prevalence": 0.36877828054298645,
+    "K_years": 19,
+    "climatology_auc": 0.5096202475976868,
+    "models": {
+      "RF_2273": {
+        "auc_seed_mean": 0.4992061921410823,
+        "auc_seed_sd": 0.003542235703696465,
+        "auc_of_mean_prob": 0.49934582316335724,
+        "within_station_auc": {
+          "Alcantarilla": 0.5015070921985816,
+          "Almeria": 0.4816209431594048,
+          "Mallorca": 0.5128066378066378,
+          "Tortosa": 0.502028740490279
+        },
+        "within_station_mean": 0.4994908534137258
+      },
+      "XGB": {
+        "auc_seed_mean": 0.501881903672919,
+        "auc_seed_sd": 0.011711828302006315,
+        "auc_of_mean_prob": 0.5038426017547332,
+        "within_station_auc": {
+          "Alcantarilla": 0.5365248226950354,
+          "Almeria": 0.5210686749148288,
+          "Mallorca": 0.47086940836940844,
+          "Tortosa": 0.4899408284023669
+        },
+        "within_station_mean": 0.5046009335954099
+      },
+      "PureLSTM": {
+        "auc_seed_mean": 0.5188655804032807,
+        "auc_seed_sd": 0.02340952704325846,
+        "auc_of_mean_prob": 0.5282890252215405,
+        "within_station_auc": {
+          "Alcantarilla": 0.523936170212766,
+          "Almeria": 0.5303926842388381,
+          "Mallorca": 0.5680916305916305,
+          "Tortosa": 0.48258664412510566
+        },
+        "within_station_mean": 0.526251782292085
+      },
+      "CTRL_LINEAR4D": {
+        "auc_seed_mean": 0.5228558758639898,
+        "auc_seed_sd": 0.015464056368818636,
+        "auc_of_mean_prob": 0.5291905798535523,
+        "within_station_auc": {
+          "Alcantarilla": 0.5523936170212767,
+          "Almeria": 0.5734265734265735,
+          "Mallorca": 0.5408549783549783,
+          "Tortosa": 0.4724429416737109
+        },
+        "within_station_mean": 0.5347795276191348
+      },
+      "LSTM_QNN": {
+        "auc_seed_mean": 0.5151288929935278,
+        "auc_seed_sd": 0.026980846955367427,
+        "auc_of_mean_prob": 0.5314004881588494,
+        "within_station_auc": {
+          "Alcantarilla": 0.5462765957446808,
+          "Almeria": 0.5609646763492916,
+          "Mallorca": 0.5689033189033189,
+          "Tortosa": 0.4781910397295013
+        },
+        "within_station_mean": 0.5385839076816982
+      },
+      "FOURIER2": {
+        "auc_seed_mean": 0.5201138304344322,
+        "auc_seed_sd": 0.0193495593630619,
+        "auc_of_mean_prob": 0.5451766827187369,
+        "within_station_auc": {
+          "Alcantarilla": 0.5770390070921986,
+          "Almeria": 0.5814954276492739,
+          "Mallorca": 0.5708874458874459,
+          "Tortosa": 0.48512256973795437
+        },
+        "within_station_mean": 0.5536361125917182
+      }
+    },
+    "pairs": {
+      "RF_2273-PureLSTM": {
+        "S_A": 15,
+        "S_B": 15,
+        "delta": -0.019659388262198374,
+        "se_delong": 0.016345682839335116,
+        "z": -1.2027266438138016,
+        "p_delong": 0.22908211988493132,
+        "ci_delong": [
+          -0.0516969266272952,
+          0.012378150102898451
+        ],
+        "ci_block": [
+          -0.05696888776714277,
+          0.01893728952626916
+        ],
+        "se_block": 0.019257500006601737,
+        "ci_two_way": [
+          -0.06324194961952287,
+          0.01925371860319568
+        ],
+        "se_two_way": 0.02070784980462634,
+        "mde_delong": 0.045767911950138324,
+        "mde_block": 0.05392100001848486,
+        "se_iid": 0.01632417481620654,
+        "se_cluster": 0.01928458747846845,
+        "ratio": 1.1813514432179955,
+        "perm_ratio_q025": 0.6861868588081274,
+        "perm_ratio_q975": 1.3255150811543108,
+        "phases_excluding_zero": 0,
+        "phases": [
+          {
+            "start": 1,
+            "se": 0.019284587478468455,
+            "excludes_zero": false
+          },
+          {
+            "start": 2,
+            "se": 0.021684572798982622,
+            "excludes_zero": false
+          },
+          {
+            "start": 3,
+            "se": 0.0223365308306954,
+            "excludes_zero": false
+          },
+          {
+            "start": 4,
+            "se": 0.02501240675281769,
+            "excludes_zero": false
+          },
+          {
+            "start": 5,
+            "se": 0.024386851181013924,
+            "excludes_zero": false
+          },
+          {
+            "start": 6,
+            "se": 0.02525657470240241,
+            "excludes_zero": false
+          },
+          {
+            "start": 7,
+            "se": 0.020587833065273873,
+            "excludes_zero": false
+          },
+          {
+            "start": 8,
+            "se": 0.02079920079446283,
+            "excludes_zero": false
+          },
+          {
+            "start": 9,
+            "se": 0.01982434920458064,
+            "excludes_zero": false
+          },
+          {
+            "start": 10,
+            "se": 0.017715050013008087,
+            "excludes_zero": false
+          },
+          {
+            "start": 11,
+            "se": 0.018511747028859455,
+            "excludes_zero": false
+          },
+          {
+            "start": 12,
+            "se": 0.01833478236037379,
+            "excludes_zero": false
+          }
+        ]
+      },
+      "RF_2273-LSTM_QNN": {
+        "S_A": 15,
+        "S_B": 15,
+        "delta": -0.015922700852445515,
+        "se_delong": 0.019221545120615857,
+        "z": -0.8283777788169483,
+        "p_delong": 0.4074565869544875,
+        "ci_delong": [
+          -0.053596929288852596,
+          0.021751527583961566
+        ],
+        "ci_block": [
+          -0.06019712498083268,
+          0.029343638148684563
+        ],
+        "se_block": 0.02231807889687184,
+        "ci_two_way": [
+          -0.06360507680052856,
+          0.029517422675321404
+        ],
+        "se_two_way": 0.023601263984804156,
+        "mde_delong": 0.0538203263377244,
+        "mde_block": 0.06249062091124114,
+        "se_iid": 0.019196231954883937,
+        "se_cluster": 0.022438231719316765,
+        "ratio": 1.168887298926808,
+        "perm_ratio_q025": 0.6857999178934634,
+        "perm_ratio_q975": 1.3277485094896966,
+        "phases_excluding_zero": 0,
+        "phases": [
+          {
+            "start": 1,
+            "se": 0.022438231719316765,
+            "excludes_zero": false
+          },
+          {
+            "start": 2,
+            "se": 0.021181361567494096,
+            "excludes_zero": false
+          },
+          {
+            "start": 3,
+            "se": 0.022130786765149273,
+            "excludes_zero": false
+          },
+          {
+            "start": 4,
+            "se": 0.026557021891154657,
+            "excludes_zero": false
+          },
+          {
+            "start": 5,
+            "se": 0.024445798289902815,
+            "excludes_zero": false
+          },
+          {
+            "start": 6,
+            "se": 0.023450189733190224,
+            "excludes_zero": false
+          },
+          {
+            "start": 7,
+            "se": 0.019939607301591708,
+            "excludes_zero": false
+          },
+          {
+            "start": 8,
+            "se": 0.02248771503446302,
+            "excludes_zero": false
+          },
+          {
+            "start": 9,
+            "se": 0.02063165357713394,
+            "excludes_zero": false
+          },
+          {
+            "start": 10,
+            "se": 0.019761528717097812,
+            "excludes_zero": false
+          },
+          {
+            "start": 11,
+            "se": 0.021255594517302193,
+            "excludes_zero": false
+          },
+          {
+            "start": 12,
+            "se": 0.02357795209016831,
+            "excludes_zero": false
+          }
+        ]
+      },
+      "XGB-LSTM_QNN": {
+        "S_A": 15,
+        "S_B": 15,
+        "delta": -0.01324698932060886,
+        "se_delong": 0.01687797768145399,
+        "z": -0.7848682804673356,
+        "p_delong": 0.4325308012806238,
+        "ci_delong": [
+          -0.046327825576258676,
+          0.019833846935040957
+        ],
+        "ci_block": [
+          -0.04823066173759303,
+          0.02331327471892644
+        ],
+        "se_block": 0.018633001764511752,
+        "ci_two_way": [
+          -0.05280577169361966,
+          0.0273462108455558
+        ],
+        "se_two_way": 0.020424720762746002,
+        "mde_delong": 0.047258337508071166,
+        "mde_block": 0.052172404940632904,
+        "se_iid": 0.016855941101373787,
+        "se_cluster": 0.018650722735768087,
+        "ratio": 1.106477687813469,
+        "perm_ratio_q025": 0.6854544109791201,
+        "perm_ratio_q975": 1.322350681735823,
+        "phases_excluding_zero": 0,
+        "phases": [
+          {
+            "start": 1,
+            "se": 0.01865072273576809,
+            "excludes_zero": false
+          },
+          {
+            "start": 2,
+            "se": 0.016146359970789805,
+            "excludes_zero": false
+          },
+          {
+            "start": 3,
+            "se": 0.017498761189151422,
+            "excludes_zero": false
+          },
+          {
+            "start": 4,
+            "se": 0.01903705738430884,
+            "excludes_zero": false
+          },
+          {
+            "start": 5,
+            "se": 0.01748607716354227,
+            "excludes_zero": false
+          },
+          {
+            "start": 6,
+            "se": 0.01778419960737379,
+            "excludes_zero": false
+          },
+          {
+            "start": 7,
+            "se": 0.01622018027911037,
+            "excludes_zero": false
+          },
+          {
+            "start": 8,
+            "se": 0.01918698199501849,
+            "excludes_zero": false
+          },
+          {
+            "start": 9,
+            "se": 0.01765848551455015,
+            "excludes_zero": false
+          },
+          {
+            "start": 10,
+            "se": 0.015683611601665603,
+            "excludes_zero": false
+          },
+          {
+            "start": 11,
+            "se": 0.01695172421304732,
+            "excludes_zero": false
+          },
+          {
+            "start": 12,
+            "se": 0.017464716528643735,
+            "excludes_zero": false
+          }
+        ]
+      },
+      "CTRL_LINEAR4D-LSTM_QNN": {
+        "S_A": 15,
+        "S_B": 15,
+        "delta": 0.007726982870462029,
+        "se_delong": 0.014267501684483692,
+        "z": 0.5415792506171798,
+        "p_delong": 0.5881083890618054,
+        "ci_delong": [
+          -0.020237320431126006,
+          0.035691286172050064
+        ],
+        "ci_block": [
+          -0.027211657550953894,
+          0.044380294152441546
+        ],
+        "se_block": 0.017759368030407032,
+        "ci_two_way": [
+          -0.030221897519691673,
+          0.04784920178084606
+        ],
+        "se_two_way": 0.019864966140964516,
+        "mde_delong": 0.03994900471655433,
+        "mde_block": 0.04972623048513969,
+        "se_iid": 0.014248843581503415,
+        "se_cluster": 0.01797767668952276,
+        "ratio": 1.261693735824273,
+        "perm_ratio_q025": 0.665321728793929,
+        "perm_ratio_q975": 1.3231995870076445,
+        "phases_excluding_zero": 0,
+        "phases": [
+          {
+            "start": 1,
+            "se": 0.01797767668952276,
+            "excludes_zero": false
+          },
+          {
+            "start": 2,
+            "se": 0.0171755730759368,
+            "excludes_zero": false
+          },
+          {
+            "start": 3,
+            "se": 0.018558436628609343,
+            "excludes_zero": false
+          },
+          {
+            "start": 4,
+            "se": 0.01672070276453023,
+            "excludes_zero": false
+          },
+          {
+            "start": 5,
+            "se": 0.016434652046791134,
+            "excludes_zero": false
+          },
+          {
+            "start": 6,
+            "se": 0.015614302113450709,
+            "excludes_zero": false
+          },
+          {
+            "start": 7,
+            "se": 0.014411001066234802,
+            "excludes_zero": false
+          },
+          {
+            "start": 8,
+            "se": 0.016020143440735088,
+            "excludes_zero": false
+          },
+          {
+            "start": 9,
+            "se": 0.017335253700779558,
+            "excludes_zero": false
+          },
+          {
+            "start": 10,
+            "se": 0.018726329413229336,
+            "excludes_zero": false
+          },
+          {
+            "start": 11,
+            "se": 0.01874357426189372,
+            "excludes_zero": false
+          },
+          {
+            "start": 12,
+            "se": 0.016801555546580863,
+            "excludes_zero": false
+          }
+        ]
+      },
+      "PureLSTM-LSTM_QNN": {
+        "S_A": 15,
+        "S_B": 15,
+        "delta": 0.003736687409752859,
+        "se_delong": 0.01249265799203824,
+        "z": 0.29911067861893814,
+        "p_delong": 0.7648555987092696,
+        "ci_delong": [
+          -0.02074892225464209,
+          0.02822229707414781
+        ],
+        "ci_block": [
+          -0.018094783798605574,
+          0.026146563528745042
+        ],
+        "se_block": 0.011070532711973436,
+        "ci_two_way": [
+          -0.025795574430903693,
+          0.0370928373334742
+        ],
+        "se_two_way": 0.015666115343081058,
+        "mde_delong": 0.03497944237770707,
+        "mde_block": 0.03099749159352562,
+        "se_iid": 0.012476396390976642,
+        "se_cluster": 0.01108227103978914,
+        "ratio": 0.8882589725831586,
+        "perm_ratio_q025": 0.6661330545705562,
+        "perm_ratio_q975": 1.3239577984765327,
+        "phases_excluding_zero": 0,
+        "phases": [
+          {
+            "start": 1,
+            "se": 0.011082271039789138,
+            "excludes_zero": false
+          },
+          {
+            "start": 2,
+            "se": 0.009041016893243587,
+            "excludes_zero": false
+          },
+          {
+            "start": 3,
+            "se": 0.010423827444672037,
+            "excludes_zero": false
+          },
+          {
+            "start": 4,
+            "se": 0.009959548415046017,
+            "excludes_zero": false
+          },
+          {
+            "start": 5,
+            "se": 0.011341952457449239,
+            "excludes_zero": false
+          },
+          {
+            "start": 6,
+            "se": 0.011758900200813244,
+            "excludes_zero": false
+          },
+          {
+            "start": 7,
+            "se": 0.009904410206252838,
+            "excludes_zero": false
+          },
+          {
+            "start": 8,
+            "se": 0.01044290898814892,
+            "excludes_zero": false
+          },
+          {
+            "start": 9,
+            "se": 0.010329952752175388,
+            "excludes_zero": false
+          },
+          {
+            "start": 10,
+            "se": 0.010829294164590657,
+            "excludes_zero": false
+          },
+          {
+            "start": 11,
+            "se": 0.012078531233024135,
+            "excludes_zero": false
+          },
+          {
+            "start": 12,
+            "se": 0.010319833805601636,
+            "excludes_zero": false
+          }
+        ]
+      },
+      "FOURIER2-LSTM_QNN": {
+        "S_A": 15,
+        "S_B": 15,
+        "delta": 0.004984937440904336,
+        "se_delong": 0.009114953117700794,
+        "z": 0.5468966627183008,
+        "p_delong": 0.5844497286259285,
+        "ci_delong": [
+          -0.01288037066978922,
+          0.02285024555159789
+        ],
+        "ci_block": [
+          -0.018485232190456093,
+          0.02922431545376924
+        ],
+        "se_block": 0.012104098407496702,
+        "ci_two_way": [
+          -0.02748721764198203,
+          0.03783308464837812
+        ],
+        "se_two_way": 0.016819445714704322,
+        "mde_delong": 0.025521868729562223,
+        "mde_block": 0.03389147554099076,
+        "se_iid": 0.009102880841681713,
+        "se_cluster": 0.012325230230405524,
+        "ratio": 1.3539922629733663,
+        "perm_ratio_q025": 0.6803363470784617,
+        "perm_ratio_q975": 1.330528856376542,
+        "phases_excluding_zero": 0,
+        "phases": [
+          {
+            "start": 1,
+            "se": 0.012325230230405524,
+            "excludes_zero": false
+          },
+          {
+            "start": 2,
+            "se": 0.010789796188486139,
+            "excludes_zero": false
+          },
+          {
+            "start": 3,
+            "se": 0.012762664427208541,
+            "excludes_zero": false
+          },
+          {
+            "start": 4,
+            "se": 0.012036218174703755,
+            "excludes_zero": false
+          },
+          {
+            "start": 5,
+            "se": 0.011262483187879268,
+            "excludes_zero": false
+          },
+          {
+            "start": 6,
+            "se": 0.011031279875789566,
+            "excludes_zero": false
+          },
+          {
+            "start": 7,
+            "se": 0.009804004482088511,
+            "excludes_zero": false
+          },
+          {
+            "start": 8,
+            "se": 0.011300607014686022,
+            "excludes_zero": false
+          },
+          {
+            "start": 9,
+            "se": 0.011246318171671392,
+            "excludes_zero": false
+          },
+          {
+            "start": 10,
+            "se": 0.012131512148427538,
+            "excludes_zero": false
+          },
+          {
+            "start": 11,
+            "se": 0.012106390318629591,
+            "excludes_zero": false
+          },
+          {
+            "start": 12,
+            "se": 0.011774941324863569,
+            "excludes_zero": false
+          }
+        ]
+      },
+      "RF_2273-XGB": {
+        "S_A": 15,
+        "S_B": 15,
+        "delta": -0.0026757115318366553,
+        "se_delong": 0.012670025968429904,
+        "z": -0.21118437629913045,
+        "p_delong": 0.8327434017364628,
+        "ci_delong": [
+          -0.027508962429959267,
+          0.022157539366285957
+        ],
+        "ci_block": [
+          -0.03449901082248571,
+          0.027222768190536883
+        ],
+        "se_block": 0.015910817437288505,
+        "ci_two_way": [
+          -0.03616359073387157,
+          0.029587199562574187
+        ],
+        "se_two_way": 0.01675314402418675,
+        "mde_delong": 0.035476072711603725,
+        "mde_block": 0.04455028882440781,
+        "se_iid": 0.012653621223705462,
+        "se_cluster": 0.016188104696472323,
+        "ratio": 1.279325847540411,
+        "perm_ratio_q025": 0.677918183705227,
+        "perm_ratio_q975": 1.3347305847503934,
+        "phases_excluding_zero": 0,
+        "phases": [
+          {
+            "start": 1,
+            "se": 0.016188104696472323,
+            "excludes_zero": false
+          },
+          {
+            "start": 2,
+            "se": 0.015554418952162698,
+            "excludes_zero": false
+          },
+          {
+            "start": 3,
+            "se": 0.015418409022692271,
+            "excludes_zero": false
+          },
+          {
+            "start": 4,
+            "se": 0.01715178731040729,
+            "excludes_zero": false
+          },
+          {
+            "start": 5,
+            "se": 0.016033794958283096,
+            "excludes_zero": false
+          },
+          {
+            "start": 6,
+            "se": 0.017235226279657512,
+            "excludes_zero": false
+          },
+          {
+            "start": 7,
+            "se": 0.015697093636221213,
+            "excludes_zero": false
+          },
+          {
+            "start": 8,
+            "se": 0.015526842033643106,
+            "excludes_zero": false
+          },
+          {
+            "start": 9,
+            "se": 0.013973996057033792,
+            "excludes_zero": false
+          },
+          {
+            "start": 10,
+            "se": 0.014652915879874629,
+            "excludes_zero": false
+          },
+          {
+            "start": 11,
+            "se": 0.014658257121894114,
+            "excludes_zero": false
+          },
+          {
+            "start": 12,
+            "se": 0.016642897082011377,
+            "excludes_zero": false
+          }
+        ]
+      }
+    }
+  }
+}

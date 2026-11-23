@@ -1,0 +1,753 @@
+{
+  "config": {
+    "reps": 5000,
+    "reps_q": 20000,
+    "seed": 63
+  },
+  "threshold": {
+    "reps": 20000,
+    "median": 0.9746749973537033,
+    "q05": 0.7083536016495585,
+    "q01": 0.607518323756318,
+    "q10": 0.763180052270227
+  },
+  "contrasts": {
+    "RF-XGB": {
+      "delta": 0.009997037475929393,
+      "ratio_cr1_iid": 0.749117833557671,
+      "triggered": false,
+      "df": 15.889628567264602,
+      "p_cr2": 0.1104540681849604,
+      "p_decision": 0.1104540681849604,
+      "resolved_cr2": false,
+      "resolved_decision": false,
+      "mde_cr2": 0.017657965494474324,
+      "mde_decision": 0.017657965494474324,
+      "mde_delong": 0.022098545385887177
+    },
+    "RF-PureLSTM": {
+      "delta": 0.014560805806547172,
+      "ratio_cr1_iid": 0.5944414262941211,
+      "triggered": true,
+      "df": 15.889628567264602,
+      "p_cr2": 0.04142871466138003,
+      "p_decision": 0.20435628026035446,
+      "resolved_cr2": true,
+      "resolved_decision": false,
+      "mde_cr2": 0.019596258944981168,
+      "mde_decision": 0.032847347535901975,
+      "mde_delong": 0.0308019459600609
+    },
+    "XGB-PureLSTM": {
+      "delta": 0.004563768330617779,
+      "ratio_cr1_iid": 0.7722733399789025,
+      "triggered": false,
+      "df": 15.889628567264602,
+      "p_cr2": 0.5801393425354965,
+      "p_decision": 0.5801393425354965,
+      "resolved_cr2": false,
+      "resolved_decision": false,
+      "mde_cr2": 0.024130054808106018,
+      "mde_decision": 0.024130054808106018,
+      "mde_delong": 0.02923980555116583
+    },
+    "RF-LSTM_QNN": {
+      "delta": 0.01965733471584452,
+      "ratio_cr1_iid": 0.7225812108463471,
+      "triggered": false,
+      "df": 15.889628567264602,
+      "p_cr2": 0.031048541155861913,
+      "p_decision": 0.031048541155861913,
+      "resolved_cr2": true,
+      "resolved_decision": true,
+      "mde_cr2": 0.02480998493875354,
+      "mde_decision": 0.02480998493875354,
+      "mde_delong": 0.03223461533218973
+    },
+    "CTRL_LINEAR4D-LSTM_QNN": {
+      "delta": -0.0033832024885203094,
+      "ratio_cr1_iid": 1.0909038699590525,
+      "triggered": false,
+      "df": 15.889628567264602,
+      "p_cr2": 0.6077989641025672,
+      "p_decision": 0.6077989641025672,
+      "resolved_cr2": false,
+      "resolved_decision": false,
+      "mde_cr2": 0.0192942618857076,
+      "mde_decision": 0.0192942618857076,
+      "mde_delong": 0.01645423296842343
+    },
+    "PureLSTM-LSTM_QNN": {
+      "delta": 0.005096528909297349,
+      "ratio_cr1_iid": 0.8838952126442182,
+      "triggered": false,
+      "df": 15.889628567264602,
+      "p_cr2": 0.32361067434674734,
+      "p_decision": 0.32361067434674734,
+      "resolved_cr2": false,
+      "resolved_decision": false,
+      "mde_cr2": 0.014938684310391505,
+      "mde_decision": 0.014938684310391505,
+      "mde_delong": 0.015845844643107083
+    },
+    "FOURIER2-LSTM_QNN": {
+      "delta": 0.004061620500666607,
+      "ratio_cr1_iid": 1.1243176678925257,
+      "triggered": false,
+      "df": 15.889628567264602,
+      "p_cr2": 0.45055453306919313,
+      "p_decision": 0.45055453306919313,
+      "resolved_cr2": false,
+      "resolved_decision": false,
+      "mde_cr2": 0.015678076429306326,
+      "mde_decision": 0.015678076429306326,
+      "mde_delong": 0.012988100911389177
+    },
+    "FOURIER_FULL1-LSTM_QNN": {
+      "delta": 0.008351355354762169,
+      "ratio_cr1_iid": 1.2382983371093148,
+      "triggered": false,
+      "df": 15.889628567264602,
+      "p_cr2": 0.15792264113080254,
+      "p_decision": 0.15792264113080254,
+      "resolved_cr2": false,
+      "resolved_decision": false,
+      "mde_cr2": 0.016827294823940332,
+      "mde_decision": 0.016827294823940332,
+      "mde_delong": 0.0126141771945077
+    },
+    "FOURIER_FULL2-LSTM_QNN": {
+      "delta": 0.0025527082407542645,
+      "ratio_cr1_iid": 1.1954061043935427,
+      "triggered": false,
+      "df": 15.889628567264602,
+      "p_cr2": 0.6655319678305683,
+      "p_decision": 0.6655319678305683,
+      "resolved_cr2": false,
+      "resolved_decision": false,
+      "mde_cr2": 0.017304841550624,
+      "mde_decision": 0.017304841550624,
+      "mde_delong": 0.013507326310624113
+    },
+    "FROZEN_RANDOM-LSTM_QNN": {
+      "delta": -0.012116723448378108,
+      "ratio_cr1_iid": 1.1452217553189996,
+      "triggered": false,
+      "df": 15.889628567264602,
+      "p_cr2": 0.014247247333952816,
+      "p_decision": 0.014247247333952816,
+      "resolved_cr2": true,
+      "resolved_decision": true,
+      "mde_cr2": 0.013147409406411417,
+      "mde_decision": 0.013147409406411417,
+      "mde_delong": 0.010763380415861813
+    },
+    "FROZEN_IDENTITY-LSTM_QNN": {
+      "delta": -0.012899817311015749,
+      "ratio_cr1_iid": 1.0807831339681455,
+      "triggered": false,
+      "df": 15.889628567264602,
+      "p_cr2": 0.010217963262283625,
+      "p_decision": 0.010217963262283625,
+      "resolved_cr2": true,
+      "resolved_decision": true,
+      "mde_cr2": 0.013222520290231007,
+      "mde_decision": 0.013222520290231007,
+      "mde_delong": 0.011348935793263779
+    },
+    "RF-QTL_FIXED": {
+      "delta": 0.023528366167975157,
+      "ratio_cr1_iid": 0.7791585601549553,
+      "triggered": false,
+      "df": 15.889628567264602,
+      "p_cr2": 0.008111663281621313,
+      "p_decision": 0.008111663281621313,
+      "resolved_cr2": true,
+      "resolved_decision": true,
+      "mde_cr2": 0.023230866856698708,
+      "mde_decision": 0.023230866856698708,
+      "mde_delong": 0.028005435753012696
+    },
+    "triggered": [
+      "RF-PureLSTM"
+    ],
+    "changed": [
+      "RF-PureLSTM"
+    ]
+  },
+  "operating": [
+    {
+      "scenario": "iid",
+      "delta": 0.0,
+      "reps": 5000,
+      "q05_ratio": 0.7153838680787712,
+      "share_triggered": 0.0468,
+      "all": {
+        "cr2": 0.9528,
+        "always_floored": 0.9756,
+        "rule": 0.9578
+      },
+      "triggered": {
+        "n": 234,
+        "cr2": 0.8461538461538461,
+        "rule": 0.9529914529914529
+      }
+    },
+    {
+      "scenario": "iid",
+      "delta": 0.02,
+      "reps": 5000,
+      "q05_ratio": 0.7086149439063743,
+      "share_triggered": 0.05,
+      "all": {
+        "cr2": 0.9484,
+        "always_floored": 0.9722,
+        "rule": 0.957
+      },
+      "triggered": {
+        "n": 250,
+        "cr2": 0.804,
+        "rule": 0.976
+      }
+    },
+    {
+      "scenario": "shared",
+      "delta": 0.0,
+      "reps": 5000,
+      "q05_ratio": 0.7142546142940596,
+      "share_triggered": 0.0466,
+      "all": {
+        "cr2": 0.9534,
+        "always_floored": 0.975,
+        "rule": 0.959
+      },
+      "triggered": {
+        "n": 233,
+        "cr2": 0.8412017167381974,
+        "rule": 0.9613733905579399
+      }
+    },
+    {
+      "scenario": "shared",
+      "delta": 0.02,
+      "reps": 5000,
+      "q05_ratio": 0.715691950189035,
+      "share_triggered": 0.046,
+      "all": {
+        "cr2": 0.9546,
+        "always_floored": 0.9762,
+        "rule": 0.9594
+      },
+      "triggered": {
+        "n": 230,
+        "cr2": 0.8782608695652174,
+        "rule": 0.9826086956521739
+      }
+    },
+    {
+      "scenario": "station_year_tc0.25",
+      "delta": 0.0,
+      "reps": 5000,
+      "q05_ratio": 0.826482122713504,
+      "share_triggered": 0.0094,
+      "all": {
+        "cr2": 0.9488,
+        "always_floored": 0.9586,
+        "rule": 0.9498
+      },
+      "triggered": {
+        "n": 47,
+        "cr2": 0.8297872340425532,
+        "rule": 0.9361702127659575
+      }
+    },
+    {
+      "scenario": "station_year_tc0.25",
+      "delta": 0.02,
+      "reps": 5000,
+      "q05_ratio": 0.8074829322267773,
+      "share_triggered": 0.0118,
+      "all": {
+        "cr2": 0.951,
+        "always_floored": 0.9594,
+        "rule": 0.9526
+      },
+      "triggered": {
+        "n": 59,
+        "cr2": 0.7796610169491526,
+        "rule": 0.9152542372881356
+      }
+    },
+    {
+      "scenario": "zero_sum_tz0.5",
+      "delta": 0.0,
+      "reps": 5000,
+      "q05_ratio": 0.8362559984686422,
+      "share_triggered": 0.0102,
+      "all": {
+        "cr2": 0.9554,
+        "always_floored": 0.9624,
+        "rule": 0.9574
+      },
+      "triggered": {
+        "n": 51,
+        "cr2": 0.7647058823529411,
+        "rule": 0.9607843137254902
+      }
+    },
+    {
+      "scenario": "zero_sum_tz0.5",
+      "delta": 0.02,
+      "reps": 5000,
+      "q05_ratio": 0.819618293089708,
+      "share_triggered": 0.009,
+      "all": {
+        "cr2": 0.9516,
+        "always_floored": 0.96,
+        "rule": 0.953
+      },
+      "triggered": {
+        "n": 45,
+        "cr2": 0.7333333333333333,
+        "rule": 0.8888888888888888
+      }
+    },
+    {
+      "scenario": "swap_tw0.1",
+      "delta": 0.0,
+      "reps": 5000,
+      "q05_ratio": 0.7575939671435964,
+      "share_triggered": 0.0266,
+      "all": {
+        "cr2": 0.952,
+        "always_floored": 0.9678,
+        "rule": 0.9548
+      },
+      "triggered": {
+        "n": 133,
+        "cr2": 0.8345864661654135,
+        "rule": 0.9398496240601504
+      }
+    },
+    {
+      "scenario": "swap_tw0.1",
+      "delta": 0.02,
+      "reps": 5000,
+      "q05_ratio": 0.7551972119950042,
+      "share_triggered": 0.024,
+      "all": {
+        "cr2": 0.9526,
+        "always_floored": 0.9672,
+        "rule": 0.956
+      },
+      "triggered": {
+        "n": 120,
+        "cr2": 0.8333333333333334,
+        "rule": 0.975
+      }
+    },
+    {
+      "scenario": "seasonal_shift",
+      "delta": 0.0,
+      "reps": 5000,
+      "q05_ratio": 0.7136762883162566,
+      "share_triggered": 0.0466,
+      "all": {
+        "cr2": 0.9542,
+        "always_floored": 0.9758,
+        "rule": 0.9588
+      },
+      "triggered": {
+        "n": 233,
+        "cr2": 0.8626609442060086,
+        "rule": 0.9613733905579399
+      }
+    },
+    {
+      "scenario": "seasonal_shift",
+      "delta": 0.02,
+      "reps": 5000,
+      "q05_ratio": 0.7077972864319674,
+      "share_triggered": 0.0508,
+      "all": {
+        "cr2": 0.95,
+        "always_floored": 0.9722,
+        "rule": 0.9572
+      },
+      "triggered": {
+        "n": 254,
+        "cr2": 0.84251968503937,
+        "rule": 0.984251968503937
+      }
+    },
+    {
+      "scenario": "seasonal_signal",
+      "delta": 0.0,
+      "reps": 5000,
+      "q05_ratio": 0.6701528748559351,
+      "share_triggered": 0.0904,
+      "all": {
+        "cr2": 0.9582,
+        "always_floored": 0.983,
+        "rule": 0.9698
+      },
+      "triggered": {
+        "n": 452,
+        "cr2": 0.8584070796460177,
+        "rule": 0.9867256637168141
+      }
+    },
+    {
+      "scenario": "seasonal_signal",
+      "delta": 0.02,
+      "reps": 5000,
+      "q05_ratio": 0.6766118662519156,
+      "share_triggered": 0.0778,
+      "all": {
+        "cr2": 0.9514,
+        "always_floored": 0.9772,
+        "rule": 0.9618
+      },
+      "triggered": {
+        "n": 389,
+        "cr2": 0.8277634961439588,
+        "rule": 0.961439588688946
+      }
+    },
+    {
+      "scenario": "seasonal_signal_strong",
+      "delta": 0.0,
+      "reps": 5000,
+      "q05_ratio": 0.6249421034196234,
+      "share_triggered": 0.1496,
+      "all": {
+        "cr2": 0.9548,
+        "always_floored": 0.9892,
+        "rule": 0.9716
+      },
+      "triggered": {
+        "n": 748,
+        "cr2": 0.8810160427807486,
+        "rule": 0.9933155080213903
+      }
+    },
+    {
+      "scenario": "seasonal_signal_strong",
+      "delta": 0.02,
+      "reps": 5000,
+      "q05_ratio": 0.6325622548084108,
+      "share_triggered": 0.1444,
+      "all": {
+        "cr2": 0.9504,
+        "always_floored": 0.9848,
+        "rule": 0.9668
+      },
+      "triggered": {
+        "n": 722,
+        "cr2": 0.8670360110803325,
+        "rule": 0.9806094182825484
+      }
+    },
+    {
+      "scenario": "seasonal_signal_2",
+      "delta": 0.0,
+      "reps": 5000,
+      "q05_ratio": 0.6069716732423465,
+      "share_triggered": 0.1952,
+      "all": {
+        "cr2": 0.9498,
+        "always_floored": 0.9864,
+        "rule": 0.9692
+      },
+      "triggered": {
+        "n": 976,
+        "cr2": 0.8790983606557377,
+        "rule": 0.9784836065573771
+      }
+    },
+    {
+      "scenario": "seasonal_signal_2",
+      "delta": 0.02,
+      "reps": 5000,
+      "q05_ratio": 0.6089460766204139,
+      "share_triggered": 0.1962,
+      "all": {
+        "cr2": 0.958,
+        "always_floored": 0.9896,
+        "rule": 0.9758
+      },
+      "triggered": {
+        "n": 981,
+        "cr2": 0.8929663608562691,
+        "rule": 0.9836901121304791
+      }
+    },
+    {
+      "scenario": "seasonal_shift_2",
+      "delta": 0.0,
+      "reps": 5000,
+      "q05_ratio": 0.694656879498439,
+      "share_triggered": 0.0606,
+      "all": {
+        "cr2": 0.9478,
+        "always_floored": 0.9728,
+        "rule": 0.9554
+      },
+      "triggered": {
+        "n": 303,
+        "cr2": 0.8448844884488449,
+        "rule": 0.9702970297029703
+      }
+    },
+    {
+      "scenario": "seasonal_shift_2",
+      "delta": 0.02,
+      "reps": 5000,
+      "q05_ratio": 0.6996365487521898,
+      "share_triggered": 0.0562,
+      "all": {
+        "cr2": 0.9496,
+        "always_floored": 0.9746,
+        "rule": 0.9572
+      },
+      "triggered": {
+        "n": 281,
+        "cr2": 0.8362989323843416,
+        "rule": 0.9715302491103203
+      }
+    }
+  ],
+  "brier": {
+    "raw/classical/RF-XGB": {
+      "ratio_cr1_iid": 1.0175542263645156,
+      "triggered": false,
+      "p_cr2": 0.013330414217736807,
+      "p_decision": 0.013330414217736807,
+      "resolved_cr2": true,
+      "resolved_decision": true
+    },
+    "raw/classical/RF-PureLSTM": {
+      "ratio_cr1_iid": 0.9291756408457654,
+      "triggered": false,
+      "p_cr2": 0.0005054578743242958,
+      "p_decision": 0.0005054578743242958,
+      "resolved_cr2": true,
+      "resolved_decision": true
+    },
+    "raw/classical/XGB-PureLSTM": {
+      "ratio_cr1_iid": 0.9119228702284828,
+      "triggered": false,
+      "p_cr2": 0.48974476720626664,
+      "p_decision": 0.48974476720626664,
+      "resolved_cr2": false,
+      "resolved_decision": false
+    },
+    "raw/hybrid/RF-LSTM_QNN": {
+      "ratio_cr1_iid": 1.0068599947672954,
+      "triggered": false,
+      "p_cr2": 0.0006404900282835414,
+      "p_decision": 0.0006404900282835414,
+      "resolved_cr2": true,
+      "resolved_decision": true
+    },
+    "raw/hybrid/LSTM_QNN-CTRL_LINEAR4D": {
+      "ratio_cr1_iid": 0.9832317925970935,
+      "triggered": false,
+      "p_cr2": 0.015973453768631646,
+      "p_decision": 0.015973453768631646,
+      "resolved_cr2": true,
+      "resolved_decision": true
+    },
+    "raw/hybrid/PureLSTM-LSTM_QNN": {
+      "ratio_cr1_iid": 0.8282545766556368,
+      "triggered": false,
+      "p_cr2": 0.8304803712887876,
+      "p_decision": 0.8304803712887876,
+      "resolved_cr2": false,
+      "resolved_decision": false
+    },
+    "raw/interface/CTRL_LINEAR4D-LSTM_QNN": {
+      "ratio_cr1_iid": 0.9832317925970935,
+      "triggered": false,
+      "p_cr2": 0.015973453768631646,
+      "p_decision": 0.015973453768631646,
+      "resolved_cr2": true,
+      "resolved_decision": true
+    },
+    "raw/interface/FOURIER2-LSTM_QNN": {
+      "ratio_cr1_iid": 1.2463285925444636,
+      "triggered": false,
+      "p_cr2": 0.09120336187179562,
+      "p_decision": 0.09120336187179562,
+      "resolved_cr2": false,
+      "resolved_decision": false
+    },
+    "raw/interface/FOURIER_FULL1-LSTM_QNN": {
+      "ratio_cr1_iid": 1.1944079677802433,
+      "triggered": false,
+      "p_cr2": 0.06327287178250705,
+      "p_decision": 0.06327287178250705,
+      "resolved_cr2": false,
+      "resolved_decision": false
+    },
+    "raw/interface/FOURIER_FULL2-LSTM_QNN": {
+      "ratio_cr1_iid": 1.1632394623155682,
+      "triggered": false,
+      "p_cr2": 0.8043713804569381,
+      "p_decision": 0.8043713804569381,
+      "resolved_cr2": false,
+      "resolved_decision": false
+    },
+    "raw/interface/QTL_FIXED-QTL_CLASSICAL": {
+      "ratio_cr1_iid": 1.1811122062471453,
+      "triggered": false,
+      "p_cr2": 0.35198783880118667,
+      "p_decision": 0.35198783880118667,
+      "resolved_cr2": false,
+      "resolved_decision": false
+    },
+    "raw/interface/QTL_FIXED-QTL_TENSOR1": {
+      "ratio_cr1_iid": 1.2634112369077533,
+      "triggered": false,
+      "p_cr2": 0.5625283674504155,
+      "p_decision": 0.5625283674504155,
+      "resolved_cr2": false,
+      "resolved_decision": false
+    },
+    "raw/climatology/RF-CLIM": {
+      "ratio_cr1_iid": 0.864422234625653,
+      "triggered": false,
+      "p_cr2": 0.01651068848558439,
+      "p_decision": 0.01651068848558439,
+      "resolved_cr2": true,
+      "resolved_decision": true
+    },
+    "raw/climatology/XGB-CLIM": {
+      "ratio_cr1_iid": 0.9357461694848498,
+      "triggered": false,
+      "p_cr2": 0.0013844152946550223,
+      "p_decision": 0.0013844152946550223,
+      "resolved_cr2": true,
+      "resolved_decision": true
+    },
+    "raw/climatology/PureLSTM-CLIM": {
+      "ratio_cr1_iid": 0.7868186767107832,
+      "triggered": false,
+      "p_cr2": 8.092295405005679e-05,
+      "p_decision": 8.092295405005679e-05,
+      "resolved_cr2": true,
+      "resolved_decision": true
+    },
+    "raw/climatology/CTRL_LINEAR4D-CLIM": {
+      "ratio_cr1_iid": 0.8253126020035058,
+      "triggered": false,
+      "p_cr2": 0.0006807064302753175,
+      "p_decision": 0.0006807064302753175,
+      "resolved_cr2": true,
+      "resolved_decision": true
+    },
+    "raw/climatology/LSTM_QNN-CLIM": {
+      "ratio_cr1_iid": 0.8851097195983362,
+      "triggered": false,
+      "p_cr2": 0.0001590890602933585,
+      "p_decision": 0.0001590890602933585,
+      "resolved_cr2": true,
+      "resolved_decision": true
+    },
+    "recal/classical/RF-XGB": {
+      "ratio_cr1_iid": 0.7980047280685703,
+      "triggered": false,
+      "p_cr2": 0.19966561955382955,
+      "p_decision": 0.19966561955382955,
+      "resolved_cr2": false,
+      "resolved_decision": false
+    },
+    "recal/classical/RF-PureLSTM": {
+      "ratio_cr1_iid": 0.6430000953245283,
+      "triggered": true,
+      "p_cr2": 0.17880976592656544,
+      "p_decision": 0.37841821076968823,
+      "resolved_cr2": false,
+      "resolved_decision": false
+    },
+    "recal/classical/XGB-PureLSTM": {
+      "ratio_cr1_iid": 0.8446042983459627,
+      "triggered": false,
+      "p_cr2": 0.9091318482431272,
+      "p_decision": 0.9091318482431272,
+      "resolved_cr2": false,
+      "resolved_decision": false
+    },
+    "recal/hybrid/RF-LSTM_QNN": {
+      "ratio_cr1_iid": 0.7324751840094144,
+      "triggered": false,
+      "p_cr2": 0.026859759951136552,
+      "p_decision": 0.026859759951136552,
+      "resolved_cr2": true,
+      "resolved_decision": true
+    },
+    "recal/hybrid/LSTM_QNN-CTRL_LINEAR4D": {
+      "ratio_cr1_iid": 1.0010491308683636,
+      "triggered": false,
+      "p_cr2": 0.4378741953048662,
+      "p_decision": 0.4378741953048662,
+      "resolved_cr2": false,
+      "resolved_decision": false
+    },
+    "recal/hybrid/PureLSTM-LSTM_QNN": {
+      "ratio_cr1_iid": 0.9064353044105742,
+      "triggered": false,
+      "p_cr2": 0.026758954534661237,
+      "p_decision": 0.026758954534661237,
+      "resolved_cr2": true,
+      "resolved_decision": true
+    },
+    "recal/climatology/RF-CLIM": {
+      "ratio_cr1_iid": 1.0167198603406389,
+      "triggered": false,
+      "p_cr2": 0.30642929851354184,
+      "p_decision": 0.30642929851354184,
+      "resolved_cr2": false,
+      "resolved_decision": false
+    },
+    "recal/climatology/XGB-CLIM": {
+      "ratio_cr1_iid": 0.9955258985435241,
+      "triggered": false,
+      "p_cr2": 0.07646945503595699,
+      "p_decision": 0.07646945503595699,
+      "resolved_cr2": false,
+      "resolved_decision": false
+    },
+    "recal/climatology/PureLSTM-CLIM": {
+      "ratio_cr1_iid": 0.6570039808107557,
+      "triggered": true,
+      "p_cr2": 0.01572035665363579,
+      "p_decision": 0.09452915788658364,
+      "resolved_cr2": true,
+      "resolved_decision": false
+    },
+    "recal/climatology/CTRL_LINEAR4D-CLIM": {
+      "ratio_cr1_iid": 0.8311632884752747,
+      "triggered": false,
+      "p_cr2": 0.027869338609105787,
+      "p_decision": 0.027869338609105787,
+      "resolved_cr2": true,
+      "resolved_decision": true
+    },
+    "recal/climatology/LSTM_QNN-CLIM": {
+      "ratio_cr1_iid": 0.9207087094513124,
+      "triggered": false,
+      "p_cr2": 0.010244063488874067,
+      "p_decision": 0.010244063488874067,
+      "resolved_cr2": true,
+      "resolved_decision": true
+    },
+    "triggered": [
+      "recal/classical/RF-PureLSTM",
+      "recal/climatology/PureLSTM-CLIM"
+    ],
+    "changed": [
+      "recal/climatology/PureLSTM-CLIM"
+    ]
+  }
+}

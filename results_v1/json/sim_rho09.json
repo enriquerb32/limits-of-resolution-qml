@@ -1,0 +1,99 @@
+{
+  "config": {
+    "n": 528,
+    "years": 19,
+    "prev": 0.41,
+    "auc_b": 0.65,
+    "rho": 0.9,
+    "tau_prev": 0.3,
+    "tau_score": 0.3,
+    "deltas": [
+      0.0,
+      0.01,
+      0.02,
+      0.03,
+      0.04
+    ],
+    "reps": 400,
+    "B": 300,
+    "seed": 0,
+    "out": "sim_rho09.json"
+  },
+  "rows": [
+    {
+      "delta_design": 0.0,
+      "delta_true": 0.0004406649643137195,
+      "auc_A": 0.6440458936176315,
+      "auc_B": 0.6436052286533178,
+      "reps": 400,
+      "rejection_delong": 0.0375,
+      "rejection_block": 0.08,
+      "coverage_delong": 0.9575,
+      "coverage_block": 0.925,
+      "mean_delta_hat": 0.0011635022375229612,
+      "sd_delta_hat": 0.010924814929142988,
+      "mean_se_delong": 0.0110445437966363,
+      "mean_se_block": 0.010763491608532367
+    },
+    {
+      "delta_design": 0.01,
+      "delta_true": 0.010037665344126423,
+      "auc_A": 0.6541705139120324,
+      "auc_B": 0.644132848567906,
+      "reps": 400,
+      "rejection_delong": 0.185,
+      "rejection_block": 0.2175,
+      "coverage_delong": 0.9275,
+      "coverage_block": 0.8975,
+      "mean_delta_hat": 0.01035397352218944,
+      "sd_delta_hat": 0.011951266959340404,
+      "mean_se_delong": 0.011006956011213318,
+      "mean_se_block": 0.010668443269999588
+    },
+    {
+      "delta_design": 0.02,
+      "delta_true": 0.019032357493494967,
+      "auc_A": 0.6630872086253923,
+      "auc_B": 0.6440548511318973,
+      "reps": 400,
+      "rejection_delong": 0.43,
+      "rejection_block": 0.47,
+      "coverage_delong": 0.97,
+      "coverage_block": 0.935,
+      "mean_delta_hat": 0.019915716945709407,
+      "sd_delta_hat": 0.011371091236857192,
+      "mean_se_delong": 0.011046429163755337,
+      "mean_se_block": 0.010594248124713514
+    },
+    {
+      "delta_design": 0.03,
+      "delta_true": 0.029368485878971673,
+      "auc_A": 0.6732254628129096,
+      "auc_B": 0.643856976933938,
+      "reps": 400,
+      "rejection_delong": 0.76,
+      "rejection_block": 0.78,
+      "coverage_delong": 0.95,
+      "coverage_block": 0.925,
+      "mean_delta_hat": 0.029018818192535357,
+      "sd_delta_hat": 0.011000254337695414,
+      "mean_se_delong": 0.01102072072534638,
+      "mean_se_block": 0.010758877582522353
+    },
+    {
+      "delta_design": 0.04,
+      "delta_true": 0.03910061940437204,
+      "auc_A": 0.6819623445793896,
+      "auc_B": 0.6428617251750176,
+      "reps": 400,
+      "rejection_delong": 0.95,
+      "rejection_block": 0.9525,
+      "coverage_delong": 0.945,
+      "coverage_block": 0.925,
+      "mean_delta_hat": 0.038424167591306096,
+      "sd_delta_hat": 0.011449822305370116,
+      "mean_se_delong": 0.010931846583404741,
+      "mean_se_block": 0.010646869476553428
+    }
+  ]
+}

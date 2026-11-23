@@ -1,0 +1,472 @@
+{
+  "rhos": [
+    0.75,
+    0.5
+  ],
+  "search": {
+    "date": "2026-11-21",
+    "sources": [
+      "the QML studies already cited in the manuscript",
+      "four web searches (queries below) and the papers they returned",
+      "quantum binary-classification benchmarks in particle physics that compare with BDT/SVM/DNN baselines"
+    ],
+    "queries": [
+      "quantum machine learning precipitation rainfall classification hybrid quantum neural network accuracy AUC compared classical",
+      "variational quantum classifier high energy physics event classification AUC test events comparison BDT",
+      "quantum support vector machine medical diagnosis dataset AUC outperforms classical test set hybrid quantum classifier 2023 2024",
+      "quantum machine learning fraud detection credit card AUC classical comparison test set quantum kernel",
+      "hybrid quantum classical neural network pneumonia chest X-ray AUC test set classical CNN comparison"
+    ],
+    "inclusion": "binary classification on real or simulated-physics data; a quantum and a classical model compared on a held-out test set; test size and test AUC of both printed for the same setting"
+  },
+  "contrasts": [
+    {
+      "key": "wu2021_tth",
+      "study": "Wu et al. (2021)",
+      "arxiv": "2012.11560",
+      "task": "ttH(gamma gamma) vs background",
+      "quantum": "VQC (10 qubits)",
+      "classical": "SVM / BDT",
+      "auc_q": 0.81,
+      "auc_c": 0.83,
+      "n_set": 100,
+      "n_sets": 10,
+      "prev": null,
+      "claim": "comparable (within the margin of error)",
+      "where": "Results, Fig. 3a",
+      "delta": -0.02,
+      "prev_used": 0.5,
+      "prev_assumed": true,
+      "n_pooled": 1000,
+      "se_0.75": 0.00944105504867492,
+      "ci95_0.75": [
+        -0.038504128017420994,
+        -0.0014958719825788162
+      ],
+      "smallest_margin_0.75": 0.03552915716103305,
+      "se_0.5": 0.013351668092947052,
+      "ci95_0.5": [
+        -0.046168788802124786,
+        0.006168788802124969
+      ],
+      "smallest_margin_0.5": 0.04196154466935624,
+      "mde_pooled": {
+        "0.75": 0.026449920267758466,
+        "0.5": 0.037405835966351025
+      },
+      "mde_one_set": {
+        "0.75": 0.08413530591528594,
+        "0.5": 0.11898529069980665
+      },
+      "ci95_excludes_zero_0.75": true,
+      "rounding": 0.01,
+      "smallest_margin_worst_rounding_0.75": 0.04552915716103305,
+      "hm_se_one_auc_one_set": 0.0424707019192335,
+      "checked_against": "arXiv"
+    },
+    {
+      "key": "wu2021_hmm",
+      "study": "Wu et al. (2021)",
+      "arxiv": "2012.11560",
+      "task": "H(mu mu) vs Z/gamma* background",
+      "quantum": "VQC (10 qubits)",
+      "classical": "SVM",
+      "auc_q": 0.83,
+      "auc_c": 0.82,
+      "n_set": 100,
+      "n_sets": 10,
+      "prev": null,
+      "claim": "performs similarly",
+      "where": "Results, Fig. 3b",
+      "delta": 0.01,
+      "prev_used": 0.5,
+      "prev_assumed": true,
+      "n_pooled": 1000,
+      "se_0.75": 0.009321120339975527,
+      "ci95_0.75": [
+        -0.008269060306019788,
+        0.028269060306019805
+      ],
+      "smallest_margin_0.75": 0.025331882075690114,
+      "se_0.5": 0.013182054801305104,
+      "ci95_0.5": [
+        -0.015836352856585148,
+        0.035836352856585166
+      ],
+      "smallest_margin_0.5": 0.03168255556814592,
+      "mde_pooled": {
+        "0.75": 0.026113912960727563,
+        "0.5": 0.03693064987569146
+      },
+      "mde_one_set": {
+        "0.75": 0.08307076186137523,
+        "0.5": 0.1174797980610225
+      },
+      "ci95_excludes_zero_0.75": false,
+      "rounding": 0.01,
+      "smallest_margin_worst_rounding_0.75": 0.035331882075690116,
+      "hm_se_one_auc_one_set": 0.041933330209441934,
+      "checked_against": "arXiv"
+    },
+    {
+      "key": "belis2021_qsvm16",
+      "study": "Belis et al. (2021)",
+      "arxiv": "2104.07692",
+      "task": "ttH(bb) vs ttbb",
+      "quantum": "QSVM, 16 features",
+      "classical": "SVM (RBF)",
+      "auc_q": 0.66,
+      "auc_c": 0.65,
+      "n_set": 720,
+      "n_sets": 5,
+      "prev": null,
+      "claim": "similar or better",
+      "where": "Table 2a",
+      "delta": 0.01,
+      "prev_used": 0.5,
+      "prev_assumed": true,
+      "n_pooled": 3600,
+      "se_0.75": 0.006399690008541882,
+      "ci95_0.75": [
+        -0.0025431620279017728,
+        0.02254316202790179
+      ],
+      "smallest_margin_0.75": 0.020526555709310158,
+      "se_0.5": 0.009050528405063518,
+      "ci95_0.5": [
+        -0.007738709854901903,
+        0.02773870985490192
+      ],
+      "smallest_margin_0.5": 0.02488679784918236,
+      "mde_pooled": {
+        "0.75": 0.017929276928436193,
+        "0.5": 0.025355826595737492
+      },
+      "mde_one_set": {
+        "0.75": 0.04011481493524437,
+        "0.5": 0.056730915333509366
+      },
+      "ci95_excludes_zero_0.75": false,
+      "rounding": 0.01,
+      "smallest_margin_worst_rounding_0.75": 0.030526555709310156,
+      "hm_se_one_auc_one_set": 0.0202495769062206,
+      "checked_against": "published"
+    },
+    {
+      "key": "belis2021_qsvm64",
+      "study": "Belis et al. (2021)",
+      "arxiv": "2104.07692",
+      "task": "ttH(bb) vs ttbb",
+      "quantum": "QSVM, 64 features",
+      "classical": "logistic regression",
+      "auc_q": 0.68,
+      "auc_c": 0.68,
+      "n_set": 720,
+      "n_sets": 5,
+      "prev": null,
+      "claim": "similar or better",
+      "where": "Table 2b",
+      "delta": 0.0,
+      "prev_used": 0.5,
+      "prev_assumed": true,
+      "n_pooled": 3600,
+      "se_0.75": 0.006255449999408448,
+      "ci95_0.75": [
+        -0.01226045680264058,
+        0.01226045680264058
+      ],
+      "smallest_margin_0.75": 0.010289301953326984,
+      "se_0.5": 0.008846542227910197,
+      "ci95_0.5": [
+        -0.01733890429118378,
+        0.01733890429118378
+      ],
+      "smallest_margin_0.5": 0.014551270369746998,
+      "mde_pooled": {
+        "0.75": 0.017525176250987484,
+        "0.5": 0.024784341937125372
+      },
+      "mde_one_set": {
+        "0.75": 0.039211207800449996,
+        "0.5": 0.05545302186842608
+      },
+      "ci95_excludes_zero_0.75": false,
+      "rounding": 0.01,
+      "smallest_margin_worst_rounding_0.75": 0.020289301953326982,
+      "hm_se_one_auc_one_set": 0.019793444621961895,
+      "checked_against": "published"
+    },
+    {
+      "key": "belis2021_vqc",
+      "study": "Belis et al. (2021)",
+      "arxiv": "2104.07692",
+      "task": "ttH(bb) vs ttbb",
+      "quantum": "VQC, 8 features",
+      "classical": "random forest",
+      "auc_q": 0.66,
+      "auc_c": 0.66,
+      "n_set": 720,
+      "n_sets": 5,
+      "prev": null,
+      "claim": "similar or better",
+      "where": "Table 3",
+      "delta": 0.0,
+      "prev_used": 0.5,
+      "prev_assumed": true,
+      "n_pooled": 3600,
+      "se_0.75": 0.006372686052863076,
+      "ci95_0.75": [
+        -0.012490235246913726,
+        0.012490235246913726
+      ],
+      "smallest_margin_0.75": 0.010482138144796042,
+      "se_0.5": 0.009012339044704828,
+      "ci95_0.5": [
+        -0.017663860083415854,
+        0.017663860083415854
+      ],
+      "smallest_margin_0.5": 0.014823981927038914,
+      "mde_pooled": {
+        "0.75": 0.017853623045375872,
+        "0.5": 0.025248835848267395
+      },
+      "mde_one_set": {
+        "0.75": 0.0399456470836564,
+        "0.5": 0.05649167586347615
+      },
+      "ci95_excludes_zero_0.75": false,
+      "rounding": 0.01,
+      "smallest_margin_worst_rounding_0.75": 0.02048213814479604,
+      "hm_se_one_auc_one_set": 0.020164182584289404,
+      "checked_against": "published"
+    },
+    {
+      "key": "grossi2022",
+      "study": "Grossi et al. (2022)",
+      "arxiv": "2208.07963",
+      "task": "card fraud vs genuine",
+      "quantum": "QSVM",
+      "classical": "XGBoost",
+      "auc_q": 0.81,
+      "auc_c": 0.834,
+      "n_set": 999,
+      "n_sets": 1,
+      "prev": 0.47847847847847846,
+      "claim": "similar",
+      "where": "Tables I, IV, VI",
+      "delta": -0.024,
+      "prev_used": 0.47847847847847846,
+      "prev_assumed": false,
+      "n_pooled": 999,
+      "se_0.75": 0.00950702706971446,
+      "ci95_0.75": [
+        -0.042633430803665745,
+        -0.005366569196334079
+      ],
+      "smallest_margin_0.75": 0.03963767150372802,
+      "se_0.5": 0.013444966619838333,
+      "ci95_0.5": [
+        -0.05035165055608473,
+        0.0023516505560849076
+      ],
+      "smallest_margin_0.5": 0.04611500712450747,
+      "mde_pooled": {
+        "0.75": 0.026634746506711878,
+        "0.5": 0.03766721974016135
+      },
+      "mde_one_set": {
+        "0.75": 0.026634746506711878,
+        "0.5": 0.03766721974016135
+      },
+      "ci95_excludes_zero_0.75": true,
+      "rounding": 0.0055,
+      "smallest_margin_worst_rounding_0.75": 0.045137671503728015,
+      "hm_se_one_auc_one_set": 0.013444966619838333,
+      "checked_against": "arXiv (published version confirms the wording and a test set of 1,000 only)"
+    },
+    {
+      "key": "heredge2021",
+      "study": "Heredge et al. (2021)",
+      "arxiv": "2103.12257",
+      "task": "B-meson pairs vs continuum",
+      "quantum": "QSVM (separate-particle circuit, Bloch encoding)",
+      "classical": "SVM (RBF)",
+      "auc_q": 0.848,
+      "auc_c": 0.793,
+      "n_set": 10000,
+      "n_sets": 10,
+      "prev": null,
+      "claim": "best average AUC",
+      "where": "Table 1",
+      "delta": 0.055,
+      "prev_used": 0.5,
+      "prev_assumed": true,
+      "n_pooled": 100000,
+      "se_0.75": 0.0009423040844991157,
+      "ci95_0.75": [
+        0.05315311791732871,
+        0.05684688208267116
+      ],
+      "smallest_margin_0.75": 0.056549952642604644,
+      "se_0.5": 0.0013326192161782124,
+      "ci95_0.5": [
+        0.05238811431058242,
+        0.057611885689417455
+      ],
+      "smallest_margin_0.5": 0.05719196404820753,
+      "mde_pooled": {
+        "0.75": 0.0026399451941001963,
+        "0.5": 0.00373344629741817
+      },
+      "mde_one_set": {
+        "0.75": 0.008348734595342543,
+        "0.5": 0.011806893693386876
+      },
+      "ci95_excludes_zero_0.75": true,
+      "rounding": 0.001,
+      "smallest_margin_worst_rounding_0.75": 0.057549952642604645,
+      "hm_se_one_auc_one_set": 0.004214361789551242,
+      "checked_against": "published"
+    },
+    {
+      "key": "kulkarni2023",
+      "study": "Kulkarni et al. (2023)",
+      "arxiv": "2202.10452",
+      "task": "pneumonia vs normal radiograph",
+      "quantum": "CNN with VQC layer",
+      "classical": "CNN",
+      "auc_q": 0.836,
+      "auc_c": 0.727,
+      "n_set": 624,
+      "n_sets": 1,
+      "prev": 0.625,
+      "claim": "statistically significant (test over 30 training runs)",
+      "where": "Section 3.5, Table 1",
+      "delta": 0.109,
+      "prev_used": 0.625,
+      "prev_assumed": false,
+      "n_pooled": 624,
+      "se_0.75": 0.012720840626796381,
+      "ci95_0.75": [
+        0.08406761032174165,
+        0.13393238967825832
+      ],
+      "smallest_margin_0.75": 0.12992392558834853,
+      "se_0.5": 0.017989985339202104,
+      "ci95_0.5": [
+        0.07374027637463607,
+        0.1442597236253639
+      ],
+      "smallest_margin_0.5": 0.13859089934512792,
+      "mde_pooled": {
+        "0.75": 0.035638519062003646,
+        "0.5": 0.05040047700037763
+      },
+      "mde_one_set": {
+        "0.75": 0.035638519062003646,
+        "0.5": 0.05040047700037763
+      },
+      "ci95_excludes_zero_0.75": true,
+      "rounding": 0.001,
+      "smallest_margin_worst_rounding_0.75": 0.13092392558834853,
+      "hm_se_one_auc_one_set": 0.017989985339202104,
+      "checked_against": "arXiv"
+    }
+  ],
+  "mde_only": [
+    {
+      "key": "terashi2020_vqc",
+      "study": "Terashi et al. (2020)",
+      "arxiv": "2002.09935",
+      "task": "SUSY chargino pairs vs WW",
+      "quantum": "VQC (QASM simulator)",
+      "auc_q": 0.555,
+      "n_set": 40,
+      "n_sets": 1,
+      "prev": 0.5,
+      "where": "Section 3.3, Table 2",
+      "mde": {
+        "0.75": 0.1817498556130268,
+        "0.5": 0.2570331107672943
+      }
+    }
+  ],
+  "screened": {
+    "Blance and Spannowsky (2021), arXiv 2010.07335": "accuracy only; classical baseline shown only as a ROC curve",
+    "Alvi et al. (2023), arXiv 2206.08391": "anomaly detection; AUC only in a figure; \"no evidence that QML provides any advantage\"",
+    "Gianelle et al. (2022), arXiv 2202.13943": "tagging power; test sets of 40,000 and 290,000 jets; values only in figures",
+    "Schuhmacher et al. (2023), arXiv 2301.10787": "validation AUC; test-set size not printed",
+    "Wu et al. (2021b), arXiv 2104.05059": "AUCs only in figures",
+    "Terashi et al. (2020), arXiv 2002.09935 (QCL)": "QCL AUCs only in figures (\"comparable\")",
+    "Bowles et al. (2024), arXiv 2403.07059": "accuracy on mostly synthetic data; no uncertainty for the differences",
+    "Tudisco et al. (2025), arXiv 2505.20804": "precision and recall only; test size not printed",
+    "El Alami et al. (2024), arXiv 2412.19441": "no classical baseline"
+  },
+  "regression_only": [
+    "da Silva et al. (2026)",
+    "Pastori et al. (2026)",
+    "Fellner et al. (2026)",
+    "Marchisio et al. (2026)"
+  ],
+  "n_contrasts": 8,
+  "n_studies": 5,
+  "n_similarity": 6,
+  "similarity_ci_excludes_zero_rho075": [
+    "wu2021_tth",
+    "grossi2022"
+  ],
+  "similarity_ci_excludes_zero_rho05": [],
+  "superiority_ci_excludes_zero_both": true,
+  "margin_range_similarity": [
+    0.010289301953326984,
+    0.03963767150372802
+  ],
+  "margin_range_similarity_rho05": [
+    0.014551270369746998,
+    0.04611500712450747
+  ],
+  "consistency": {
+    "wu2021": {
+      "printed_spread": [
+        0.03,
+        0.06
+      ],
+      "printed_as": "SD over the 10 datasets of 100 test events (Fig. 3)",
+      "hm_se_one_auc_one_set": [
+        0.0419,
+        0.0425
+      ]
+    },
+    "belis2021": {
+      "printed_spread": [
+        0.01,
+        0.02
+      ],
+      "printed_as": "printed as +/- over the 5 test sets of 720 samples; definition not stated",
+      "hm_se_one_auc_one_set": [
+        0.0198,
+        0.0202
+      ]
+    },
+    "heredge2021": {
+      "printed_spread": [
+        0.0031622776601683794,
+        0.0031622776601683794
+      ],
+      "printed_as": "SD implied by the printed 0.001 = SD / sqrt(10) (Table 1); test sets redrawn at random",
+      "hm_se_one_auc_one_set": [
+        0.0042
+      ]
+    },
+    "grossi2022": {
+      "printed_spread": [
+        0.01,
+        0.01
+      ],
+      "printed_as": "printed as +/- over the trials; definition not stated",
+      "hm_se_one_auc_one_set": [
+        0.0134
+      ]
+    }
+  }
+}

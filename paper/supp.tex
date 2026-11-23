@@ -1,0 +1,1346 @@
+\documentclass[11pt,a4paper]{article}
+
+% Essential Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{microtype}
+\usepackage{siunitx}
+\usepackage{adjustbox}
+\usepackage[authoryear,round]{natbib}
+\usepackage{parskip}
+\usepackage{setspace}
+\usepackage{tabularx}
+\usepackage{lineno}
+\onehalfspacing
+
+\IfFileExists{newtxtext.sty}{\usepackage{newtxtext, newtxmath}}{\usepackage{mathptmx}}
+\usepackage[font=small, labelfont=bf, margin=1cm]{caption}
+\usepackage{authblk}
+\usepackage{xurl}
+\usepackage{xr}% xr, not xr-hyper: xr-hyper with cleveref printed the file name after every cross-document reference
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{cleveref}
+\externaldocument[M-]{main}
+\usepackage{tikz}
+\emergencystretch=2em
+\usepackage{quantikz}
+\usetikzlibrary{shapes.geometric, arrows, arrows.meta, positioning, fit, backgrounds, calc}
+\definecolor{primaryblue}{HTML}{2A78D6}
+\definecolor{inkgray}{HTML}{52514E}
+\definecolor{paleblue}{HTML}{EAF2FC}
+\definecolor{palegray}{HTML}{F2F1EE}
+
+\usepackage{xcolor}
+
+
+% Fail compilation if a figure is missing (prevent silent placeholder boxes)
+\graphicspath{{figs/}{./}}
+\newcommand{\safefig}[2]{\IfFileExists{#1}{\includegraphics[width=#2]{#1}}{\IfFileExists{figs/#1}{\includegraphics[width=#2]{figs/#1}}{\PackageError{safefig}{figure file \detokenize{#1} not found. Run scripts/make_paper_figs.py first.}{}}}}
+
+% Page Geometry
+\geometry{top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
+
+\title{\textbf{Supplementary Material to: Limits of Resolution in Small Machine-Learning Benchmarks: Calibrated Inference for Clustered Test Sets}}
+
+\author[1,*]{Enrique Real}
+\affil[1]{Independent Researcher, Alicante, Spain. ORCID: \href{https://orcid.org/0009-0006-3862-9797}{0009-0006-3862-9797}}
+\affil[*]{\textit{Corresponding author: enriquerb32@gmail.com}}
+\renewcommand\Affilfont{\itshape\small}
+
+\date{November 2026}
+
+\begin{document}
+\maketitle
+\renewcommand{\thesection}{S\arabic{section}}
+\setcounter{section}{0}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\theequation}{S\arabic{equation}}
+
+\noindent\textbf{How this supplement is organized.} It follows the order of the main text and holds the material that a reader needs to check a result but not to follow the argument. \Cref{app:pipeline} documents the stations and the data pipeline, including the lookahead audit; \Cref{app:models} the models and the software environment; \Cref{app:inference} the estimators and further inferential results, among them the calibration of the primary procedure, the few-cluster corrections, the sensitivity to consecutive and influential years, and the uncertainty of the MDE with the equivalence tests; \Cref{app:resolution} the empirical resolution curve; \Cref{app:qml} the quantum case study (spectrum, emulation and common angles, all controls, the planted-signal controls and finite shots); \Cref{app:refs} the references and the second panel; \Cref{app:external} the external benchmark; and \Cref{app:v1} the changes from the earlier version of the analysis. Every number is produced by a script named in the text and archived in the repository.
+
+\section{Data, Labels and Features}
+\label{app:pipeline}
+
+\subsection{Monthly Panel and Labels}
+
+The daily files of each station (precipitation; maximum and minimum pressure; maximum and minimum temperature; sunshine duration; mean wind speed and maximum gust) are read separately and placed on a full daily calendar from the first to the last date found in any of them (\path{code/etl_v2.py}). Precipitation is taken from its own file only: a trace (``Ip'') counts as 0\,mm, and an empty or unparseable entry is missing. At the daily level, covariates stay missing where they are missing; no value is carried forward or backward. \Cref{tab:etl} lists the spans and the shares of missing days.
+
+The four stations, their test windows and their test-set class prevalence are in \Cref{tab:station_coverage}.
+
+\begin{table}[htbp]
+\centering
+\caption{AEMET stations (climatological identifier, altitude), test windows and test-set class prevalence for the regional exceedance threshold ($P_{60}=29.9$\,mm). Coordinates: Alicante \ang{38;22;21}\,N \ang{0;29;39}\,W; Barcelona \ang{41;17;30}\,N \ang{2;3;38}\,E; San Javier \ang{37;47;20}\,N \ang{0;48;12}\,W; Valencia \ang{39;28;50}\,N \ang{0;21;59}\,W. Last test year: the last year with a complete set of predictors. Missing days of the precipitation and pressure files over the span of each station in \Cref{tab:etl}.}
+\label{tab:station_coverage}
+{\small
+\begin{tabular}{llccc}
+\toprule
+\textbf{Station} & \textbf{AEMET id (alt.)} & \textbf{Test windows} & \textbf{Last test year} & \textbf{Test positive rate} \\
+\midrule
+Alicante    & 8025 (81\,m) & 220 & 2026 & 27.3\% (60 / 220) \\
+Barcelona   & 0076 (1\,m)  & 221 & 2026 & 51.1\% (113 / 221) \\
+San Javier  & 7031 (4\,m)  & 37  & 2011 & 37.8\% (14 / 37) \\
+Valencia    & 8416 (13\,m) & 51  & 2012 & 54.9\% (28 / 51) \\
+\midrule
+\textbf{Total} & & \textbf{529} & & \textbf{40.6\% (215 / 529)} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+Monthly aggregation (\path{code/local_experiments/dataset_v2.py}) produces, per station and calendar month: the \emph{label total}, the sum of daily precipitation, defined when at most 3 days of the month are missing; the \emph{precipitation lag}, the sum over observed days rescaled to the month length, defined with at least 10 observed days; and the covariates, means over observed days (sunshine and ET$_0$ sums as means times the month length), defined with at least 10 observed days, with at most two consecutive missing months interpolated linearly within the station (in a longer gap, its first two months; \Cref{sec:lookahead}). ET$_0$ follows FAO-56 Penman--Monteith with $u_2=0.748\,u_{10}$ from the observed mean wind (FAO-56 eq.~47 for a 10\,m anemometer). Every calendar month is kept, and a window with target month $t$ is used only if $t$ has a label total, month $t-1$ has all covariates and the 12 lags $t-12,\dots,t-1$ are defined. Training-partition medians replace undefined cells before the min--max scalers are fitted, so that rows that never enter a window do not stretch the scales. Thresholds ($P_{60}=29.9$\,mm, $P_{90}$) are percentiles of all 2{,}847 labelled months up to 1996 of the four stations (Alicante 699, Barcelona 809, San Javier 629, Valencia 710), not only of the months that are window targets; the precipitation records start before the first training window (Barcelona March 1924, Valencia November 1937, Alicante October 1938, San Javier August 1944), so the Barcelona count exceeds the 708 months of 1938--1996.
+
+\begin{table}[htbp]
+\centering
+\caption{Daily records of the first panel: span of the union of the five files and share of calendar days missing in each variable over that span (\%).}
+\label{tab:etl}
+{\small
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Station} & \textbf{First day} & \textbf{Last day} & \textbf{Precip.} & \textbf{Pressure} & \textbf{Temperature} & \textbf{Sunshine} & \textbf{Wind} \\
+\midrule
+Barcelona & 1924-03-01 & 2026-05-31 & 5.3 & 36.6 & 15.8 & 31.1 & 5.3 \\
+Valencia & 1937-11-01 & 2026-05-31 & 0.0 & 18.6 & 0.1 & 2.0 & 0.0 \\
+Alicante & 1938-09-01 & 2026-05-15 & 0.0 & 1.6 & 0.3 & 0.5 & 0.0 \\
+San Javier & 1944-08-01 & 2026-05-31 & 0.0 & 25.5 & 2.0 & 9.0 & 12.7 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Lookahead Audit}
+\label{sec:lookahead}
+
+A forecast for month $t$ is issued at the end of month $t-1$, so its inputs may use only data up to that date. Three steps of the monthly pipeline used for the results of the paper do not satisfy this. (i) The interpolation of missing monthly covariates is two-sided: a missing $t-1$ is filled from $t-2$ and $t$, and the first two months of a longer gap from the month after the gap, up to 18 months later. (ii) The antecedent-summer evapotranspiration (\texttt{et0\_verano\_prev}) of a summer with an incomplete June--August record is interpolated towards the next complete summer and back-filled. (iii) A missing one-month evapotranspiration lag is replaced by the station mean over the full record, test years included. The chronological split does not prevent any of these.
+
+\textbf{Truncation test} (\path{exp47_truncation_audit.py}). For each test target month $t$ the monthly panel was rebuilt from the daily file cut at the end of $t-1$, with the transformations fitted on the training partition (anomaly statistics, medians, scalers and $P_{60}$, all from data up to 1996 and therefore unaffected by the cut); the label of $t$ is the outcome and comes from the full record. For all 529 test windows the 35 inputs and the eligibility of the window are identical to those of the full pipeline, and no window becomes eligible only after the cut. The reason is that the gaps that the interpolation fills lie before the test period or at stations whose records stop: 54 station-months receive an interpolated covariate; 26 of them are the last antecedent month of an eligible window (24 training, 2 validation windows) and none of a test window. The incomplete summers after 2011 (San Javier) and 2012 (Valencia) have no later complete summer to interpolate from. The daily file does not record when each value became available, so this is a retrospective check of lookahead in the processing, not a reconstruction of what could have been issued in real time.
+
+\textbf{Causal pipeline.} With \texttt{V2\_CAUSAL=1}, a missing covariate is carried forward from the last observed month for at most two months, \texttt{et0\_verano\_prev} is the last complete summer (before the first one, the station's training median), and a missing evapotranspiration lag takes the station's training mean. The same truncation test gives no change for any test window. The causal panel has 533 test windows instead of 529, because carrying forward also fills the last months before the covariate records of Valencia and San Javier stop. \Cref{tab:lookahead} compares models retrained on the two panels on the 529 common test windows: the differences are an order of magnitude below the standard error of one AUC (0.024) and below every minimum detectable difference between complete models. Small as they are, these changes act on differences that lie near the resolution limit. \Cref{tab:causal} repeats the two primary families on the causal refits: every comparison that is not resolved on the archived pipeline stays unresolved, but Random Forest against the LSTM is no longer resolved, and Random Forest against \texttt{LSTM+QNN} becomes resolved after the Holm correction. With clusters of two and three consecutive years its causal $p$-values are 0.020 and 0.076 on the common rows (archived 0.051 and 0.131), and those of Random Forest against the LSTM 0.058 and 0.143. Both verdicts therefore depend on the fitting pipeline as well as on the cluster definition, which is why the main text treats them as exploratory. The archived pipeline remains the primary analysis: every model, control and reference of the paper shares it, it was the primary analysis before the causal refits were made, and only the five models of the primary families were refitted.
+
+\begin{table}[htbp]
+\centering
+\caption{The two primary families on the archived and on the causal pipeline (15-seed means; RF, XGBoost, LSTM, \texttt{LSTM+QNN} and Linear-4D all refitted with \texttt{V2\_CAUSAL=1}; \protect\path{exp55_review_closing.py}). $\hat\Delta$ with the CR2 $p$-value (Bell--McCaffrey degrees of freedom, calendar-year clusters). $^{*}$: resolved (CR2 interval excludes zero); $^{**}$: resolved after Holm within the family of three.}
+\label{tab:causal}
+{\small
+\begin{tabular}{lccc}
+\toprule
+Comparison & Archived (529) & Causal, common (529) & Causal, own (533) \\
+\midrule
+RF $-$ XGBoost & $+0.0100$ (0.110) & $+0.0090$ (0.158) & $+0.0088$ (0.159) \\
+RF $-$ LSTM & $+0.0146$ (0.041)$^{*}$ & $+0.0163$ (0.070) & $+0.0169$ (0.058) \\
+XGBoost $-$ LSTM & $+0.0046$ (0.580) & $+0.0073$ (0.355) & $+0.0080$ (0.293) \\
+\midrule
+RF $-$ LSTM+QNN & $+0.0197$ (0.031)$^{*}$ & $+0.0218$ (0.009)$^{**}$ & $+0.0220$ (0.008)$^{**}$ \\
+LSTM+QNN $-$ Linear-4D & $+0.0034$ (0.608) & $+0.0022$ (0.800) & $+0.0027$ (0.762) \\
+LSTM $-$ LSTM+QNN & $+0.0051$ (0.324) & $+0.0055$ (0.263) & $+0.0051$ (0.294) \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Test AUC (15-seed mean) of models retrained on the archived and on the causal panel, on the 529 common test windows (Linear-4D: \protect\path{exp55_review_closing.py}). Interval: calendar-year block bootstrap ($B=2{,}000$) of the archived $-$ causal difference.}
+\label{tab:lookahead}
+{\small
+\begin{tabular}{lcccc}
+\toprule
+Model & Archived & Causal & Archived $-$ causal & 95\,\% interval \\
+\midrule
+Random Forest & 0.6784 & 0.6797 & $-0.0013$ & $[-0.003,+0.000]$ \\
+XGBoost & 0.6684 & 0.6707 & $-0.0023$ & $[-0.009,+0.004]$ \\
+LSTM & 0.6638 & 0.6634 & $+0.0004$ & $[-0.006,+0.006]$ \\
+LSTM+QNN & 0.6587 & 0.6579 & $+0.0008$ & $[-0.006,+0.006]$ \\
+Linear-4D control & 0.6553 & 0.6558 & $-0.0004$ & $[-0.003,+0.002]$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\textbf{Label completeness.} The label rule admits up to 3 missing days, and with missing days the observed total is a lower bound of the true one, so that a fixed threshold can only produce false negatives. In this panel all 529 test targets, all 528 labelled validation months and all 2{,}847 labelled months up to 1996 that define $P_{60}$ have complete records; one labelled month of the test period has missing days but is not a window target. A sensitivity analysis restricted to complete months therefore reproduces the reported AUCs and $P_{60}$ exactly.
+
+\subsection{Engineered Features}
+\label{sec:glossary}
+
+Each window has 35 covariates: 12 precipitation lags, 17 physical and synoptic indicators of the last antecedent month (\Cref{tab:glossary}), 2 cyclic terms of the target month and 4 station indicators. Anomalies and scaling statistics are computed from the training years (1938--1996) only. The covariates are candidate predictors, not physical state variables of a numerical weather prediction model.
+
+\begin{table}[htbp]
+\centering
+\caption{Complete enumeration of the 35 engineered features ($12 \text{ lags} + 17 \text{ physical} + 2 \text{ cyclic} + 4 \text{ station indicators}$).}
+\label{tab:glossary}
+{\footnotesize\setstretch{1.0}
+\begin{tabularx}{\textwidth}{lllX}
+\toprule
+\textbf{Group} & \textbf{Feature Label} & \textbf{Code Token} & \textbf{Definition / Formulation} \\
+\midrule
+\multirow{2}{*}{Antecedent} & Precip. Lags (12) & \texttt{precip\_lag\_1..12} & Monthly precipitation totals for months $i, \dots, i+11$ (rescaled to the month length; at least 10 observed days) \\
+& Pressure variability & \texttt{dp\_std} & Standard deviation of daily station-level pressure in anchor month $i+11$ \\
+\midrule
+\multirow{8}{*}{Physical} & Mean pressure & \texttt{pmed} & Monthly mean of the daily (max + min)/2 station-level pressure of the AEMET daily records ($\mathrm{hPa}$; not reduced to sea level, so it also encodes station altitude) \\
+& Diurnal temp. range & \texttt{t\_rango} & Mean daily maximum minus minimum temperature ($^\circ\mathrm{C}$) \\
+& Mean wind speed & \texttt{veloc\_ms} & Monthly-mean surface wind speed ($\mathrm{m/s}$) \\
+& Evapotranspiration & \texttt{et0\_sum} & Monthly reference evapotranspiration (FAO-56 Penman--Monteith; humidity from $T_{\min}$, radiation from sunshine duration, $u_2=0.748\,u_{10}$ from the observed wind), mean over observed days times the month length \\
+& Summer evapotransp. & \texttt{et0\_verano\_prev} & Antecedent summer (JJA) accumulated $\text{ET}_0$; defined only when all three months are available, otherwise interpolated within the station \\
+& Evapotransp. Lags & \texttt{et0\_lag1m, et0\_lag3m} & $\text{ET}_0$ of month $i+10$; $\text{ET}_0$ summed over months $i+9$ to $i+11$ \\
+& Evaporative deficit & \texttt{fao\_evapo\_deficit} & $\text{ET}_0$ minus precipitation of month $i+10$ \\
+& Coastal vulnerability & \texttt{vuln\_costera} & Pressure-variability ratio \texttt{ib} times mean wind speed \texttt{veloc\_ms} (time-varying; not a geographic indicator) \\
+\midrule
+\multirow{3}{*}{Anomalies} & Pressure anomaly & \texttt{iap} & Monthly-mean pressure minus station-month climatology \\
+& Wind-gust anomaly & \texttt{ia\_racha} & Maximum gust speed minus station-month climatology \\
+& Temp. anomaly & \texttt{t\_anomaly} & Monthly-mean temperature standardized by the mean and SD of the station's trailing 12 months (largely tracks the seasonal cycle) \\
+\midrule
+\multirow{4}{*}{Proxies} & Pressure-variability ratio & \texttt{ib} & Pressure variability over diurnal range, $\sigma_p / \text{t\_rango}$ (not a measure of static stability) \\
+& Insolation ratio & \texttt{iir} & Relative sunshine $n/N$: monthly sunshine hours over mean astronomical daylight hours \\
+& Thermal contrast proxy & \texttt{choque\_clausius} & Difference of \texttt{t\_anomaly} three months apart ($T'_{i+8} - T'_{i+11}$) \\
+& Evaporation--variability interaction & \texttt{potencial\_convectivo} & Summer $\text{ET}_0^{\text{JJA}} \times$ monthly pressure variability ($\sigma_p$) \\
+\midrule
+Seasonal & Target month cyclic & \texttt{mes\_sin, mes\_cos} & $\sin(2\pi m / 12)$ and $\cos(2\pi m / 12)$ for target month $i+12$ \\
+Station & Station Indicators & \texttt{ciudad\_*} & One-hot indicators (Alicante, Barcelona, San Javier, Valencia) \\
+\bottomrule
+\end{tabularx}%
+}
+\end{table}
+
+
+
+% ============================================================
+\section{Models, Hyperparameters and Environment}
+\label{app:models}
+% ============================================================
+
+\subsection{Specification of the Experiments}
+\label{app:architectures}
+
+\Cref{tab:core_spec} specifies every model of the 15-seed experiments: architecture, optimizer, training budget and number of trainable parameters. All models are fitted on the same rows, with the seeds set immediately before each model is built.
+
+\textbf{Circuit details.} In \texttt{LSTM+QNN} each of the two layers re-uploads the angles as $R_Z(q_j)R_Y(q_j)$ ($R_Y$ acts first on $|0\rangle$, so $R_Z$ is not a global phase) before one \texttt{StronglyEntanglingLayers} block of range $r=1$, a ring of nearest-neighbour CNOTs (the template is called once per layer, so both layers have $r=1$); the readout is $\langle Z_j\rangle$ on every qubit, and gradients are computed by backpropagation through the \texttt{default.qubit} state-vector simulator in double precision. Because LayerNorm standardizes the four readouts of each row, the model is approximately invariant to a common contraction of the $\langle Z_j\rangle$, such as global depolarizing noise would cause; the invariance is not exact, because of the $\epsilon$ in the LayerNorm denominator, it breaks down when the contraction makes the spread of the readouts comparable to $\sqrt{\epsilon}$, and it does not extend to shot noise or to qubit-dependent noise. \texttt{LSTM+QTL} feeds a trainable adapter ($67\to8\to4$, angles in $[0,\pi]$) into a 2-layer circuit with a single $R_Y$ encoding (per-coordinate frequencies $\{0,\pm1\}$; one \texttt{StronglyEntanglingLayers} call with two layers, so PennyLane's default ranges $r=1$ and $r=2$). The separable Fourier controls have 36--132 parameters in the map, \texttt{Fourier-4} covering the circuit's full per-coordinate spectrum without its cross-coordinate products; a full degree-4 tensor basis would have $9^4=6{,}561$ features for 2{,}332 training rows. All controls share the training loop of the model they are compared with (\Cref{tab:core_spec}). The tree ensembles were tuned with Optuna (TPE sampler): Random Forest selected 350 trees of depth 11 (minimum split 13, minimum leaf 10, $\sqrt{p}$ features), and XGBoost a learning rate of 0.036 with trees of depth 3 (median 16 trees after early stopping, 2--3 in five seeds).
+
+
+\begin{table}[htbp]
+\centering
+\caption{Specification of the 15-seed experiments. All models use the same 2{,}332 training windows (1938--1996), 516 validation windows (1997--2007) and 529 test windows (2008--2026), seeds 0--14 (\texttt{torch.manual\_seed}, \texttt{numpy.random.seed}, \texttt{random\_state}); the seed index is nominal across frameworks.}
+\label{tab:core_spec}
+\small
+\begin{tabular}{@{}p{0.2\textwidth}p{0.74\textwidth}@{}}
+\toprule
+\textbf{Item} & \textbf{Specification} \\
+\midrule
+Random Forest & 350 trees, maximum depth 11, minimum split 13, minimum leaf 10, $\sqrt{p}$ features (validation AUC 0.701); balanced class weights; mean imputation fitted on the training rows. \\
+XGBoost & learning rate 0.036, maximum depth 3, minimum child weight 3.01, subsample 0.99, column subsample 0.62, $\lambda=0.074$, $\gamma=2.94$; best iteration in the search 1, that is two trees (validation AUC 0.723); in the 15 seeds of the paper early stopping keeps 2 to 121 trees, median 16 (\path{exp44_xgb_iterations.py}); up to 2{,}000 rounds with early stopping after 50 rounds without improvement of the validation AUC; \texttt{scale\_pos\_weight} $=n_{\text{neg}}/n_{\text{pos}}$ of the training rows. \\
+Standalone LSTM & 2-layer bidirectional LSTM (16 units per direction, dropout 0.3) over the 12 precipitation lags; its final states are concatenated with all 35 features, batch normalization, a 16-unit GELU layer (dropout 0.2, layer normalization) and a linear output; 10{,}103 parameters. \\
+Linear-4D control & 2-layer bidirectional LSTM (8 units per direction, dropout 0.2); projection of the LSTM state and features ($51\to4$, dropout 0.1), sigmoid scaled to $[0,\pi]$, linear $4\to4$ map (20 parameters), layer normalization, linear output; 2{,}609 parameters. \\
+LSTM+QNN & The control with the linear map replaced by the 4-qubit circuit of \Cref{fig:vqc_circuit} (re-uploaded $R_Y$ then $R_Z$ encoding, one \texttt{StronglyEntanglingLayers} block of range 1 per layer, two layers; $\langle Z_j\rangle$ readout); 2{,}613 parameters, 24 quantum. \\
+LSTM+PI-QNN & LSTM+QNN trained with two additional hand-set penalties on the predicted probability and on the readouts ($\lambda=0.2$ and 0.1). \\
+LSTM+QTL & The standalone LSTM of the same seed, frozen in evaluation mode; adapter $67\to8\to4$ with sigmoid output, angles $\pi\times$output; single $R_Y$ encoding; one \texttt{StronglyEntanglingLayers} call with two layers (ranges 1 and 2); layer normalization and linear output; weighted cross-entropy; AdamW $2\times10^{-3}$, batch 8, at most 15 epochs, patience 4; 617 trainable parameters, 24 quantum. \\
+QTL-classical / QTL tensor-81 & LSTM+QTL with the circuit replaced by \texttt{Linear(4,4)} or by \texttt{Linear(81,4)} on $\prod_{j}\{1,\cos q_j,\sin q_j\}$. \\
+Fourier-$d$ & The Linear-4D control with the map applied to $[\sin kq_j,\cos kq_j]_{k\le d}$, $d=1,\dots,4$ (maps of 36, 68, 100 and 132 parameters). \\
+Full Fourier-$d$ & The Linear-4D control with the map applied to $\prod_{j=1}^{4}\{1,\cos kq_j,\sin kq_j\}_{k\le d}$, $d=1$ (81 features) or $d=2$ (625 features). \\
+Frozen circuits & LSTM+QNN with the 24 circuit weights drawn from $U(-\pi,\pi)$ or set to 0 and not trained. \\
+Neural training & AdamW (learning rate $5\times10^{-3}$, weight decay $10^{-4}$), reduction on plateau (patience 3, factor 0.5), binary cross-entropy with positive-class weight, batch 16, at most 25 epochs, gradient clipping at 1.0, double precision; early stopping on validation loss (patience 6), best checkpoint restored. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[font=\small, node distance=3mm and 4mm,
+  blk/.style={draw=inkgray, rounded corners=2pt, align=center, inner sep=3pt, fill=white, minimum height=9mm},
+  qb/.style={blk, draw=primaryblue, line width=1.1pt, fill=paleblue},
+  ctl/.style={draw=inkgray!70, rounded corners=2pt, align=left, inner sep=3pt, fill=palegray, font=\footnotesize, text width=3.55cm, execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}},
+  arr/.style={-{Stealth[length=2mm]}, draw=inkgray, line width=0.6pt}]
+\node[blk, text width=2.0cm] (in) {12 monthly\\precipitation lags\\+ 23 features};
+\node[blk, right=of in, text width=2.1cm] (lstm) {LSTM\\(bidirectional)};
+\node[blk, right=of lstm, text width=1.8cm] (proj) {projection\\to 4 angles\\$q\in[0,\pi]^4$};
+\node[qb, right=8mm of proj, text width=2.7cm] (circ) {\textbf{4-qubit circuit}\\2 re-uploading layers\\readouts $\langle Z_1\rangle,\dots,\langle Z_4\rangle$};
+\node[blk, right=8mm of circ, text width=1.9cm] (ln) {LayerNorm\\+ linear output};
+\node[blk, below=3mm of ln, text width=2.3cm] (out) {$P(\text{wet month})$};
+\draw[arr] (in) -- (lstm); \draw[arr] (lstm) -- (proj); \draw[arr] (proj) -- (circ); \draw[arr] (circ) -- (ln); \draw[arr] (ln) -- (out);
+\draw[arr] (in.north) -- ++(0,4mm) -| (proj.north);
+\node[ctl, below=11mm of circ, xshift=-2.1cm] (c1) {\textbf{Is any nonlinearity needed?}\\ Linear-4D: linear $4\to4$ map};
+\node[ctl, right=2mm of c1] (c2) {\textbf{Does training the circuit matter?}\\ the same circuit, weights frozen (random or zero)};
+\node[ctl, below=2mm of c1] (c3) {\textbf{Is it the periodic map?}\\ separable Fourier maps of the angles (Fourier-1 to -4)};
+\node[ctl, below=2mm of c2] (c4) {\textbf{Is it the interactions between angles?}\\ tensor Fourier maps, 81 or 625 functions};
+\node[draw=inkgray!70, dashed, rounded corners=3pt, inner sep=3pt, fit=(c1)(c2)(c3)(c4), label={[font=\footnotesize, text=inkgray]below:interface controls: each replaces only the circuit, on the same four angles}] (ctlbox) {};
+\draw[arr, dashed, draw=inkgray!70] (ctlbox.north) -- node[right, font=\footnotesize, text=inkgray] {replaces the circuit} (circ.south);
+\end{tikzpicture}
+\caption{The hybrid model \texttt{LSTM+QNN} and its classical controls. A classical network compresses the inputs to four angles; the quantum circuit (blue) is the only part that a control replaces, so each control asks one question about what the circuit contributes. \texttt{LSTM+QTL} has the same structure with a frozen pre-trained LSTM and a single-encoding circuit. The trained circuit can also be emulated exactly by a classical Fourier expansion with $9^4$ coefficients per readout (\Cref{M-sec:applying}).}
+\label{fig:architecture}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \adjustbox{max width=\textwidth}{%
+    \begin{quantikz}[row sep=0.5cm, column sep=0.45cm]
+        \lstick{qubit 1: $\ket{0}$} &
+        \gate{R_y(q_1)}\gategroup[wires=4, steps=2, style={dashed, rounded corners, fill=blue!5, inner sep=6pt}, background, label style={label position=above, anchor=south, yshift=0.2cm}]{Data Encoding} & \gate{R_z(q_1)} &
+        \gate{\mathrm{Rot}(\vec\theta_1)}\gategroup[wires=4, steps=5, style={dashed, rounded corners, fill=purple!5, inner sep=6pt}, background, label style={label position=above, anchor=south, yshift=0.2cm}]{Variational Ansatz} &
+        \ctrl{1} & \qw & \qw & \targ{} & \meter{} \\
+        \lstick{qubit 2: $\ket{0}$} & \gate{R_y(q_2)} & \gate{R_z(q_2)} & \gate{\mathrm{Rot}(\vec\theta_2)} & \targ{} & \ctrl{1} & \qw & \qw & \meter{} \\
+        \lstick{qubit 3: $\ket{0}$} & \gate{R_y(q_3)} & \gate{R_z(q_3)} & \gate{\mathrm{Rot}(\vec\theta_3)} & \qw & \targ{} & \ctrl{1} & \qw & \meter{} \\
+        \lstick{qubit 4: $\ket{0}$} & \gate{R_y(q_4)} & \gate{R_z(q_4)} & \gate{\mathrm{Rot}(\vec\theta_4)} & \qw & \qw & \targ{} & \ctrl{-3} & \meter{}
+    \end{quantikz}%
+    }
+    \caption{Gate-level schematic of one layer of the 4-qubit circuit of \texttt{LSTM+QNN} (\Cref{fig:architecture}). The four angles $q=(q_1,\dots,q_4)\in[0,\pi]^4$ produced by the classical projection are encoded by consecutive $R_y(q_j)$ and $R_z(q_j)$ rotations on qubit $j$ (Data Encoding; \citealp{perez2020}). The trainable ansatz consists of general
+    $\mathrm{SU}(2)$ rotations ($\mathrm{Rot}$ gates, each parameterized by a 3-component vector
+    $\vec\theta_j = (\theta_{j,1}, \theta_{j,2}, \theta_{j,3})$) followed by a circular CNOT
+    entanglement topology. To implement the Strongly Entangling Layers architecture, this entire
+    encoding-ansatz block is repeated $L$ times (with $L=2$, yielding 24 quantum parameters). The readouts are the Pauli-$Z$ expectation values $\langle Z_j\rangle$ of the four qubits.}
+    \label{fig:vqc_circuit}
+\end{figure}
+
+\subsection{Tuning of the Tree Ensembles}
+\label{app:hyperparams}
+
+Both tree ensembles were tuned by the same declared search (\path{exp40_v2_tune.py}): Optuna, TPE sampler with seed 0, 50 trials each, objective the validation AUC of a model fitted on the training rows with model seed 0. Random Forest: 100--500 trees (step 50), depth 3--16, minimum split 2--20, minimum leaf 1--10, $\sqrt{p}$, $\log_2 p$ or half of the features. XGBoost: learning rate 0.01--0.3 (log), depth 2--8, minimum child weight 1--20 (log), subsample and column subsample 0.5--1, $\lambda$ $10^{-3}$--10 (log), $\gamma$ 0--5, early stopping on the validation AUC. The validation partition is used both for early stopping and for the search; the test partition is not touched. With the selected configurations (\Cref{tab:core_spec}) the 15-seed test AUCs are 0.6784 (SD 0.0011) for Random Forest and 0.6684 (0.0081) for XGBoost, against 0.6773 (0.0037; 300 trees of depth 8) and 0.6531 (0.0054; 500 trees of depth 4, learning rate 0.05, no early stopping) for the untuned configurations of the earlier version; the differences, $+0.001$ (DeLong $p=0.69$) and $+0.015$ ($p=0.27$), are not resolved. In the search the validation AUC of XGBoost peaked after very few boosting rounds. The neural models were not tuned automatically; their configuration is that of the earlier version.
+
+\subsection{Software Environment}
+
+Every result of the paper was produced in one pinned environment (\Cref{tab:software_env}); the archived predictions of an earlier environment are not mixed with these.
+
+\begin{table}[htbp]
+\centering
+\caption{Software environment of all results (Python 3.12.0, Windows, CPU only, 4 threads; complete list with hashes in \protect\path{requirements-v2.lock}). Simulator: PennyLane \texttt{default.qubit}, \texttt{diff\_method='backprop'}. XGBoost 2.0.3 is older than the rest of the environment; it is the version pinned in the lock file, and it imports and fits with numpy 2.5.4 in this environment.}
+\label{tab:software_env}
+{\small
+\begin{tabular}{ll}
+\toprule
+\textbf{Package} & \textbf{Version} \\
+\midrule
+torch & 2.15.0+cpu \\
+pennylane & 0.45.1 \\
+pennylane-lightning & 0.45.0 \\
+scikit-learn & 1.9.1 \\
+xgboost & 2.0.3 \\
+optuna & 5.0.0 \\
+numpy & 2.5.4 \\
+pandas & 3.1.1 \\
+scipy & 1.18.1 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+% ============================================================
+\section{Inference: Further Results}
+\label{app:inference}
+% ============================================================
+
+\subsection{Estimators}
+\label{app:noise_budget}
+
+
+\textbf{Estimators.} For two models scored on the same 529 rows, the DeLong estimator gives the covariance of the two AUCs from their structural components \citep{delong1988}; it treats station-months as independent. The block bootstrap resamples the 19 calendar years (2008--2026) with replacement, keeping all stations of a year together, recomputes both AUCs on each resample ($B=2{,}000$) and takes percentile intervals \citep{field2007}; the moving-block variant with blocks of several consecutive years \citep{kunsch1989} is a sensitivity check. The two-way bootstrap draws a calendar-year resample and a resample of the 15 seeds, one draw shared by both models when they share the fitted LSTM of a seed and one per model otherwise, and recomputes the difference of seed-averaged AUCs. The cluster-robust estimator uses the influence values $\psi_i=(\bar v^{A}_{10,i}-\bar v^{B}_{10,i}-\hat\Delta)/n_1$ for positives and $(\bar v^{A}_{01,j}-\bar v^{B}_{01,j}-\hat\Delta)/n_0$ for negatives, where $\bar v$ are the DeLong components averaged over seeds; $\sum_i\psi_i^2$ equals the DeLong variance of $\hat\Delta$ up to factors $(n-1)/n$, and the year sums of $\psi$ give the cluster-robust one. Writing the year sum as $S_u=\sum_s S_{u,s}$ over stations $s$, $\sum_u S_u^2=\sum_{u,s}S_{u,s}^2+\sum_u\sum_{s\ne t}S_{u,s}S_{u,t}$ separates the within-station and cross-station terms; the permutation null permutes the year labels independently within each station (2{,}000 permutations).
+
+\textbf{Seed-mean statistic.} The AUC of one model is the mean of the DeLong structural components over positives and over negatives, so the mean of the 15 AUCs equals the AUC statistic built from components averaged over seeds, and the paired DeLong variance of $\hat\Delta$ follows from the averaged components. This treats the 15 seeds as fixed and so conditions on the fitted models; the two-way bootstrap relaxes this by resampling seeds.
+
+\subsection{Single-Seed Pairings}
+\label{app:single_seed}
+
+For one seed per model, the paired DeLong standard error and MDE are averaged over the $15\times15$ seed pairings, and the last column gives the share of pairings in which Random Forest is declared better at $\alpha=0.05$ (\Cref{tab:single_seed}). A verdict about one pair of runs depends largely on which seeds are compared.
+
+\begin{table}[htbp]
+\centering
+\caption{Single-seed comparisons (529 test rows; $15\times15$ pairings).}
+\label{tab:single_seed}
+{\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Pair} & \textbf{Mean SE (DeLong)} & \textbf{MDE} & \textbf{Declared RF $>$ B} \\
+\midrule
+RF $-$ XGBoost & 0.0109 & 0.031 & 6.7\,\% \\
+RF $-$ LSTM & 0.0127 & 0.036 & 0.0\,\% \\
+RF $-$ LSTM+QNN & 0.0158 & 0.044 & 8.9\,\% \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Cross-Station Structure of the Cluster Variance}
+\label{app:cancellation}
+
+\Cref{tab:cancellation} decomposes the calendar-year cluster variance of four paired differences (\path{exp37_cancellation.py}). The cross-station term is the sum over years of the products of the contributions of different stations; it is negative when, within a year, a model gains at one station and loses at another. The permutation null permutes the years independently within each station (2{,}000 permutations), which removes the co-movement of stations and keeps the within-station structure. The last two columns recompute the ratio after removing, from the influence values, the mean of each station (and class) or of each station$\times$calendar month$\times$class cell.
+
+A cluster standard error below the DeLong one means that the advantage of one model is steadier from year to year than independent months would suggest. In the years in which Random Forest gains on the LSTM at one station, it tends to lose at another, so the station contributions partly cancel within each year. Shuffling the years independently within each station, which breaks that link, brings the ratio back towards 0.75--0.87, and the observed values lie in the lower tail of that distribution ($p=0.07$ and 0.12; \Cref{tab:cancellation}). The cancellation comes from seasonal patterns that differ between stations and between the two model families, and it did not appear on the second panel (\Cref{M-sec:replication}).
+
+\textbf{The cancellation by period} (\path{exp45_cluster_periods.py}). Restricted to 2008--2012, the only five years with more than two stations (all four in 2008--2011), the cross-station term is $-88$\,\% and $-99$\,\% of the within-station one for RF $-$ LSTM and RF $-$ \texttt{LSTM+QNN}, and Random Forest has no advantage (gaps $-0.004$ and $-0.0005$); in 2013--2026, with two stations, the terms are $-25$\,\% and $-3$\,\%, the cluster/iid ratios 0.65 and 0.87, and the gaps $+0.023$ and $+0.030$. Because the composition of the test set changes with the period, a difference in the relative behaviour of the models between the two periods is an alternative reading of the same pattern, and the two cannot be separated with five years of more than two stations. Removing a constant per station changes nothing, whereas removing the mean of each station, calendar month and class brings the ratio to 1.0--1.06. Removing the partial year 2026 (nine rows, January--May) leaves the ratios unchanged (0.60 and 0.73). The effect was stronger in the earlier version of the analysis, whose labels were partly wrong (\Cref{app:v1}).
+
+\begin{table}[htbp]
+\centering
+\caption{Cluster-robust/DeLong ratio and its decomposition. Cross/within: cross-station term over within-station term. Corr.: mean correlation over station pairs of the yearly sums. Null: median [5\,\%, 95\,\%] of the ratio under the within-station permutation, and lower-tail $p$. Demeaned: ratio after removing station or station$\times$month means.}
+\label{tab:cancellation}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{lcccccccc}
+\toprule
+\textbf{Pair} & $\hat\Delta$ & \textbf{Ratio} & \textbf{Cross/within} & \textbf{Corr.} & \textbf{Null ratio} & $p$ & \textbf{Station} & \textbf{Station$\times$month} \\
+\midrule
+RF $-$ LSTM+QNN & $+0.0197$ & 0.72 & $-35$\,\% & $-0.11$ & 0.87 [0.67, 1.09] & 0.116 & 0.69 & 1.06 \\
+RF $-$ LSTM & $+0.0146$ & 0.59 & $-42$\,\% & $-0.15$ & 0.75 [0.58, 0.94] & 0.074 & 0.62 & 1.00 \\
+LSTM $-$ LSTM+QNN & $+0.0051$ & 0.88 & $-12$\,\% & $-0.03$ & 0.92 [0.72, 1.12] & 0.398 & 0.90 & 1.10 \\
+RF $-$ Linear-4D & $+0.0230$ & 0.75 & $-36$\,\% & $-0.12$ & 0.90 [0.68, 1.12] & 0.141 & 0.79 & 1.11 \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\subsection{Simulation of Within-Year Cancellation}
+\label{app:cancellation_sim}
+
+The observed ratios of 0.59 and 0.72 (\Cref{tab:cancellation}) are rare in the calibration of \Cref{app:fewclusters}. \path{exp61_cancellation_calibration.py} asks whether a mechanism of cancellation between stations would make them common, and how the intervals behave when the data show such a ratio. By the design effect, a ratio $r$ over clusters of $m$ rows implies an intraclass correlation $(r^2-1)/(m-1)$ of the influence values; with $m=27.8$ rows per year the observed ratios imply $-0.024$ and $-0.018$, against a lower bound of $-1/(m-1)=-0.037$.
+
+\textbf{Search.} On the real test mask, 1{,}000 replications per cell, thirteen mechanisms that make station contributions cancel within a year (year$\times$station effects with opposite loadings up to $\tau_c=1$, prevalence dipoles with a scorer that uses the base rate, station effects centred within each year, and a swap of the advantage between the two station groups) give median ratios of 1.05--2.45: random within-year effects add variance to the yearly sums, whatever their signs across stations, and the probability of a ratio $\le0.72$ is at most 0.033. Only a pattern that recurs every year can lower the ratio legitimately, because every year holds every month and the years become balanced blocks; a fixed station$\times$month pattern of the scores or of the signal of one scorer lowers the median ratio to 0.83--0.97.
+
+\textbf{Coverage given a low ratio.} \Cref{tab:cancellation_sim} gives, in ten mechanisms and 20{,}000 replications each, the coverage of the 95\,\% intervals for the difference for new years, over all replications and over those whose cluster/iid ratio is as low as observed. CR2 is calibrated overall (0.947--0.955 over both true differences) but covers 0.78--0.90 when the ratio is $\le0.72$ and 0.70--0.86 when it is $\le0.59$: a low ratio mostly reflects an underestimated cluster variance. Flooring the CR2 standard error at the iid one keeps the coverage at 0.92--0.99 in those replications and makes the interval conservative overall (0.96--0.99). Applied to the contrasts of the paper (\path{exp62_floored_cr2_observed.py}), the floor changes only the two exploratory verdicts, Random Forest against the LSTM ($p$ from 0.041 to 0.204) and against \texttt{LSTM+QNN} (0.031 to 0.107); the frozen circuits and Random Forest against \texttt{LSTM+QTL} remain resolved. The within-station structure of the real data (\Cref{tab:cancellation}, permutation null centred at 0.75--0.92) is not fully reproduced by these mechanisms, so the floor is a conservative rule, not a proof that the two differences are absent.
+
+\textbf{A trigger for the floor} (\path{exp63_floor_threshold.py}). Item 1 of the protocol floors the CR2 standard error only when the cluster/iid ratio (CR1 over DeLong) is at or below the 5th percentile of its distribution on the real test mask with independent cases: 0.708 in 20{,}000 replications (median 0.975; 1st and 10th percentiles 0.61 and 0.76). In the ten mechanisms of \Cref{tab:cancellation_sim} (5{,}000 replications per mechanism and true difference, 0 and 0.02) the 5th percentile of the ratio is 0.61--0.84 and the rule triggers in 0.9--19.6\,\% of replications, most often under the seasonal patterns that lower the ratio legitimately. The rule covers at 0.95--0.98 overall, against 0.95--0.96 for CR2 and 0.96--0.99 for the floor applied to every replication, and at 0.89--0.99 among the replications that trigger it (45 to 981 per cell), where CR2 covers at 0.73--0.89. In this paper the unfloored CR2 interval, fixed before the rule existed, decides, and the rule is a sensitivity check. On the contrasts of the paper it triggers only for Random Forest against the LSTM (ratio 0.594), which with the floor would not be resolved ($p=0.204$), with the MDE of the floored procedure, 0.033 (\Cref{tab:mde_ci}); Random Forest against \texttt{LSTM+QNN} (0.723) and against \texttt{LSTM+QTL} (0.779) lie above it, so their CR2 verdicts stand. The trigger was set after the primary analysis and from this panel, so it is post hoc, and it is a property of this design: another test set needs its own calibration; it was fixed as a percentile of the independent-cases distribution before the contrasts were sorted against it, and Random Forest against \texttt{LSTM+QNN} falls 0.014 above it. A trigger of 0.75 would also floor Random Forest against \texttt{LSTM+QNN} ($p=0.107$; already exploratory for the reasons of \Cref{M-sec:budget}) and Random Forest against XGBoost ($p$ from 0.110 to 0.224; not resolved either way), and change no other AUC verdict. On the Brier contrasts of \Cref{tab:brier_inference}, for which the trigger was not calibrated (a Brier-specific trigger would be computed in the same way, as the 5th percentile of the Brier cluster/iid ratio simulated on the design with independent cases), it fires for two recalibrated contrasts and changes one verdict: the LSTM against the climatology (ratio 0.66; $p$ from 0.016 to 0.095).
+
+\begin{table}[htbp]
+\centering
+\caption{Coverage of 95\,\% intervals given the cluster/iid ratio (true difference 0.02; 20{,}000 replications per mechanism on the real test mask; \protect\path{exp61_cancellation_calibration.py}). Median ratio: of the CR1 to the DeLong standard error. $n$: replications with a ratio $\le0.72$ (in parentheses, $\le0.59$). Floored: CR2 with the standard error floored at the DeLong one, Bell--McCaffrey degrees of freedom.}
+\label{tab:cancellation_sim}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lcccccccc@{}}
+\toprule
+& & & \multicolumn{3}{c}{\textbf{CR2}} & \textbf{DeLong} & \multicolumn{2}{c}{\textbf{Floored CR2}} \\
+\cmidrule(lr){4-6}\cmidrule(lr){7-7}\cmidrule(lr){8-9}
+\textbf{Mechanism} & \textbf{Median ratio} & $n$ & \textbf{All} & \textbf{Ratio $\le0.72$} & \textbf{Ratio $\le0.59$} & \textbf{Ratio $\le0.72$} & \textbf{All} & \textbf{Ratio $\le0.72$} \\
+\midrule
+Independent & 0.98 & 1080 & 0.953 & 0.841 & 0.740 (123) & 0.944 & 0.975 & 0.964 \\
+Shared year effects & 0.98 & 1122 & 0.952 & 0.848 & 0.760 (129) & 0.955 & 0.975 & 0.971 \\
+Year$\times$station, opposite loadings & 1.14 & 301 & 0.950 & 0.787 & 0.783 (23) & 0.944 & 0.961 & 0.953 \\
+Zero-sum station effects & 1.16 & 276 & 0.951 & 0.819 & 0.724 (29) & 0.924 & 0.961 & 0.953 \\
+Swap of the advantage between stations & 1.04 & 566 & 0.952 & 0.809 & 0.755 (53) & 0.938 & 0.969 & 0.966 \\
+Seasonal pattern, scores & 0.97 & 1170 & 0.952 & 0.838 & 0.737 (118) & 0.957 & 0.975 & 0.973 \\
+Seasonal pattern, signal & 0.92 & 1902 & 0.954 & 0.864 & 0.796 (216) & 0.963 & 0.981 & 0.976 \\
+Seasonal pattern, signal (strong) & 0.86 & 3396 & 0.955 & 0.882 & 0.816 (512) & 0.975 & 0.987 & 0.983 \\
+Seasonal pattern, signal (very strong) & 0.83 & 4325 & 0.954 & 0.894 & 0.825 (765) & 0.978 & 0.988 & 0.987 \\
+Seasonal pattern, scores (strong) & 0.95 & 1543 & 0.949 & 0.831 & 0.751 (193) & 0.951 & 0.976 & 0.971 \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\subsection{Calibration of the Primary Procedure and Few-Cluster Checks}
+\label{app:fewclusters}
+
+\textbf{Calibration of the primary procedure} (\path{exp48_primary_calibration.py}, 600 replications per cell, Monte Carlo standard error of a coverage of 0.95 about 0.009). Rows are the 529 station-months of the test set with their stations and years, or variants with 10 or 38 years of the same station patterns and with two or four stations in every year. Two binormal scorers ($\rho=0.85$, AUC 0.66 and $0.66+\Delta$, $\Delta\in\{0,0.02\}$) receive year effects on the prevalence logit and on a shared score shift ($\tau=0.3$), scorer-specific year shifts ($\tau_m=0.15$), scorer-specific year$\times$station effects with opposite loadings at Alicante/San Javier and Barcelona/Valencia ($\tau_c=0.25$), a prevalence dipole between the two pairs of stations combined with a scorer that uses the station base rate, and AR(1) dependence between consecutive years (coefficient 0.5). The truth is the difference for new independent years, analytic where no scorer uses the base rate (\Cref{app:sim_mechanism}) and computed on 300 independent copies of the design otherwise. \Cref{tab:primary_cal} summarizes the coverage of the 95\,\% intervals.
+
+\begin{table}[htbp]
+\centering
+\caption{Coverage of 95\,\% intervals for the difference for new years (minimum--maximum over the cells of each group; 600 replications per cell). CR2-BM: CR2 with Bell--McCaffrey degrees of freedom (the primary procedure); CR1: $t_{K-1}$; jackknife: delete-one-year, $t_{K-1}$; wild: studentized wild cluster bootstrap, Webb weights; block: percentile year-block bootstrap.}
+\label{tab:primary_cal}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Cells & DeLong & Block & CR1 & CR2-BM & Jackknife & Wild \\
+\midrule
+19 years, independent (10 cells) & 0.845--0.960 & 0.885--0.930 & 0.937--0.953 & 0.940--0.955 & 0.940--0.955 & 0.935--0.952 \\
+10 years (4 cells) & 0.897--0.947 & 0.873--0.908 & 0.927--0.962 & 0.935--0.967 & 0.932--0.963 & 0.923--0.958 \\
+38 years (4 cells) & 0.888--0.942 & 0.913--0.942 & 0.935--0.948 & 0.935--0.952 & 0.935--0.952 & 0.933--0.950 \\
+2 or 4 stations every year (8 cells) & 0.867--0.945 & 0.905--0.940 & 0.935--0.975 & 0.935--0.975 & 0.935--0.977 & 0.933--0.975 \\
+AR(1) years, scorer-specific effects (2 cells) & 0.932--0.932 & 0.907--0.923 & 0.937--0.938 & 0.937--0.942 & 0.938--0.943 & 0.937--0.937 \\
+AR(1) years with year$\times$station effects (2 cells) & 0.822--0.848 & 0.843--0.872 & 0.880--0.907 & 0.883--0.908 & 0.883--0.910 & 0.872--0.902 \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+Under every mechanism with independent years CR2 with Bell--McCaffrey degrees of freedom covers at 0.935--0.975, and with 10 years it is the best or joint best; the jackknife is nearly identical, CR1 and the wild bootstrap slightly less conservative with few years. DeLong undercovers whenever there are year$\times$station effects or a dipole (down to 0.845), and the percentile block bootstrap undercovers almost everywhere (0.873--0.942). Serial correlation of the year effects alone costs little (CR2 0.937--0.942), but combined with year$\times$station effects no procedure based on calendar-year clusters is calibrated (0.872--0.910). The simulated cluster/iid ratio of CR1 rarely falls as low as observed for Random Forest against the neural models: the share of replications with a ratio $\le0.59$ is at most 0.012 in every cell with 19 years, and with a ratio $\le0.72$ at most 0.058.
+
+\textbf{Clusters of consecutive years.} With CR2 on clusters of two consecutive years (10 clusters, $\nu=7.5$), the coverage under serially correlated scorer-specific effects rises from 0.937 to 0.953, but with year$\times$station effects it only moves from 0.908 to 0.915, and the power at a difference of 0.02 with independent years falls from 0.28 to 0.22 (\path{local_exp48_primary_calibration_2yr.json}). On the panel (\path{local_cr2_block_sensitivity.json}), the differences that the primary procedure resolves for Random Forest against the LSTM and \texttt{LSTM+QNN} ($p=0.041$ and 0.031) are not resolved with two-year clusters ($p=0.061$ and 0.051) or three-year clusters ($p=0.13$ for both); Random Forest against \texttt{LSTM+QTL} holds with two-year clusters ($p=0.027$) but not three ($p=0.064$); the effect of freezing the circuit holds with every block length ($p\le0.018$). As a check of the cluster definition itself, the CR1 interval is also computed with 12-month clusters starting in each of the 12 calendar months (``phases'); the number of phases for which it excludes zero is reported in \Cref{tab:panel2} and for SEAS5.
+
+\textbf{Influential years} (\path{local_cr2_leave_one_year.json}). Leaving out one test year at a time, the primary verdict on Random Forest against the LSTM changes for 9 of the 19 years ($p$ from 0.013 to 0.079) and on Random Forest against \texttt{LSTM+QNN} for 2 (2020 and 2023; $p$ from 0.021 to 0.054); Random Forest against XGBoost, not resolved on all years, becomes resolved without 2020 or 2022 ($p$ from 0.032 to 0.232). Random Forest against \texttt{LSTM+QTL} ($p\le0.017$) and the two frozen circuits ($p\le0.037$) keep their verdicts for every omitted year, and \texttt{LSTM+QNN} against Linear-4D stays unresolved ($p\ge0.34$). \Cref{fig:sensitivity} collects these checks for the resolved differences: the two exploratory verdicts fail with two- and three-year clusters, change with single omitted years, move under the causal refit and do not recur on the second panel, whereas the effect of freezing the circuit survives every check.
+
+\textbf{Station mix.} The nominal verdicts do not depend on the changing station mix: on Alicante and Barcelona alone, present in every test year (441 rows), Random Forest is 0.019 above the LSTM and 0.027 above \texttt{LSTM+QNN} (CR2 $p=0.026$ and 0.014), and no nominal verdict of the pairs discussed in \Cref{M-sec:budget} changes; the second $p$-value would also pass the first Holm step, which it does not on the full panel, an exploratory sensitivity rather than a confirmation.
+
+\begin{figure}[htbp]
+    \centering
+    \safefig{figs/fig_sensitivity.pdf}{0.95\textwidth}
+    \caption{Sensitivity of the resolved differences of 15-seed means to the robustness checks (\protect\path{scripts/make_sensitivity_plot.py}; archived results only). Each dot is the CR2 $p$-value of one check (blue: the primary analysis); filled dots exclude zero at 0.05. Leave one year out: 19 dots, one per omitted test year. Causal refit: models refitted with causal imputation, on the 529 test rows shared with the archived pipeline (\Cref{tab:causal}). Second panel: a different test set (\Cref{app:panel2}), with its difference; the contrasts of the bottom row were not part of it, nor of the causal refit. $^{\dagger}$Exploratory verdicts (\Cref{M-tab:paired_ci,M-tab:qnn_paired}).}
+    \label{fig:sensitivity}
+\end{figure}
+
+With 19 clusters, the CR1 estimator can be biased downward. \Cref{tab:fewclusters} adds the Bell--McCaffrey CR2 estimator with a $t_{18}$ reference (the primary procedure of the main text uses the Bell--McCaffrey degrees of freedom, $\nu=15.9$) \citep{bell2002} and a studentized wild cluster bootstrap with Webb six-point weights ($B=9{,}999$; \citealp{webb2023}). The last column is the smallest margin $m$ such that the 90\,\% CR2 interval lies within $[-m,m]$, a descriptive bound since no margin was fixed in advance \citep{schuirmann1987,lakens2017}.
+
+\begin{table}[htbp]
+\centering
+\caption{Few-cluster inference (529 test rows, 19 years; \protect\path{exp35_equivalence_fewclusters.py}).}
+\label{tab:fewclusters}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{lcccccccc}
+\toprule
+\textbf{Pair} & $\hat\Delta$ & \textbf{SE iid} & \textbf{SE CR1} & \textbf{SE CR2} & $p$ \textbf{DeLong} & $p$ \textbf{CR2} & $p$ \textbf{wild} & \textbf{90\,\% bound} \\
+\midrule
+RF $-$ LSTM & $+0.0146$ & 0.0110 & 0.0065 & 0.0066 & 0.185 & 0.040 & 0.041 & 0.026 \\
+RF $-$ LSTM+QNN & $+0.0197$ & 0.0115 & 0.0083 & 0.0083 & 0.087 & 0.029 & 0.022 & 0.034 \\
+LSTM $-$ LSTM+QNN & $+0.0051$ & 0.0056 & 0.0050 & 0.0050 & 0.367 & 0.322 & 0.312 & 0.014 \\
+Linear-4D $-$ LSTM+QNN & $-0.0034$ & 0.0059 & 0.0064 & 0.0065 & 0.564 & 0.607 & 0.604 & 0.015 \\
+Fourier-1 $-$ LSTM+QNN & $+0.0051$ & 0.0045 & 0.0052 & 0.0052 & 0.261 & 0.347 & 0.360 & 0.014 \\
+Fourier-2 $-$ LSTM+QNN & $+0.0041$ & 0.0046 & 0.0052 & 0.0053 & 0.380 & 0.449 & 0.453 & 0.013 \\
+Full Fourier-2 $-$ LSTM+QNN & $+0.0026$ & 0.0048 & 0.0058 & 0.0058 & 0.596 & 0.665 & 0.652 & 0.013 \\
+Full Fourier-1 $-$ LSTM+QNN & $+0.0084$ & 0.0045 & 0.0056 & 0.0056 & 0.063 & 0.156 & 0.153 & 0.018 \\
+Fourier-3 $-$ LSTM+QNN & $+0.0040$ & 0.0048 & 0.0057 & 0.0058 & 0.399 & 0.494 & 0.493 & 0.014 \\
+Fourier-4 $-$ LSTM+QNN & $+0.0032$ & 0.0050 & 0.0070 & 0.0071 & 0.525 & 0.663 & 0.660 & 0.015 \\
+QTL-classical $-$ LSTM+QTL & $+0.0027$ & 0.0041 & 0.0041 & 0.0041 & 0.505 & 0.514 & 0.509 & 0.010 \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\subsection{Uncertainty of the MDE and Equivalence Tests}
+\label{app:mde_ci}
+
+\textbf{Uncertainty of the MDE} (\path{exp57_mde_ci_equivalence.py}). The MDE of the primary procedure, $(t_{0.975,\nu}+t_{0.80,\nu})\,\text{SE}_{\text{CR2}}$, treats the CR2 standard error as known. \Cref{tab:mde_ci} gives two 95\,\% intervals for it. The first uses the Satterthwaite approximation that defines the Bell--McCaffrey degrees of freedom, $\nu\,\text{SE}^2/\sigma^2\sim\chi^2_\nu$, so that $\sigma$ lies in $\text{SE}\,[\{\nu/\chi^2_{0.975,\nu}\}^{1/2},\{\nu/\chi^2_{0.025,\nu}\}^{1/2}]$; with $\nu=15.9$ the interval is 0.74--1.52 times the point MDE for every contrast. The second is a percentile bootstrap over the 19 calendar years ($B=2{,}000$; years drawn with replacement and relabelled, $\text{SE}_{\text{CR2}}$ and $\nu$ recomputed), 0.45--1.44 times the point MDE. If the true standard error lay at either end of the first interval, the power of the design at the reported MDE would be 0.44 or 0.96.
+
+\begin{table}[htbp]
+\centering
+\caption{80\,\%-power MDE of the primary procedure (CR2, $\nu=15.9$) with two 95\,\% intervals: $\chi^2_\nu$ approximation and year bootstrap ($B=2{,}000$). 15-seed means, 529 test rows. The first six rows are the two Holm families. For RF $-$ LSTM, whose cluster/iid ratio (0.59) is below the floor trigger of 0.71 (\Cref{app:cancellation_sim}), the floored CR2 interval of the sensitivity check has MDE 0.033 (DeLong 0.031); RF $-$ LSTM+QNN (0.72) lies just above the trigger, and floored its MDE would be 0.034.}
+\label{tab:mde_ci}
+{\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Difference} & $\hat\Delta$ & \textbf{MDE (CR2)} & \textbf{95\,\% CI, $\chi^2_\nu$} & \textbf{95\,\% CI, year bootstrap} \\
+\midrule
+RF $-$ XGBoost & $+0.0100$ & 0.018 & $[0.013,0.027]$ & $[0.011,0.024]$ \\
+RF $-$ LSTM & $+0.0146$ & 0.020 & $[0.015,0.030]$ & $[0.013,0.026]$ \\
+XGBoost $-$ LSTM & $+0.0046$ & 0.024 & $[0.018,0.037]$ & $[0.013,0.035]$ \\
+RF $-$ LSTM+QNN & $+0.0197$ & 0.025 & $[0.018,0.038]$ & $[0.011,0.035]$ \\
+Linear-4D $-$ LSTM+QNN & $-0.0034$ & 0.019 & $[0.014,0.029]$ & $[0.013,0.022]$ \\
+LSTM $-$ LSTM+QNN & $+0.0051$ & 0.015 & $[0.011,0.023]$ & $[0.010,0.020]$ \\
+\midrule
+Fourier-2 $-$ LSTM+QNN & $+0.0041$ & 0.016 & $[0.012,0.024]$ & $[0.010,0.020]$ \\
+Full Fourier-1 $-$ LSTM+QNN & $+0.0084$ & 0.017 & $[0.013,0.026]$ & $[0.010,0.021]$ \\
+Full Fourier-2 $-$ LSTM+QNN & $+0.0026$ & 0.017 & $[0.013,0.026]$ & $[0.012,0.021]$ \\
+LSTM+QTL $-$ QTL-classical & $-0.0027$ & 0.012 & $[0.009,0.019]$ & $[0.008,0.016]$ \\
+LSTM+QTL $-$ QTL tensor-81 & $-0.0066$ & 0.012 & $[0.009,0.018]$ & $[0.007,0.016]$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\textbf{Equivalence of the circuit and its interface controls.} Two one-sided CR2 $t$ tests at $\alpha=0.05$ \citep{schuirmann1987,lakens2017}, i.e.\ the 90\,\% CR2 interval inside $(-0.01,+0.01)$ (\Cref{tab:tost}). The margin of 0.01 AUC is the smallest difference of interest recorded for the external benchmark (\path{audit/prediction_external.txt}, 18 November 2026) after the main analysis of this panel: it was not chosen from the equivalence results, but it was not blind to them, so the tests are post hoc and unadjusted. The last column is the smallest margin that the data would accept, the descriptive bound of \Cref{tab:fewclusters} with CR2 degrees of freedom.
+
+\begin{table}[htbp]
+\centering
+\caption{Equivalence tests (TOST, margin $\pm0.01$ AUC) of the trained circuits against their interface controls, with the primary procedure (CR2, $\nu=15.9$). 15-seed means, 529 test rows; post hoc, unadjusted.}
+\label{tab:tost}
+{\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Difference} & $\hat\Delta$ & \textbf{CR2 90\,\% CI} & \textbf{TOST $p$} & \textbf{Smallest margin} \\
+\midrule
+Linear-4D $-$ LSTM+QNN & $-0.0034$ & $[-0.0147,+0.0079]$ & 0.161 & 0.0147 \\
+Fourier-2 $-$ LSTM+QNN & $+0.0041$ & $[-0.0051,+0.0132]$ & 0.137 & 0.0132 \\
+Full Fourier-1 $-$ LSTM+QNN & $+0.0084$ & $[-0.0015,+0.0182]$ & 0.387 & 0.0182 \\
+Full Fourier-2 $-$ LSTM+QNN & $+0.0026$ & $[-0.0076,+0.0127]$ & 0.109 & 0.0127 \\
+LSTM+QTL $-$ QTL-classical & $-0.0027$ & $[-0.0098,+0.0044]$ & 0.047 & 0.0098 \\
+LSTM+QTL $-$ QTL tensor-81 & $-0.0066$ & $[-0.0134,+0.0001]$ & 0.200 & 0.0134 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Probabilistic skill against the month$\times$station climatology (15 seeds per model, 529 test rows). As trained: mean Brier score, Brier skill score (BSS), year-block 95\,\% interval of the Brier difference model $-$ climatology, 10-bin expected calibration error (ECE). After Platt recalibration on the validation partition: Brier score, BSS against the raw and against the recalibrated climatology ($n$: seeds with BSS $>0$), year-block interval of the Brier difference to the recalibrated climatology, ECE. Models of the recalibration columns refitted with the same seeds.}
+\label{tab:brier}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lccccccccc@{}}
+\toprule
+& \multicolumn{4}{c}{\textbf{As trained}} & \multicolumn{5}{c}{\textbf{After Platt recalibration}} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-10}
+\textbf{Model} & \textbf{Brier} & \textbf{BSS} & $\Delta$\textbf{BS [block CI]} & \textbf{ECE} & \textbf{Brier} & \textbf{BSS vs raw} ($n$) & \textbf{BSS vs recal.} ($n$) & $\Delta$\textbf{BS vs recal. [CI]} & \textbf{ECE} \\
+\midrule
+Climatology & 0.2184 & 0 & -- & 0.061 & 0.2155 & -- & 0 & -- & 0.042 \\
+\midrule
+Random Forest & 0.2284 & $-0.046$ & $[+0.002,+0.017]$ & 0.099 & 0.2189 & $-0.002$ (0) & $-0.016$ (0) & $[-0.003,+0.009]$ & 0.029 \\
+XGBoost & 0.2394 & $-0.096$ & $[+0.011,+0.031]$ & 0.109 & 0.2212 & $-0.013$ (1) & $-0.027$ (0) & $[-0.000,+0.011]$ & 0.050 \\
+Standalone LSTM & 0.2427 & $-0.111$ & $[+0.015,+0.033]$ & 0.144 & 0.2215 & $-0.014$ (1) & $-0.028$ (0) & $[+0.001,+0.010]$ & 0.053 \\
+Linear-4D control & 0.2378 & $-0.089$ & $[+0.010,+0.028]$ & 0.125 & 0.2233 & $-0.023$ (0) & $-0.037$ (0) & $[+0.001,+0.014]$ & 0.055 \\
+LSTM+QNN & 0.2424 & $-0.110$ & $[+0.015,+0.033]$ & 0.132 & 0.2245 & $-0.028$ (1) & $-0.042$ (0) & $[+0.003,+0.015]$ & 0.049 \\
+\bottomrule
+\end{tabular}}%
+}
+\end{table}
+
+\subsection{Inference on the Brier Score}
+\label{app:brier}
+
+The inference of the main text applies to any metric with per-case influence values. For a difference of seed-mean Brier scores the influence value of a case is its centred loss difference divided by $N$, so the CR2 leverage correction of a mean is exact (\path{qml_resolution.cluster_robust_brier_delta}; \path{exp58_brier_inference.py}). \Cref{tab:brier_inference} repeats the two primary families, the Fourier controls and the comparisons with the climatology, as trained and after a per-seed Platt map fitted on the validation partition (the refit of the right block of \Cref{tab:brier}, the only archive with validation predictions of these models). Both columns reproduce the Brier scores of \Cref{tab:brier}.
+
+As trained, the Brier score resolves most differences, among them Random Forest against the three neural models and \texttt{LSTM+QNN} against its Linear-4D control (worse by 0.0046), all after Holm. These differences mostly measure calibration: every model except the climatology was trained with positive-class weighting, and the as-trained calibration errors are 0.10--0.14 (\Cref{tab:brier}). After recalibration no difference of the primary families passes Holm, \texttt{LSTM+QNN} is not distinguished from Linear-4D ($+0.0012$, $p=0.44$), and Random Forest against \texttt{LSTM+QNN} and the LSTM against \texttt{LSTM+QNN} are resolved before correction only ($p=0.027$). The standalone LSTM, Linear-4D and \texttt{LSTM+QNN} remain worse than the recalibrated climatology (CR2 $p=0.010$--0.028; secondary, unadjusted); with the floor of protocol item 1, which the LSTM triggers (ratio 0.66), the LSTM is not ($p=0.095$; \Cref{app:cancellation_sim}). The Brier MDEs of 15-seed means are 0.004--0.010 after recalibration. No verdict of the main text changes: none of the AUC statements concerns calibration, and on the recalibrated Brier score, as on the AUC, no learned model is better than the climatology and the circuit shows no advantage over its interface controls.
+
+\begin{table}[htbp]
+\centering
+\caption{Paired differences of 15-seed mean Brier scores, $A-B$ (negative: $A$ better), with the primary procedure (CR2, calendar-year clusters, $\nu=15.9$) and its 80\,\%-power MDE; 529 test rows. Left: as trained (archived predictions of the main text). Right: after a per-seed Platt map fitted on the validation partition (refitted models with the same seeds, as in \Cref{tab:brier}; not available for the Fourier controls). The first two blocks are the Holm families of the main text. $^{*}$: resolved (CR2 interval excludes zero); $^{**}$: resolved after Holm within the family. The other blocks are secondary and unadjusted.}
+\label{tab:brier_inference}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+& \multicolumn{3}{c}{\textbf{As trained}} & \multicolumn{3}{c}{\textbf{After Platt recalibration}} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+\textbf{Difference} & $\hat\Delta$BS & \textbf{CR2 95\,\% CI} ($p$) & \textbf{MDE} & $\hat\Delta$BS & \textbf{CR2 95\,\% CI} ($p$) & \textbf{MDE} \\
+\midrule
+RF $-$ XGBoost & $-0.0110$ & $[-0.0194,-0.0026]$ (0.013)$^{**}$ & 0.0118 & $-0.0024$ & $[-0.0061,+0.0014]$ (0.200) & 0.0053 \\
+RF $-$ LSTM & $-0.0143$ & $[-0.0213,-0.0073]$ (0.001)$^{**}$ & 0.0098 & $-0.0026$ & $[-0.0066,+0.0013]$ (0.179) & 0.0056 \\
+XGBoost $-$ LSTM & $-0.0033$ & $[-0.0132,+0.0066]$ (0.490) & 0.0139 & $-0.0003$ & $[-0.0052,+0.0047]$ (0.909) & 0.0069 \\
+\midrule
+RF $-$ LSTM+QNN & $-0.0140$ & $[-0.0210,-0.0070]$ (0.001)$^{**}$ & 0.0098 & $-0.0056$ & $[-0.0105,-0.0007]$ (0.027)$^{*}$ & 0.0069 \\
+LSTM+QNN $-$ Linear-4D & $+0.0046$ & $[+0.0010,+0.0082]$ (0.016)$^{**}$ & 0.0051 & $+0.0012$ & $[-0.0019,+0.0043]$ (0.438) & 0.0044 \\
+LSTM $-$ LSTM+QNN & $+0.0004$ & $[-0.0031,+0.0038]$ (0.830) & 0.0048 & $-0.0030$ & $[-0.0056,-0.0004]$ (0.027)$^{*}$ & 0.0037 \\
+\midrule
+Fourier-2 $-$ LSTM+QNN & $-0.0035$ & $[-0.0076,+0.0006]$ (0.091) & 0.0058 & -- & -- & -- \\
+Full Fourier-1 $-$ LSTM+QNN & $-0.0040$ & $[-0.0083,+0.0003]$ (0.063) & 0.0060 & -- & -- & -- \\
+Full Fourier-2 $-$ LSTM+QNN & $+0.0005$ & $[-0.0038,+0.0048]$ (0.804) & 0.0060 & -- & -- & -- \\
+\midrule
+RF $-$ climatology & $+0.0100$ & $[+0.0021,+0.0179]$ (0.017)$^{*}$ & 0.0111 & $+0.0034$ & $[-0.0034,+0.0102]$ (0.306) & 0.0096 \\
+XGBoost $-$ climatology & $+0.0210$ & $[+0.0095,+0.0325]$ (0.001)$^{*}$ & 0.0162 & $+0.0058$ & $[-0.0007,+0.0122]$ (0.076) & 0.0091 \\
+LSTM $-$ climatology & $+0.0243$ & $[+0.0145,+0.0341]$ ($<0.001$)$^{*}$ & 0.0138 & $+0.0060$ & $[+0.0013,+0.0108]$ (0.016)$^{*}$ & 0.0067 \\
+Linear-4D $-$ climatology & $+0.0194$ & $[+0.0096,+0.0291]$ (0.001)$^{*}$ & 0.0137 & $+0.0079$ & $[+0.0010,+0.0148]$ (0.028)$^{*}$ & 0.0097 \\
+LSTM+QNN $-$ climatology & $+0.0240$ & $[+0.0136,+0.0343]$ ($<0.001$)$^{*}$ & 0.0146 & $+0.0090$ & $[+0.0025,+0.0156]$ (0.010)$^{*}$ & 0.0093 \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\subsection{Simulation: All Scenarios}
+\label{app:sim_all}
+
+\textbf{Earlier simulation: DeLong and the block bootstrap.} This simulation compares only DeLong and the percentile year-block bootstrap; the calibration that selects the primary procedure, with every candidate on the real coverage mask, is in \Cref{M-sec:simulation} and \Cref{app:fewclusters}. Two binormal scorers with noise correlation $\rho=0.9$, which reproduces the paired DeLong standard error of the classical comparisons (0.011), have design AUCs of 0.65 and $0.65+\Delta$ without year effects. Labels have prevalence 0.41 and 528 rows are split among 19 years, the size of the test set of the first version of the analysis (\Cref{app:v1}); the version matched to the present test set (529 rows, prevalence 0.406) is in \Cref{app:panel_matched}. Year effects enter as a prevalence shift ($\tau_\pi$), a shift shared by both scorers ($\tau_s$) and a shift specific to each scorer ($\tau_m$): scenario B has $\tau_\pi=\tau_s=0.3$, C adds $\tau_m=0.3$, D is C with unequal year sizes, and E has all three equal to 0.6 (500 replications each).
+
+The simulations (\Cref{tab:sim,fig:sim}) give three results. With year effects shared by the two scorers (B) DeLong is calibrated (type-I error 0.040, coverage 0.960), whereas the block bootstrap rejects the exact null in 7.4\,\% of replications. With scorer-specific year effects the DeLong standard error is too small (ratio of Monte Carlo SD to mean SE 1.07, 1.17 and 1.57 in C--E; type-I error 0.068, 0.096 and 0.220), whereas the block standard error tracks the SD (1.01--1.08) with a type-I error of 0.074--0.084: neither procedure is uniformly better calibrated. Where DeLong is calibrated, power follows the MDE rule: in B (MDE 0.031) a true difference of 0.029 is detected in 74\,\% of replications and 0.0145 in 32\,\%. The panel-matched version gives type-I errors of 0.048--0.058 for DeLong and 0.064--0.088 for the block bootstrap, and only 17--24\,\% power at an observed gap of 0.013. None of these mechanisms produces a cluster standard error well below the DeLong one (\Cref{M-sec:budget}).
+
+\textbf{Mechanism and population AUC.}\label{app:sim_mechanism} In each replication year $u$ receives a prevalence effect $\tau_\pi\eta_u$ on the logit of $\pi=0.41$, and scorer $k$ is $s_k=\mu_k y+e_k+\tau_s w_u+\tau_m v_{k,u}$, with $e_k=\sqrt\rho\,z+\sqrt{1-\rho}\,\varepsilon_k$, $w_u$ shared, $v_{k,u}$ independent between scorers, all standard normal, and $\mu_k=\sqrt2\,\Phi^{-1}(\mathrm{AUC}_k)$. In D the shares of the rows among years follow a Dirichlet(3) draw independent of the year effects; the mean of the estimates then differs from the equal-weight reference by $+0.0002$, $-0.0008$ and $-0.0004$ for design differences of 0, 0.015 and 0.03 (Monte Carlo standard error about 0.0008). The target is the difference for new years, computed as the mean of four independent draws of 400{,}000 rows. Because the year shifts are independent of the prevalence effect, it also has a closed form: in an infinite population of independent years a positive and a negative come from different years with probability 1, so their score difference is normal with mean $\mu_k$ and variance $2(1+\tau_s^2+\tau_m^2)$, and
+\begin{equation}
+\mathrm{AUC}_k=\Phi\!\left(\frac{\mu_k}{\sqrt{2\,(1+\tau_s^2+\tau_m^2)}}\right),
+\end{equation}
+the AUC for new independent years, not the expected AUC of a fixed set of 19 years. At a design difference of 0.03 it gives population differences of 0.0290 (B), 0.0280 (C and D) and 0.0238 (E), in agreement with the Monte Carlo references (\path{exp49_review_minor.py}). DeLong tests use the paired estimator; the block bootstrap resamples years ($B=300$ per replication).
+
+\begin{figure}[htbp]
+    \centering
+    \safefig{figs/fig_sim.pdf}{0.9\textwidth}
+    \caption{Simulation scenarios B--E (\Cref{tab:sim}). (a) Rejection rate of an exactly null difference; the band is the 95\,\% Monte Carlo interval around the nominal 0.05 for 500 replications. (b) Ratio of the Monte Carlo standard deviation of the estimate to the mean standard error; values above 1 mean that the standard error is too small.}
+    \label{fig:sim}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{Simulation with known truth ($N=528$, 19 years, prevalence 0.41, $\rho=0.9$, 500 replications). $\tau_\pi$, $\tau_s$ and $\tau_m$: standard deviations of the year effects on the prevalence logit, on a shift shared by both scorers and on a shift specific to each scorer. Type-I error and coverage are for an exactly null difference (DeLong, block bootstrap); SD$(\hat\Delta)$ is the Monte Carlo standard deviation of the estimate, to be compared with the mean standard error (DeLong / block). Last column: power at the largest simulated difference (population difference in brackets). All rows are in the Supplement.}
+\label{tab:sim}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Scenario} & \textbf{Type-I DeLong} & \textbf{Type-I block} & \textbf{Cover. DeLong} & \textbf{Cover. block} & SD$(\hat\Delta)$ & \textbf{Mean SE} & \textbf{Power (DeLong / block)} \\
+\midrule
+B: shared year effects ($\tau_\pi=\tau_s=0.3$) & 0.040 & 0.074 & 0.960 & 0.926 & 0.0108 & 0.0111 / 0.0108 & 0.74 / 0.78 (0.029) \\
+C: + scorer-specific year effects ($\tau_m=0.3$) & 0.068 & 0.076 & 0.932 & 0.924 & 0.0154 & 0.0144 / 0.0153 & 0.50 / 0.47 (0.028) \\
+D: C with unequal year sizes & 0.096 & 0.084 & 0.904 & 0.916 & 0.0168 & 0.0144 / 0.0155 & 0.51 / 0.48 (0.028) \\
+E: all $\tau=0.6$ & 0.220 & 0.074 & 0.780 & 0.926 & 0.0290 & 0.0185 / 0.0273 & 0.35 / 0.21 (0.023) \\
+\bottomrule
+\end{tabular}%
+}%
+}
+\end{table}
+
+\Cref{tab:sim_all} lists every simulated row of \Cref{M-sec:simulation}, including the first run of scenario B and scenario A ($\rho=0.75$). In none of the scenarios is the mean block standard error clearly below the DeLong one.
+\begin{table}[H]
+\centering
+\caption{All simulation rows. Population difference (Monte Carlo SE of the reference), rejection rate of $\Delta=0$ (number of rejections in brackets; DeLong, block bootstrap), coverage of the population difference, mean of the estimates, SD of the estimates and mean standard errors (DeLong, block). Scenario B first run: the Monte Carlo standard error of the reference was not recorded. Scenario A values are those of the first script run, rounded.}
+\label{tab:sim_all}
+{\scriptsize
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{lcccccccc}
+\toprule
+$\Delta_{\text{true}}$ & \textbf{Rej. DeLong} & \textbf{Rej. block} & \textbf{Cov. DeLong} & \textbf{Cov. block} & \textbf{Mean $\hat\Delta$} & \textbf{SD$(\hat\Delta)$} & \textbf{SE DeLong} & \textbf{SE block} \\
+\midrule
+\multicolumn{9}{l}{\emph{Scenario B: shared year effects ($\tau_\pi=\tau_s=0.3$)}} \\
+0.0000 (0.0002) & 0.040 (20) & 0.074 (37) & 0.960 & 0.926 & 0.0007 & 0.0108 & 0.0111 & 0.0108 \\
+0.0145 (0.0001) & 0.318 (159) & 0.350 (175) & 0.946 & 0.934 & 0.0151 & 0.0115 & 0.0110 & 0.0107 \\
+0.0291 (0.0002) & 0.738 (369) & 0.778 (389) & 0.946 & 0.936 & 0.0284 & 0.0109 & 0.0110 & 0.0107 \\
+\midrule
+\multicolumn{9}{l}{\emph{Scenario C: + scorer-specific year effects ($\tau_m=0.3$)}} \\
+0.0000 (0.0001) & 0.068 (34) & 0.076 (38) & 0.932 & 0.924 & -0.0008 & 0.0154 & 0.0144 & 0.0153 \\
+0.0136 (0.0001) & 0.210 (105) & 0.216 (108) & 0.912 & 0.928 & 0.0161 & 0.0161 & 0.0144 & 0.0153 \\
+0.0276 (0.0002) & 0.496 (248) & 0.468 (234) & 0.916 & 0.932 & 0.0272 & 0.0165 & 0.0142 & 0.0151 \\
+\midrule
+\multicolumn{9}{l}{\emph{Scenario D: C with unequal year sizes}} \\
+0.0000 (0.0001) & 0.096 (48) & 0.084 (42) & 0.904 & 0.916 & 0.0002 & 0.0168 & 0.0144 & 0.0155 \\
+0.0140 (0.0001) & 0.202 (101) & 0.168 (84) & 0.900 & 0.910 & 0.0132 & 0.0171 & 0.0143 & 0.0154 \\
+0.0280 (0.0002) & 0.506 (253) & 0.480 (240) & 0.882 & 0.920 & 0.0276 & 0.0172 & 0.0142 & 0.0154 \\
+\midrule
+\multicolumn{9}{l}{\emph{Scenario E: all $\tau=0.6$}} \\
+0.0000 (0.0002) & 0.220 (110) & 0.074 (37) & 0.780 & 0.926 & -0.0012 & 0.0290 & 0.0185 & 0.0273 \\
+0.0114 (0.0002) & 0.262 (131) & 0.122 (61) & 0.784 & 0.936 & 0.0154 & 0.0290 & 0.0185 & 0.0277 \\
+0.0230 (0.0002) & 0.350 (175) & 0.206 (103) & 0.752 & 0.908 & 0.0231 & 0.0305 & 0.0182 & 0.0272 \\
+\midrule
+\multicolumn{9}{l}{\emph{Scenario B, first run (seed 0, 400 replications, $B=300$)}} \\
+0.0004 (--) & 0.037 (15) & 0.080 (32) & 0.958 & 0.925 & 0.0012 & 0.0109 & 0.0110 & 0.0108 \\
+0.0100 (--) & 0.185 (74) & 0.217 (87) & 0.927 & 0.897 & 0.0104 & 0.0120 & 0.0110 & 0.0107 \\
+0.0190 (--) & 0.430 (172) & 0.470 (188) & 0.970 & 0.935 & 0.0199 & 0.0114 & 0.0110 & 0.0106 \\
+0.0294 (--) & 0.760 (304) & 0.780 (312) & 0.950 & 0.925 & 0.0290 & 0.0110 & 0.0110 & 0.0108 \\
+0.0391 (--) & 0.950 (380) & 0.953 (381) & 0.945 & 0.925 & 0.0384 & 0.0114 & 0.0109 & 0.0106 \\
+\midrule
+\multicolumn{9}{l}{\emph{Scenario A: $\rho=0.75$, shared year effects (500 replications, $B=500$; rates rounded to 2 decimals)}} \\
+0.0008 (--) & 0.05 & 0.07 & 0.95 & 0.94 & -- & 0.0165 & 0.0172 & 0.0166 \\
+0.0092 (--) & 0.09 & 0.12 & 0.93 & 0.90 & -- & 0.0179 & 0.0171 & 0.0167 \\
+0.0182 (--) & 0.19 & 0.23 & 0.93 & 0.91 & -- & 0.0179 & 0.0171 & 0.0165 \\
+0.0281 (--) & 0.39 & 0.44 & 0.95 & 0.94 & -- & 0.0166 & 0.0170 & 0.0165 \\
+0.0389 (--) & 0.65 & 0.67 & 0.95 & 0.94 & -- & 0.0169 & 0.0170 & 0.0164 \\
+0.0483 (--) & 0.80 & 0.80 & 0.95 & 0.92 & -- & 0.0171 & 0.0170 & 0.0166 \\
+\bottomrule
+\end{tabular}%
+}
+}
+\end{table}
+
+
+
+\subsection{Panel-Matched Simulation}
+\label{app:panel_matched}
+
+A version of the simulation uses the year sizes, prevalence (0.406) and score correlation of the panel ($\rho=0.89$, the correlation of the normal scores of the two scorers, not the correlation between their AUCs assumed in \Cref{tab:hm_mde}) and the AUCs of two of its models (0.680 and 0.667; \path{exp15_panel_matched_simulation.py}), with year effects $\tau\in\{0,0.1,0.2,0.3\}$ on the prevalence, shared by both scorers, and specific to each, 500 replications each. For a true difference of 0, the type-I error is 0.048--0.058 for DeLong and 0.064--0.088 for the block bootstrap; for the observed gap (population difference 0.013--0.014) the power is 0.17--0.22 for DeLong and 0.20--0.24 for the block bootstrap, and the standard errors of both procedures track the Monte Carlo standard deviation (ratios 0.99--1.07).
+
+% ============================================================
+\section{Empirical Resolution Curve}
+\label{app:resolution}
+
+The Hanley--McNeil approximation of \Cref{M-sec:design} gives the MDE of a paired difference from the test size, the prevalence, an assumed AUC and an assumed correlation between the AUCs of the two models (\Cref{tab:hm_mde}); it is the planning tool of item 2 of the protocol. For an AUC of 0.68 and a correlation of 0.75 it gives about 0.049 for $N=500$ at prevalence 0.41 and about 0.086 at prevalence 0.10. The assumed correlation is conservative for this panel: the DeLong correlation of two single-run AUCs (\path{exp46_auc_correlation.py}) is 0.78 for Random Forest and \texttt{LSTM+QNN}, 0.86 for Random Forest and the LSTM and 0.91 for the two tree ensembles, and with these values the approximation gives 0.045 and 0.036 for the first two pairs, against empirical MDEs of 0.046 and 0.035.
+
+\begin{table}[htbp]
+\centering
+\caption{Approximate MDE for the AUC difference of two models on the same test set (Hanley--McNeil standard errors combined with an inter-model correlation of 0.75 as in \citealp{hanley1983}; AUC 0.68, $\alpha=0.05$, power 0.80). Test-set size $N$ and positive-class prevalence $\pi$.}
+\label{tab:hm_mde}
+{\small
+\begin{tabular}{rcc}
+\toprule
+$N$ & MDE, $\pi=0.41$ & MDE, $\pi=0.10$ \\
+\midrule
+250 & 0.069 & 0.122 \\
+500 & 0.049 & 0.086 \\
+1{,}000 & 0.035 & 0.061 \\
+2{,}500 & 0.022 & 0.038 \\
+5{,}000 & 0.015 & 0.027 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\path{exp43_v2_tables.py} draws, for each number of test years, 60 random subsets of whole years (all stations of a year together) and computes the 80\,\%-power DeLong MDE on the archived predictions; \Cref{tab:resolution} lists the medians plotted in \Cref{fig:resolution}. The MDEs fall approximately as $N^{-1/2}$, with single-run values 2--26\,\% below the Hanley--McNeil ones. The curve is a consistency check, not independent evidence for the scaling: the subsets overlap, reuse the same fitted models and use the DeLong standard error, and they add rows and clusters together (the simulation of \Cref{M-fig:clusters_rows} separates them). Extrapolating the full-test-set standard errors as $N^{-1/2}$, 80\,\% power for a true Random Forest $-$ \texttt{LSTM+QNN} difference of 0.02 needs about 1{,}370 test rows under DeLong (2.6 times the present test set) and about 720 under the cluster-robust standard error, and a difference of 0.01 between the hybrid and the Linear-4D control about 1{,}430 and 1{,}700 rows. These extrapolations assume that the correlation between models and the dependence between years stay as on the panel.
+
+\begin{figure}[htbp]
+    \centering
+    \safefig{figs/fig_resolution.pdf}{0.80\textwidth}
+    \caption{Empirical resolution curve: median 80\,\%-power DeLong MDE over 60 random subsets of whole test years per size (archived predictions; log-log axes). Single run: seed $s$ against seed $s$, averaged over seeds; 15-seed means: paired DeLong on seed-averaged components. Dashed: Hanley--McNeil single-run approximation of \Cref{tab:hm_mde} (prevalence 0.406, AUC 0.68, correlation 0.75). Dotted: illustrative $N^{-1/2}$ extrapolation of the 15-seed curve from the full test set, valid only if added years are independent clusters. Top axis: number of test years, the independent clusters, behind each point. Values in \Cref{tab:resolution}.}
+    \label{fig:resolution}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{Values of \Cref{fig:resolution}. Empirical resolution curve: median 80\,\%-power DeLong MDE over random subsets of test years (60 subsets per size; archived predictions). Single run: seed $s$ against seed $s$, averaged over seeds. 15-seed means: paired DeLong on seed-averaged components. The last row is the full test set; HM: Hanley--McNeil single-run value at the same $N$ (prevalence 0.406, AUC 0.68, correlation 0.75).}
+\label{tab:resolution}
+{\small
+\begin{tabular}{rrcccc}
+\toprule
+& & & \multicolumn{2}{c}{\textbf{Single run}} & \textbf{15-seed means} \\
+\cmidrule(lr){4-5}\cmidrule(lr){6-6}
+\textbf{Years} & $N$ & \textbf{HM} & \textbf{RF $-$ LSTM} & \textbf{RF $-$ LSTM+QNN} & \textbf{RF $-$ LSTM+QNN} \\
+\midrule
+5 & 143 & 0.092 & 0.069 & 0.090 & 0.063 \\
+8 & 219 & 0.074 & 0.055 & 0.071 & 0.050 \\
+10 & 278 & 0.066 & 0.049 & 0.063 & 0.044 \\
+13 & 361 & 0.058 & 0.042 & 0.055 & 0.039 \\
+16 & 454 & 0.051 & 0.038 & 0.050 & 0.035 \\
+19 & 529 & 0.048 & 0.035 & 0.046 & 0.032 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\section{Quantum Case Study: Further Results}
+\label{app:qml}
+% ============================================================
+
+\subsection{Further Hybrid}
+\label{app:hybrids}
+
+\texttt{LSTM+PI-QNN} reaches a 15-seed AUC of 0.6539 (SD 0.0201) and is not distinguished from \texttt{LSTM+QNN} ($-0.005$, DeLong $p=0.17$, year-block $[-0.013,+0.005]$). A three-layer variant trained with a staged layer-by-layer schedule (\texttt{LbL-QNN}) was evaluated in the earlier version only (\Cref{app:v1}); it behaved like \texttt{LSTM+QNN} and, at about 10 minutes per seed, was not rerun. The first implementation of \texttt{LSTM+QTL}, in which the extractor stayed in training mode and the angles were scaled twice, scores 0.6476 (SD 0.0106) and is not used.
+
+\textbf{\texttt{LSTM+QTL}.} \Cref{tab:qtl_paired} gives the paired comparisons of the second hybrid, a quantum head on the frozen pre-trained LSTM of the same seed. Random Forest scores 0.024 above it, a difference resolved by the primary procedure ($p=0.008$) with which DeLong agrees, but the comparison is secondary and unadjusted and says nothing about the circuit. Against its interface controls, a linear head (\texttt{QTL-classical}) and the 81 functions that span exactly what its circuit can compute (\texttt{QTL tensor-81}), no difference is resolved, and \texttt{LSTM+QTL} is equivalent to its linear head within $\pm0.01$ AUC (\Cref{tab:tost}).
+
+\begin{table}[htbp]
+\centering
+\caption{Paired comparisons of \texttt{LSTM+QTL} (15-seed means; procedures and notation as in \Cref{M-tab:paired_ci}). Secondary analysis: $p$-values unadjusted.}
+\label{tab:qtl_paired}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+Difference & $\hat\Delta$ & SE (DeLong) & $z$ ($p$) & CR2 95\,\% CI ($p$) & Years$\times$seeds 95\,\% CI & Cluster/iid & MDE CR2 (DeLong) \\
+\midrule
+RF $-$ LSTM+QTL & $+0.0235$ & 0.0100 & $2.35$ (0.019) & $[+0.007,+0.040]$ (0.008) & $[+0.006,+0.042]$ & 0.78 & 0.023 (0.028) \\
+LSTM+QTL $-$ its extractor & $-0.0090$ & 0.0049 & $-1.85$ (0.065) & $[-0.020,+0.002]$ (0.095) & $[-0.021,+0.004]$ & 1.04 & 0.015 (0.014) \\
+LSTM+QTL $-$ QTL-classical & $-0.0027$ & 0.0041 & $-0.67$ (0.505) & $[-0.011,+0.006]$ (0.515) & $[-0.014,+0.011]$ & 1.00 & 0.012 (0.011) \\
+LSTM+QTL $-$ QTL tensor-81 & $-0.0066$ & 0.0042 & $-1.60$ (0.111) & $[-0.015,+0.002]$ (0.106) & $[-0.019,+0.006]$ & 0.93 & 0.012 (0.012) \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\subsection{Frequency Spectrum and Angles of the Trained Circuits}
+\label{app:spectrum}
+
+For each of the 15 trained circuits of \texttt{LSTM+QNN}, the exact readouts $\langle Z_j\rangle$ were evaluated on the angles produced for the training and test rows (\path{exp34_circuit_spectrum.py}, part A). For the spectrum, each angle was swept over a full period $[0,2\pi)$ with the other three at the values of a test row, so the shares below describe the function on the whole torus; the least-squares fits that follow use only the angles the model actually visits (roughly 0.4--2.6\,rad, less than half a period), on which higher frequencies are well approximated by degree-1 terms. The two statements are therefore compatible: 24\,\% of the variance at frequency 2 over the full period, and $R^2=0.984$ for the degree-1 tensor basis on the visited range. Split by the per-coordinate frequency of its Fourier components, the variance of the readout over the full period is: 68.2\,\%, 24.2\,\%, 6.7\,\%, 0.9\,\% of the variance lies at frequencies 1, 2, 3 and 4 (circuits with random weights: 59.6\,\%, 29.1\,\%, 9.9\,\%, 1.4\,\%). Least-squares fits on the training angles, evaluated on the test angles, give $R^2$ of 0.984 (degree-1 tensor basis, 81 functions; range 0.95--1.00), 0.987 (degree-2 tensor basis, 625 functions; 0.88--1.00), 0.850 (separable degree 2) and 0.854 (separable degree 4). Fitting the degree-1 tensor basis to circuits with random weights on the same angles gives 0.974 (0.94--1.00): the near-linearity per coordinate is a property of this encoding on the visited angles. For the median seed, the 1st, 50th and 99th percentiles of the test angles of the four qubits are 0.65, 0.37, 1.01 and 0.58; 1.72, 1.40, 1.86 and 1.45; and 2.58, 2.48, 2.62 and 2.29 rad; between 0 and 14\,\% of the test angles of a seed lie within $\pi/18$ of 0 or $\pi$.
+
+\subsection{Emulation and Substitution on Common Angles}
+\label{app:emulation}
+
+\path{exp52_emulation_substitution.py} uses the 15 trained \texttt{LSTM+QNN} models of \path{exp31_shot_noise.py} (\path{checkpoints/exp31/}; their test probabilities reproduce the archived ones to $10^{-6}$; mean AUC 0.660 against 0.659 for the core fits). \emph{Emulation}: the four readouts are evaluated on the grid $q_j\in\{2\pi m/9\}$, $m=0,\dots,8$, and a four-dimensional discrete Fourier transform gives the $9^4=6{,}561$ coefficients of each readout; this is exact because the two re-uploading layers bound the frequencies at 4 per angle. Evaluated on the test angles and passed through the trained LayerNorm and output layer, the reconstruction differs from the circuit by at most $2.6\times10^{-14}$ in the logits, and the AUC is identical for every seed. Keeping only frequencies $|k_j|\le1$ (or $\le2$) per angle loses 0.058 (0.011) AUC on average, with a maximum of 0.215 (0.070), and changes the readouts by up to 0.95 (0.64) on uniform angles. \emph{Substitution}: for each seed, the LSTM and projection are frozen in evaluation mode and the angles of the training, validation and test rows computed once; on them the circuit (new random weights), Linear-4D, separable Fourier-2 and the 81- and 625-function tensor maps, each followed by LayerNorm and a linear output, are trained with the loop of the paper (AdamW $5\times10^{-3}$, batch 16, at most 25 epochs, patience 6) and the seed of the frozen model. Every head of a seed shares its extractor, so the years$\times$seeds bootstrap draws seeds jointly. On the common angles of the substitution test (\Cref{tab:common_angles}), the original end-to-end circuit lies 0.008 below the 81-function map (CR2 $p=0.035$; the years$\times$seeds interval reaches zero).
+
+\begin{table}[htbp]
+\centering
+\caption{Heads trained on the frozen angles of each seed (15 seeds; 529 test rows). Original: the end-to-end \texttt{LSTM+QNN} of the same seed. Differences of 15-seed means with the primary CR2 interval and the years$\times$seeds bootstrap (seeds drawn jointly).}
+\label{tab:common_angles}
+{\small
+\begin{tabular}{lccc}
+\toprule
+Difference & $\hat\Delta$ & CR2 95\,\% CI ($p$) & Years$\times$seeds 95\,\% CI \\
+\midrule
+Original $-$ New circuit & $+0.0083$ & $[-0.002,+0.019]$ (0.122) & $[-0.006,+0.023]$ \\
+New circuit $-$ Linear-4D & $-0.0025$ & $[-0.015,+0.009]$ (0.663) & $[-0.017,+0.013]$ \\
+New circuit $-$ Fourier-2 & $-0.0124$ & $[-0.019,-0.006]$ (0.002) & $[-0.024,-0.001]$ \\
+New circuit $-$ Tensor-81 & $-0.0166$ & $[-0.025,-0.008]$ (0.001) & $[-0.030,-0.005]$ \\
+New circuit $-$ Tensor-625 & $-0.0154$ & $[-0.027,-0.004]$ (0.013) & $[-0.031,-0.002]$ \\
+Original $-$ Linear-4D & $+0.0058$ & $[-0.004,+0.016]$ (0.233) & $[-0.006,+0.018]$ \\
+Original $-$ Fourier-2 & $-0.0040$ & $[-0.014,+0.006]$ (0.408) & $[-0.016,+0.007]$ \\
+Original $-$ Tensor-81 & $-0.0082$ & $[-0.016,-0.001]$ (0.035) & $[-0.019,+0.002]$ \\
+Original $-$ Tensor-625 & $-0.0070$ & $[-0.015,+0.001]$ (0.074) & $[-0.020,+0.005]$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{All Models and Further Interface Variants}
+\label{app:variants}
+
+\Cref{tab:case_all} lists the 15-seed AUC of every model and control cited in \Cref{M-sec:applying}, and \Cref{tab:controls_more} completes \Cref{tab:controls}: the penalized hybrid \texttt{LSTM+PI-QNN} and the separable Fourier-1, -3 and -4 controls, which repeat what Fourier-2 and the tensor bases show.
+
+\begin{table}[htbp]
+\centering
+\caption{All models and controls of the first panel: 15-seed test AUC (same 2{,}332 fitting rows; mean and sample SD; 529 test rows). Last column: difference to \texttt{LSTM+QNN}, descriptive. Controls in the bottom block, sorted by mean; in brackets the size of the map that replaces the circuit. The extractor of \texttt{LSTM+QTL}, \texttt{QTL-classical} and \texttt{QTL tensor-81} is the standalone LSTM of the same seed.}
+\label{tab:case_all}
+{\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Mean AUC} & \textbf{SD} & \textbf{Gap to LSTM+QNN} \\
+\midrule
+Month$\times$station climatology & 0.6851 & -- & $+0.0264$ \\
+\midrule
+Random Forest (tuned) & 0.6784 & 0.0011 & $+0.0197$ \\
+XGBoost (tuned, early stopping) & 0.6684 & 0.0081 & $+0.0097$ \\
+Standalone LSTM & 0.6638 & 0.0051 & $+0.0051$ \\
+LSTM+QNN (24 quantum parameters) & 0.6587 & 0.0139 & $+0.0000$ \\
+LSTM+QTL & 0.6548 & 0.0097 & $-0.0039$ \\
+LSTM+PI-QNN (penalized variant) & 0.6539 & 0.0201 & $-0.0048$ \\
+\midrule
+Full Fourier-1 (81 features) & 0.6671 & 0.0054 & $+0.0084$ \\
+Fourier-1 (36) & 0.6638 & 0.0055 & $+0.0051$ \\
+Fourier-2 (68) & 0.6628 & 0.0037 & $+0.0041$ \\
+Fourier-3 (100) & 0.6627 & 0.0058 & $+0.0040$ \\
+Fourier-4 (132) & 0.6619 & 0.0069 & $+0.0032$ \\
+QTL tensor-81 (linear map on 81 features) & 0.6615 & 0.0062 & $+0.0028$ \\
+Full Fourier-2 (625 features) & 0.6613 & 0.0063 & $+0.0026$ \\
+QTL-classical (linear head) & 0.6575 & 0.0055 & $-0.0012$ \\
+Linear-4D control (20) & 0.6553 & 0.0040 & $-0.0034$ \\
+Frozen random circuit & 0.6466 & 0.0201 & $-0.0121$ \\
+Frozen zero-angle circuit & 0.6458 & 0.0167 & $-0.0129$ \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Paired comparisons of the trained circuit of \texttt{LSTM+QNN} with Fourier surrogates and frozen circuits (15-seed means; procedures as in \Cref{M-tab:paired_ci}). Positive $\hat\Delta$: the control scores above the circuit. Secondary analysis: $p$-values unadjusted. Fourier-1, -3 and -4 and Full Fourier-2 against Fourier-2 in \Cref{tab:controls_more}.}
+\label{tab:controls}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+Difference & $\hat\Delta$ & SE (DeLong) & $z$ ($p$) & CR2 95\,\% CI ($p$) & Years$\times$seeds 95\,\% CI & Cluster/iid & MDE CR2 (DeLong) \\
+\midrule
+Fourier-2 $-$ LSTM+QNN & $+0.0041$ & 0.0046 & $0.88$ (0.381) & $[-0.007,+0.015]$ (0.451) & $[-0.010,+0.018]$ & 1.12 & 0.016 (0.013) \\
+Full Fourier-1 $-$ LSTM+QNN & $+0.0084$ & 0.0045 & $1.85$ (0.064) & $[-0.004,+0.020]$ (0.158) & $[-0.005,+0.023]$ & 1.24 & 0.017 (0.013) \\
+Full Fourier-2 $-$ LSTM+QNN & $+0.0026$ & 0.0048 & $0.53$ (0.597) & $[-0.010,+0.015]$ (0.666) & $[-0.012,+0.019]$ & 1.20 & 0.017 (0.014) \\
+Frozen random $-$ LSTM+QNN & $-0.0121$ & 0.0038 & $-3.15$ (0.002) & $[-0.021,-0.003]$ (0.014) & $[-0.030,+0.005]$ & 1.15 & 0.013 (0.011) \\
+Frozen zero-angle $-$ LSTM+QNN & $-0.0129$ & 0.0041 & $-3.18$ (0.001) & $[-0.022,-0.004]$ (0.010) & $[-0.030,+0.003]$ & 1.08 & 0.013 (0.011) \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Further interface controls against the trained circuit of \texttt{LSTM+QNN} (columns as in \Cref{tab:controls}; secondary, unadjusted).}
+\label{tab:controls_more}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+Difference & $\hat\Delta$ & SE (DeLong) & $z$ ($p$) & CR2 95\,\% CI ($p$) & Years$\times$seeds 95\,\% CI & Cluster/iid & MDE CR2 (DeLong) \\
+\midrule
+Fourier-1 $-$ LSTM+QNN & $+0.0051$ & 0.0045 & $1.12$ (0.262) & $[-0.006,+0.016]$ (0.349) & $[-0.009,+0.019]$ & 1.15 & 0.016 (0.013) \\
+Fourier-3 $-$ LSTM+QNN & $+0.0040$ & 0.0048 & $0.84$ (0.400) & $[-0.008,+0.016]$ (0.495) & $[-0.011,+0.019]$ & 1.20 & 0.017 (0.013) \\
+Fourier-4 $-$ LSTM+QNN & $+0.0032$ & 0.0050 & $0.63$ (0.526) & $[-0.012,+0.018]$ (0.664) & $[-0.012,+0.022]$ & 1.42 & 0.021 (0.014) \\
+Full Fourier-2 $-$ Fourier-2 & $-0.0015$ & 0.0030 & $-0.50$ (0.615) & $[-0.006,+0.003]$ (0.518) & $[-0.009,+0.006]$ & 0.76 & 0.007 (0.008) \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\subsection{Positive Control with a Planted Circuit Signal}
+\label{app:teacher}
+
+\path{exp38_teacher_control.py} keeps the real inputs, splits and scalers. Teacher angles are $q^\ast=\pi\,\sigma(1.5\,ZP)$, with $Z$ the inputs standardized with training statistics and $P$ a fixed $35\times4$ Gaussian projection; the teacher score is $s=w^\top\langle Z\rangle(q^\ast;W^\ast)$ for the circuit of \texttt{LSTM+QNN} with fixed random weights $W^\ast$ and readout $w$. Among 20 candidate teachers, number 12 was kept because the largest share of its score variance (89\,\%) lies outside a separable degree-4 Fourier basis. Labels are $y=\mathbb 1[s+e>$ training 60th percentile$]$ with Gaussian noise $e$ whose scale (0.82 times the training SD of $s$) gives an oracle AUC of 0.846 on the test rows (test prevalence 0.389). In the \emph{interface} mode every head receives $q^\ast$ directly and consists of its map, LayerNorm and a linear output; in the \emph{end-to-end} mode the complete models of the paper are trained on the raw inputs and must also learn the projection. Five seeds per model, same training loop. The teacher score of this control has no LayerNorm, whereas every student head standardizes its four readouts before the linear output, so teacher and student are not of exactly the same form.
+
+\begin{table}[htbp]
+\centering
+\caption{Single-teacher positive control (the teacher selected among 20 for its non-separable signal; score without LayerNorm): test AUC (5 seeds) on labels generated by a teacher circuit, for heads that receive the teacher's four angles. Oracle: AUC of the teacher's noiseless score. Complete models trained on the raw inputs in \Cref{tab:teacher}.}
+\label{tab:teacher_single}
+{\small
+\begin{tabular}{lcc}
+\toprule
+\textbf{Head at the 4-angle interface} & \textbf{Mean AUC} & \textbf{SD} \\
+\midrule
+Oracle (teacher score) & 0.846 & -- \\
+\midrule
+Full Fourier-2 (625 tensor features) & 0.810 & 0.004 \\
+Full Fourier-1 (81 tensor features) & 0.804 & 0.005 \\
+Trained circuit & 0.706 & 0.025 \\
+Fourier-4 (separable) & 0.677 & 0.024 \\
+Fourier-2 (separable) & 0.655 & 0.015 \\
+Linear-4D map & 0.613 & 0.017 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\textbf{Repeated control} (\path{exp50_teacher_grid.py}, interface mode). The teacher score is $s=w^\top\mathrm{LN}(\langle Z\rangle(q^\ast;W^\ast))$, with the same LayerNorm (without affine parameters) as the students; with this score candidate 0 has the largest non-separable share (0.83) and is the selected teacher. Configurations: candidates 0--3 (non-separable shares 0.83, 0.68, 0.57 and 0.80), none of them selected for its result, at oracle test AUCs of 0.70 and 0.85, and a second noise draw for candidate 0 (10 configurations); and two null configurations in which the labels are thresholded noise. Heads: trained circuit, Linear-4D, separable Fourier-2 and the 81-function tensor basis, 5 seeds each. For each contrast the paired difference of 5-seed mean AUCs is tested with CR2 and Bell--McCaffrey degrees of freedom over calendar years. The trained circuit is above Linear-4D in 6 of 10 configurations (never below), never above Fourier-2 (below it in 2), and below the tensor basis in all 10; under the two nulls no contrast excludes zero. Mean AUCs range from 0.54 to 0.75 for the circuit, 0.56 to 0.76 for Fourier-2 and 0.60 to 0.79 for the tensor basis (\path{local_exp50_teacher_grid.json}; \Cref{tab:teacher_main}). When complete models must also learn the angles from the raw inputs, no model recovers the planted signal (AUC 0.59--0.62 for every model; \Cref{tab:teacher}), which is why the controls at the interface are the relevant ones.
+
+\begin{table}[htbp]
+\centering
+\caption{Positive control repeated over four teachers (candidates 0--3, none selected for its result; teacher score through the same LayerNorm as the students), two signal strengths (weak and strong: oracle test AUC 0.70 and 0.85) and a second label draw for teacher 0, and two null configurations. Test AUC of 5-seed means for heads that receive the teacher's angles. $^{\downarrow}$: the control is below the trained circuit, $^{\uparrow}$: above it (primary CR2 interval of the paired difference excludes zero). Single-teacher version in \Cref{tab:teacher_single}; complete models trained on the raw inputs in \Cref{tab:teacher}.}
+\label{tab:teacher_main}
+{\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Configuration} & \textbf{Oracle} & \textbf{Circuit} & \textbf{Linear-4D} & \textbf{Fourier-2} & \textbf{Tensor-81} \\
+\midrule
+Teacher 0, weak, draw 1 & 0.70 & 0.560 & 0.551 & 0.562 & 0.610$^{\uparrow}$ \\
+Teacher 0, weak, draw 2 & 0.70 & 0.584 & 0.582 & 0.590 & 0.629$^{\uparrow}$ \\
+Teacher 0, strong, draw 1 & 0.85 & 0.678 & 0.634$^{\downarrow}$ & 0.682 & 0.759$^{\uparrow}$ \\
+Teacher 0, strong, draw 2 & 0.85 & 0.682 & 0.640 & 0.685 & 0.754$^{\uparrow}$ \\
+Teacher 1, weak & 0.70 & 0.542 & 0.512 & 0.582$^{\uparrow}$ & 0.603$^{\uparrow}$ \\
+Teacher 1, strong & 0.85 & 0.671 & 0.624$^{\downarrow}$ & 0.717$^{\uparrow}$ & 0.761$^{\uparrow}$ \\
+Teacher 2, weak & 0.70 & 0.596 & 0.536$^{\downarrow}$ & 0.607 & 0.665$^{\uparrow}$ \\
+Teacher 2, strong & 0.85 & 0.727 & 0.608$^{\downarrow}$ & 0.706 & 0.779$^{\uparrow}$ \\
+Teacher 3, weak & 0.70 & 0.625 & 0.540$^{\downarrow}$ & 0.610 & 0.658$^{\uparrow}$ \\
+Teacher 3, strong & 0.85 & 0.752 & 0.567$^{\downarrow}$ & 0.759 & 0.791$^{\uparrow}$ \\
+\midrule
+Null, draw 1 & -- & 0.510 & 0.507 & 0.505 & 0.505 \\
+Null, draw 2 & -- & 0.490 & 0.496 & 0.498 & 0.457 \\
+\midrule
+Circuit above / below (of 10) & & & 6 / 0 & 0 / 2 & 0 / 10 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Positive control: test AUC (5-seed mean and SD) on labels generated by a teacher circuit. Left: heads given the teacher angles; right: complete models on the raw inputs.}
+\label{tab:teacher}
+{\small
+\begin{tabular}{lcc@{\hspace{2em}}lcc}
+\toprule
+\multicolumn{3}{c}{\textbf{Interface (teacher angles)}} & \multicolumn{3}{c}{\textbf{End to end (raw inputs)}} \\
+\textbf{Head} & \textbf{AUC} & \textbf{SD} & \textbf{Model} & \textbf{AUC} & \textbf{SD} \\
+\midrule
+Trained circuit & 0.706 & 0.025 & LSTM+QNN & 0.589 & 0.019 \\
+Linear-4D map & 0.613 & 0.017 & Linear-4D control & 0.589 & 0.004 \\
+Fourier-2 (separable) & 0.655 & 0.015 & Fourier-2 & 0.601 & 0.012 \\
+Fourier-4 (separable) & 0.677 & 0.024 & Fourier-4 & 0.623 & 0.028 \\
+Full Fourier-1 (81) & 0.804 & 0.005 & Full Fourier-1 & 0.590 & 0.006 \\
+Full Fourier-2 (625) & 0.810 & 0.004 & Full Fourier-2 & 0.616 & 0.034 \\
+ & &  & Standalone LSTM & 0.615 & 0.036 \\
+ & &  & Random Forest & 0.612 & 0.004 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Finite-Shot Inference}
+\label{app:shots}
+
+\path{exp31_shot_noise.py} refits the 15 seeds of \texttt{LSTM+QNN} (mean exact AUC 0.6599, against 0.6587 for the archived fits) and, for each seed and shot budget, samples the 16-outcome distribution of the circuit jointly 50 times, estimating each $\langle Z_j\rangle$ from the samples (\Cref{tab:shots}). With parameter-shift gradients, each training row and step would need 81 circuit evaluations: one forward pass, 48 for the 24 weights and 32 for the 16 encoding-gate occurrences through which the classical layers are trained; training on hardware was not simulated. The refit also measures re-execution: neural training on CPU is not bit-reproducible across software versions and thread settings, and within the pinned environment refitting the 15 seeds changed their mean AUC by 0.001, a third of the uncertainty of a 15-seed mean and an order of magnitude below the MDE.
+
+\begin{table}[htbp]
+\centering
+\caption{Finite-shot inference of \texttt{LSTM+QNN} (15 seeds, 50 repetitions per budget). Loss: exact minus finite-shot 15-seed mean AUC; worst seed: largest loss of one seed's mean over repetitions; shot SD of one model and of the seed mean.}
+\label{tab:shots}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{rcccccc}
+\toprule
+\textbf{Shots} & \textbf{Mean AUC} & \textbf{Loss} & \textbf{Worst seed} & \textbf{Shot SD, one model} & \textbf{Shot SD, seed mean} & \textbf{Shots per test pass} \\
+\midrule
+32 & 0.6309 & 0.0290 & 0.0442 & 0.0149 & 0.0032 & 16{,}928 \\
+100 & 0.6481 & 0.0118 & 0.0224 & 0.0103 & 0.0024 & 52{,}900 \\
+1000 & 0.6584 & 0.0016 & 0.0041 & 0.0044 & 0.0011 & 529{,}000 \\
+10000 & 0.6598 & 0.0001 & 0.0010 & 0.0014 & 0.0004 & 5{,}290{,}000 \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+% ============================================================
+\section{References and Re-test: Further Results}
+\label{app:refs}
+% ============================================================
+
+\subsection{Base Rates: Within-Station AUC and Station$\times$Month Label}
+\label{app:baserates}
+
+These tables support the base-rate paragraph of \Cref{M-sec:reference}. With the station$\times$month label (\Cref{tab:stationmonth}) the 15-seed mean AUCs lie between 0.505 and 0.514, against 0.479 for the climatology, and no paired difference between models is distinguished from zero (DeLong $p\ge0.70$). That label removes the base rates from the training labels but not by construction from the test labels, so the same question was also asked with the original label: an AUC over pairs of the same station and calendar month, for which the climatology scores exactly 0.5 because it is constant within a cell. Every model scores 0.449--0.495 (year-block intervals include 0.5 for four of the five models; that of \texttt{LSTM+QNN}, $[0.423,0.497]$, lies just below; \path{exp49_review_minor.py}). The predictors therefore carry no detectable information about monthly exceedance beyond the seasonal cycle and the station.
+
+\begin{table}[htbp]
+\centering
+\caption{Pooled and within-station AUC (15-seed means, 529 test rows). Within-station AUC: positive--negative pairs of the same station only, per-station AUCs averaged with weights $n_{\text{pos}}n_{\text{neg}}$. SD: across seeds. Per-station AUC in the last four columns (test $n$: 220, 221, 37, 51).}
+\label{tab:within}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Model} & \textbf{Pooled AUC} & \textbf{Within-station AUC (SD)} & \textbf{Alicante} & \textbf{Barcelona} & \textbf{San Javier} & \textbf{Valencia} \\
+\midrule
+Month$\times$station climatology & 0.685 & 0.667 (--) & 0.696 & 0.648 & 0.575 & 0.651 \\
+\midrule
+Random Forest & 0.678 & 0.647 (0.002) & 0.690 & 0.620 & 0.513 & 0.594 \\
+XGBoost & 0.668 & 0.648 (0.014) & 0.682 & 0.625 & 0.529 & 0.623 \\
+Standalone LSTM & 0.664 & 0.634 (0.010) & 0.653 & 0.622 & 0.564 & 0.621 \\
+Linear-4D control & 0.655 & 0.623 (0.008) & 0.632 & 0.618 & 0.609 & 0.602 \\
+LSTM+QNN & 0.659 & 0.627 (0.022) & 0.653 & 0.608 & 0.600 & 0.609 \\
+LSTM+QTL & 0.655 & 0.627 (0.019) & 0.663 & 0.602 & 0.551 & 0.609 \\
+\bottomrule
+\end{tabular}}%
+}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Station$\times$month label: 15-seed test AUC and Brier skill after Platt recalibration on the validation partition, against the raw and the recalibrated climatology ($n$: seeds with BSS $>0$), with the year-block interval of the Brier difference to the recalibrated climatology (529 test rows, 37.8\,\% positive).}
+\label{tab:stationmonth}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{Mean AUC (SD)} & \textbf{BSS Platt vs raw clim.} ($n$) & \textbf{BSS Platt vs recal. clim.} ($n$) & $\Delta$\textbf{BS vs recal. [CI]} \\
+\midrule
+Month$\times$station climatology & 0.479 & -- & -- & -- \\
+\midrule
+Random Forest & 0.514 (0.005) & $+0.017$ (15) & $+0.006$ (15) & $[-0.004,+0.001]$ \\
+XGBoost & 0.510 (0.013) & $+0.015$ (15) & $+0.004$ (12) & $[-0.004,+0.002]$ \\
+Standalone LSTM & 0.510 (0.020) & $+0.015$ (15) & $+0.004$ (14) & $[-0.003,+0.002]$ \\
+Linear-4D control & 0.512 (0.015) & $+0.015$ (15) & $+0.004$ (14) & $[-0.004,+0.003]$ \\
+LSTM+QNN & 0.505 (0.018) & $+0.015$ (15) & $+0.004$ (13) & $[-0.003,+0.002]$ \\
+\bottomrule
+\end{tabular}}%
+}
+\end{table}
+
+\subsection{ECMWF SEAS5}
+\label{app:seas5}
+
+Monthly mean total precipitation (\texttt{seasonal-monthly-single-levels}, system 51, members 0--24) was downloaded through the CDS API on 9--10 November 2026 for the hindcast (1981--2016) and forecast (2017--2026) starts of every month and interpolated bilinearly to the stations (\path{exp33_seas5_reference.py}). Three probability definitions were computed; the quantile-corrected one was specified before the analysis and is the only one used in the inferential comparisons: the fraction of members above the model's own quantile at level $1-p_{\text{clim}}$ of the station and calendar month, from the 1981--1996 hindcasts. The ensemble-mean variant maps the standardized ensemble-mean anomaly through a normal distribution; the uncorrected variant counts members above the observed threshold. Platt maps and blends are fitted on the validation partition (1997--2007).
+
+\textbf{Increments.} Adding a model to a combination of SEAS5 and the climatology changes the AUC by $-0.008$ to $-0.001$ at lead 2 and by $-0.003$ to $+0.001$ at lead 1, with no primary interval excluding zero (CR2 $p\ge0.25$ at lead 2 and $p\ge0.62$ at lead 1; DeLong $p\ge0.31$; \Cref{tab:seas5_blends}).
+
+\textbf{Lead 1.} Lead 1 starts on the first day of the target month and is released several days later, so it is a reference issued after the statistical models, not a demonstrated upper bound. SEAS5 then scores AUC 0.728, against 0.685 for the climatology and 0.678 for Random Forest (\Cref{tab:seas5_blends}). Its gain over the climatology, $+0.043$, is not resolved: the primary interval includes zero (CR2 $[-0.008,+0.095]$, $p=0.093$), although DeLong rejects the null ($p=0.034$). Random Forest and \texttt{LSTM+QNN} lie 0.050 and 0.070 below SEAS5; the second difference is resolved (CR2 $p=0.014$), the first is not (CR2 $[-0.102,+0.002]$, $p=0.056$). The dynamical forecast is the only predictor with detectable information beyond the base rates: with the station$\times$month label it scores 0.639, against 0.479 for the climatology ($+0.159$, CR2 $[+0.081,+0.237]$). Adding a statistical model to SEAS5 and the climatology at lead 1 changes the AUC by $-0.003$ to $+0.001$ ($p\ge0.62$), and replacing the climatology by a model in the combination does not change it either. Even the operational forecast at the most favourable lead is not resolvably better than the climatology with 529 test months.
+
+\begin{table}[htbp]
+\centering
+\caption{Learned models against the month$\times$station climatology (529 test rows). $\hat\Delta$: difference of 15-seed mean AUC (the climatology is a single scorer). CR2: the primary interval (Bell--McCaffrey degrees of freedom, calendar-year clusters); MDE: its 80\,\%-power minimum detectable difference. ECMWF SEAS5 at leads 1 and 2, the increments of each model over SEAS5 + climatology and the combinations that replace the climatology by a model in \Cref{tab:seas5_blends}. Secondary analysis: $p$-values unadjusted.}
+\label{tab:seas5}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Comparison & $\hat\Delta$ & CR2 95\,\% CI ($p$) & DeLong $p$ & Year-block 95\,\% CI & MDE (CR2) \\
+\midrule
+Random Forest $-$ climatology & $-0.0068$ & $[-0.033,+0.020]$ (0.594) & 0.574 & $[-0.030,+0.016]$ & 0.037 \\
+XGBoost $-$ climatology & $-0.0168$ & $[-0.041,+0.007]$ (0.162) & 0.144 & $[-0.037,+0.005]$ & 0.034 \\
+Standalone LSTM $-$ climatology & $-0.0213$ & $[-0.045,+0.003]$ (0.077) & 0.125 & $[-0.042,+0.001]$ & 0.034 \\
+Linear-4D control $-$ climatology & $-0.0298$ & $[-0.062,+0.002]$ (0.067) & 0.070 & $[-0.059,-0.001]$ & 0.045 \\
+LSTM+QNN $-$ climatology & $-0.0264$ & $[-0.055,+0.002]$ (0.064) & 0.050 & $[-0.052,+0.000]$ & 0.040 \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{SEAS5 and statistical models under both labels (529 test rows). AUC (15-seed SD for the models); BSS: Brier skill after Platt recalibration, against the climatology recalibrated in the same way.}
+\label{tab:seas5_full}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{2}{c}{\textbf{Pooled $P_{60}$ label}} & \multicolumn{2}{c}{\textbf{Station$\times$month label}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+\textbf{Forecast} & \textbf{AUC} & \textbf{BSS} & \textbf{AUC} & \textbf{BSS} \\
+\midrule
+Climatology & 0.685 & $+0.000$ & 0.479 & $+0.000$ \\
+SEAS5, quantile-corrected (specified) & 0.728 & $+0.051$ & 0.639 & $+0.061$ \\
+SEAS5, ensemble-mean anomaly & 0.623 & $-0.071$ & 0.637 & $+0.057$ \\
+SEAS5, uncorrected member count & 0.748 & $+0.089$ & -- & -- \\
+SEAS5 lead 2, quantile-corrected & 0.676 & $-0.016$ & 0.526 & $+0.005$ \\
+SEAS5 lead 2, ensemble-mean & 0.562 & $-0.117$ & 0.546 & $+0.010$ \\
+SEAS5 lead 2, uncorrected & 0.683 & $-0.006$ & -- & -- \\
+Random Forest & 0.678 (0.001) & -- & 0.514 (0.005) & -- \\
+XGBoost & 0.668 (0.008) & -- & 0.510 (0.013) & -- \\
+Standalone LSTM & 0.664 (0.005) & -- & 0.510 (0.020) & -- \\
+Linear-4D control & 0.655 (0.004) & -- & 0.512 (0.015) & -- \\
+LSTM+QNN & 0.659 (0.014) & -- & 0.505 (0.018) & -- \\
+Blend climatology+SEAS5 & 0.730 & $+0.060$ & 0.641 & $+0.065$ \\
+Blend RF+SEAS5 & 0.731 (0.001) & $+0.061$ & 0.638 (0.002) & $+0.060$ \\
+Blend LSTM+QNN+SEAS5 & 0.730 (0.003) & $+0.059$ & 0.637 (0.004) & $+0.060$ \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{SEAS5 at leads 2 and 1, increments and combinations (529 test rows; columns as in \Cref{tab:seas5}; \protect\path{exp55_review_closing.py}). Lead 2 is available before the target month; lead 1 is issued after the statistical models. Increment: SEAS5 + climatology + model against SEAS5 + climatology. Blend: logistic combination of the logits of the named model and of SEAS5 (the model replaces the climatology). Combinations fitted per seed on the validation partition. Secondary analysis: $p$-values unadjusted.}
+\label{tab:seas5_blends}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Comparison & $\hat\Delta$ & CR2 95\,\% CI ($p$) & DeLong $p$ & Year-block 95\,\% CI & MDE (CR2) \\
+\midrule
+\multicolumn{6}{@{}l}{\textit{SEAS5 at lead 2 (operational: available before the target month)}} \\
+SEAS5 $-$ climatology (L2) & $-0.0095$ & $[-0.038,+0.019]$ (0.490) & 0.460 & $[-0.034,+0.015]$ & 0.040 \\
+Random Forest $-$ SEAS5 (L2) & $+0.0027$ & $[-0.025,+0.030]$ (0.838) & 0.869 & $[-0.021,+0.030]$ & 0.039 \\
+LSTM+QNN $-$ SEAS5 (L2) & $-0.0169$ & $[-0.047,+0.013]$ (0.253) & 0.331 & $[-0.044,+0.013]$ & 0.043 \\
+\midrule
+\multicolumn{6}{@{}l}{\textit{SEAS5 at lead 1 (issued after the statistical models)}} \\
+SEAS5 $-$ climatology (L1) & $+0.0433$ & $[-0.008,+0.095]$ (0.093) & 0.034 & $[-0.005,+0.086]$ & 0.072 \\
+Random Forest $-$ SEAS5 (L1) & $-0.0501$ & $[-0.102,+0.002]$ (0.056) & 0.021 & $[-0.094,-0.006]$ & 0.073 \\
+LSTM+QNN $-$ SEAS5 (L1) & $-0.0698$ & $[-0.123,-0.016]$ (0.014) & 0.001 & $[-0.116,-0.022]$ & 0.075 \\
+\midrule
+\multicolumn{6}{@{}l}{\textit{Increment over SEAS5 + climatology at lead 2 (operational)}} \\
+Increment Random Forest (L2) & $-0.0013$ & $[-0.014,+0.011]$ (0.824) & 0.858 & $[-0.012,+0.011]$ & 0.018 \\
+Increment XGBoost (L2) & $-0.0077$ & $[-0.022,+0.006]$ (0.255) & 0.316 & $[-0.019,+0.006]$ & 0.019 \\
+Increment Standalone LSTM (L2) & $-0.0023$ & $[-0.009,+0.005]$ (0.501) & 0.595 & $[-0.009,+0.004]$ & 0.010 \\
+Increment Linear-4D control (L2) & $-0.0048$ & $[-0.016,+0.007]$ (0.393) & 0.412 & $[-0.015,+0.006]$ & 0.016 \\
+Increment LSTM+QNN (L2) & $-0.0030$ & $[-0.011,+0.005]$ (0.468) & 0.510 & $[-0.011,+0.005]$ & 0.012 \\
+\midrule
+\multicolumn{6}{@{}l}{\textit{Increment over SEAS5 + climatology at lead 1}} \\
+Increment Random Forest (L1) & $-0.0004$ & $[-0.011,+0.010]$ (0.944) & 0.948 & $[-0.010,+0.009]$ & 0.015 \\
+Increment XGBoost (L1) & $-0.0030$ & $[-0.016,+0.010]$ (0.629) & 0.619 & $[-0.014,+0.009]$ & 0.018 \\
+Increment Standalone LSTM (L1) & $+0.0005$ & $[-0.007,+0.008]$ (0.874) & 0.891 & $[-0.006,+0.007]$ & 0.010 \\
+Increment Linear-4D control (L1) & $+0.0002$ & $[-0.011,+0.011]$ (0.976) & 0.976 & $[-0.009,+0.010]$ & 0.015 \\
+Increment LSTM+QNN (L1) & $-0.0000$ & $[-0.007,+0.007]$ (0.992) & 0.992 & $[-0.006,+0.007]$ & 0.010 \\
+\midrule
+\multicolumn{6}{@{}l}{\textit{Combinations that replace the climatology by a model (lead 1)}} \\
+Blend RF $-$ blend climatology & $+0.0006$ & $[-0.008,+0.010]$ (0.882) & 0.877 & $[-0.008,+0.008]$ & 0.013 \\
+Blend XGBoost $-$ blend climatology & $-0.0002$ & $[-0.013,+0.012]$ (0.977) & 0.970 & $[-0.012,+0.011]$ & 0.018 \\
+Blend LSTM $-$ blend climatology & $+0.0007$ & $[-0.006,+0.007]$ (0.811) & 0.831 & $[-0.006,+0.008]$ & 0.009 \\
+Blend Linear-4D $-$ blend climatology & $+0.0008$ & $[-0.009,+0.010]$ (0.863) & 0.858 & $[-0.008,+0.010]$ & 0.014 \\
+Blend LSTM+QNN $-$ blend climatology & $+0.0002$ & $[-0.007,+0.007]$ (0.952) & 0.952 & $[-0.006,+0.008]$ & 0.010 \\
+Blend LSTM+QNN $-$ blend Linear-4D & $-0.0006$ & $[-0.006,+0.004]$ (0.806) & 0.744 & $[-0.005,+0.004]$ & 0.007 \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\subsection{Second Panel}
+\label{app:panel2}
+
+The second panel uses AEMET stations B278 (Palma de Mallorca airport), 9981A (Tortosa), 7228 (Alcantarilla) and 6325O (Almería airport), processed by the same v2 code with the tree configurations tuned on the first panel (\path{exp32_second_panel.py}). The test set has 884 windows (34.7\,\% positive under the pooled label). \textbf{Lookahead.} The truncation test of \Cref{sec:lookahead}, repeated on this panel (\path{exp56_panel2_truncation.py}), leaves the inputs of all 884 test windows unchanged, but two of them (Almería, May and June 2020) are eligible only because the archived interpolation fills a covariate gap from later months; with causal imputation all 884 are eligible from data available at the time and unchanged. Without those two windows every difference of \Cref{tab:panel2} moves by less than 0.0001 and every CR2 $p$-value by less than 0.006 ($p\ge0.108$), so no verdict changes. Within-station AUCs under the pooled label are 0.649, 0.643, 0.669, 0.659, 0.668, 0.659 for Random Forest, XGBoost, the LSTM, the Linear-4D control, \texttt{LSTM+QNN} and \texttt{Fourier-2}. Under the station$\times$month label (36.9\,\% positive; climatology AUC 0.510) the models score as in \Cref{tab:panel2_sm} and no paired difference is distinguished from zero.
+
+\textbf{Resolution and truncation.} Of the CR2 MDEs of \Cref{tab:panel2}, only that of \texttt{Fourier-2} against the hybrid (0.006) is smaller on the second panel than on the first. Its truncation test finds two test windows that the archived imputation makes eligible with later data; removing them changes no verdict.
+
+\begin{table}[htbp]
+\centering
+\caption{Second panel, station$\times$month label (884 test rows): 15-seed mean AUC (SD) and paired comparisons (DeLong $p$, year-block 95\,\% interval, DeLong MDE).}
+\label{tab:panel2_sm}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{lc@{\hspace{2em}}lcccc}
+\toprule
+\textbf{Model} & \textbf{AUC (SD)} & \textbf{Pair} & $\hat\Delta$ & $p$ & \textbf{Year-block CI} & \textbf{MDE} \\
+\midrule
+Random Forest & 0.499 (0.004) & RF $-$ LSTM & $-0.0197$ & 0.229 & $[-0.057,+0.019]$ & 0.046 \\
+XGBoost & 0.502 (0.012) & RF $-$ LSTM+QNN & $-0.0159$ & 0.407 & $[-0.060,+0.029]$ & 0.054 \\
+Standalone LSTM & 0.519 (0.023) & XGBoost $-$ LSTM+QNN & $-0.0132$ & 0.433 & $[-0.048,+0.023]$ & 0.047 \\
+Linear-4D control & 0.523 (0.015) & Linear-4D $-$ LSTM+QNN & $+0.0077$ & 0.588 & $[-0.027,+0.044]$ & 0.040 \\
+LSTM+QNN & 0.515 (0.027) & LSTM $-$ LSTM+QNN & $+0.0037$ & 0.765 & $[-0.018,+0.026]$ & 0.035 \\
+Fourier-2 & 0.520 (0.019) & Fourier-2 $-$ LSTM+QNN & $+0.0050$ & 0.584 & $[-0.018,+0.029]$ & 0.026 \\
+ &  & RF $-$ XGBoost & $-0.0027$ & 0.833 & $[-0.034,+0.027]$ & 0.035 \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+% ============================================================
+\begin{table}[htbp]
+\centering
+\caption{Second panel (Mallorca, Tortosa, Alcantarilla, Almería; 884 test rows, 19 years, 15 seeds; pooled P60 label). $\hat\Delta$: difference of 15-seed mean AUC, with the first-panel value. CR2: primary interval, Bell--McCaffrey degrees of freedom ($\nu=17.7$). Cluster/iid: calendar-year cluster-robust (CR1) to DeLong standard error; phases: start months (of 12) for which a 12-month-cluster CR1 interval with $t_{18}$ excludes zero (a check of the cluster definition, not the primary procedure). MDE (pred.): observed 80\,\%-power MDE under DeLong and under the primary procedure (CR2), in parentheses the first-panel MDE of the same contrast and procedure scaled by $\sqrt{529/884}$ (computed after the analysis; the recorded prediction is the band in the text). Secondary analysis: $p$-values unadjusted.}
+\label{tab:panel2}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lccccccccc@{}}
+\toprule
+Comparison & $\hat\Delta$ & First panel & DeLong $p$ & CR2 95\,\% CI ($p$) & Years$\times$seeds 95\,\% CI & MDE DeLong (pred.) & MDE CR2 (pred.) & Cluster/iid & Phases \\
+\midrule
+RF $-$ XGBoost & $+0.0041$ & $+0.0100$ & 0.449 & $[-0.011,+0.019]$ (0.577) & $[-0.010,+0.018]$ & 0.015 (0.017) & 0.021 (0.014) & 1.33 & 0 \\
+RF $-$ LSTM & $-0.0101$ & $+0.0146$ & 0.278 & $[-0.028,+0.008]$ (0.251) & $[-0.028,+0.006]$ & 0.026 (0.024) & 0.025 (0.015) & 0.91 & 0 \\
+RF $-$ LSTM+QNN & $+0.0008$ & $+0.0197$ & 0.933 & $[-0.022,+0.023]$ (0.939) & $[-0.021,+0.020]$ & 0.027 (0.025) & 0.032 (0.019) & 1.09 & 0 \\
+XGBoost $-$ LSTM+QNN & $-0.0033$ & $+0.0097$ & 0.763 & $[-0.028,+0.022]$ (0.789) & $[-0.026,+0.021]$ & 0.030 (0.024) & 0.035 (0.023) & 1.11 & 0 \\
+LSTM $-$ LSTM+QNN & $+0.0110$ & $+0.0051$ & 0.022 & $[-0.003,+0.025]$ (0.107) & $[-0.003,+0.025]$ & 0.013 (0.012) & 0.019 (0.012) & 1.35 & 0 \\
+Linear-4D $-$ LSTM+QNN & $+0.0068$ & $-0.0034$ & 0.234 & $[-0.008,+0.021]$ (0.330) & $[-0.008,+0.021]$ & 0.016 (0.013) & 0.020 (0.015) & 1.19 & 0 \\
+Fourier-2 $-$ LSTM+QNN & $+0.0031$ & $+0.0041$ & 0.259 & $[-0.001,+0.007]$ (0.145) & $[-0.006,+0.011]$ & 0.008 (0.010) & 0.006 (0.012) & 0.74 & 0 \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\section{External Benchmark}
+\label{app:external}
+
+\textbf{Design} (recorded before any fit, \path{audit/prediction_external.txt}; \path{exp53_external_benchmark.py}). California Housing (scikit-learn), 20{,}640 block groups and 8 features; target: median house value above the training median (1.608, in units of \$100{,}000). Clusters: cells of $0.25^\circ$ latitude by $0.25^\circ$ longitude (518 cells, from 1 to 1{,}494 rows); split by cell with seed 2026 into 259 training (7{,}669 rows), 77 validation (2{,}689) and 182 test cells (10{,}282). Models, 5 seeds: logistic regression on standardized features ($C=1$; deterministic), Random Forest (300 trees, minimum leaf 5), XGBoost (depth 6, learning rate 0.05, early stopping on the validation AUC) and a multilayer perceptron $(64,32)$ with early stopping. Primary procedure: CR2 with Bell--McCaffrey degrees of freedom over cells, on 5-seed means. Reference population: the 39 test cells with 10--60 rows (1{,}170 rows); small tests: 1{,}000 draws of 19 of them without replacement (423--735 rows, median 570).
+
+\begin{table}[htbp]
+\centering
+\caption{External benchmark. Reference: the contrast on the 39 reference cells with its CR2 interval. Small tests (recorded design): share of the 1{,}000 draws of 19 of these cells in which the 95\,\% interval excludes zero (resolved) and in which it covers the reference difference. All test cells (post hoc): the contrast on the 182 test cells, and the coverage of that reference by small tests of 19 of the 182 cells, for which the finite-population factor is 0.95 instead of 0.72.}
+\label{tab:external}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lccccccccc@{}}
+\toprule
+& \multicolumn{2}{c}{Reference (39 cells)} & \multicolumn{2}{c}{Resolved} & \multicolumn{2}{c}{Coverage} & \multicolumn{3}{c}{All 182 test cells (post hoc)} \\
+Contrast & $\hat\Delta$ & CR2 95\,\% CI & CR2 & DeLong & CR2 & DeLong & $\hat\Delta$ [CR2 CI] & Cov.\ CR2 & Cov.\ DeLong \\
+\midrule
+RF $-$ LR & $+0.024$ & $[-0.022,+0.071]$ & 0.036 & 0.609 & 0.978 & 0.628 & $+0.017$ $[-0.016,+0.049]$ & 0.960 & 0.408 \\
+XGB $-$ RF & $+0.028$ & $[+0.000,+0.055]$ & 0.105 & 0.870 & 0.941 & 0.618 & $-0.002$ $[-0.015,+0.011]$ & 0.976 & 0.431 \\
+MLP $-$ RF & $+0.007$ & $[-0.036,+0.050]$ & 0.002 & 0.476 & 0.998 & 0.547 & $-0.007$ $[-0.023,+0.009]$ & 0.978 & 0.452 \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\textbf{Recorded predictions.} P1 (Random Forest against logistic regression resolved in the reference, above the margin) failed: the difference is $+0.024$, but the 39 reference cells give a CR2 interval of $[-0.022,+0.071]$; the reference population was too small for the spatial dependence, a design error that the analysis keeps rather than corrects after the fact. P2 (power of CR2 for that contrast at least 0.80 and wrong signs at most 2.5\,\%) failed on power (0.036); the wrong-sign part (none for CR2; 15.8\,\% for DeLong on the perceptron against Random Forest, relative to the fixed 39-cell reference) does not establish an error, because the sign of the reference is not determined for two of the three contrasts (XGBoost and the perceptron against Random Forest change sign between the 39 reference cells and all 182 test cells). P3 (CR2 coverage 0.93--0.97) failed: coverage is 0.941--0.998, conservative; most of the excess is the finite-population effect of drawing 19 of 39 cells, and with 19 of all 182 cells the coverage is 0.960--0.978 (post hoc). P4 held: the contrast within the margin is resolved by CR2 in 0.2\,\% of draws, and DeLong resolves every contrast more often than CR2. P5 held at the edge: the MDE predicted from the reference by $N^{-1/2}$ scaling is 1.37--1.40 times the empirical one ($2.80\times$ the standard deviation of the small-test estimates); a factor close to $1/\sqrt{1-19/39}=1.40$ is expected because the small tests draw half of a finite set of 39 cells, so the agreement says less about the scaling than the number suggests. The two reference populations also disagree: XGBoost is above Random Forest on the reference cells ($+0.028$) and not on all test cells ($-0.002$), a reminder that the reference is itself one clustered sample. Not done: a prospective evaluation, which needs data that do not exist yet.
+
+% ============================================================
+\section{Published QML Comparisons: Screening}
+\label{app:literature}
+
+\textbf{Search.} The reanalysis is illustrative and the search was targeted, not systematic. On 21 November 2026 the candidates were collected from three sources: the QML studies already cited in the main text; five web searches, whose queries are listed in \path{exp60_literature_reanalysis.py} (rainfall and weather classification; event classification in high-energy physics; medical diagnosis; fraud detection; chest radiographs), and the papers they returned; and binary-classification benchmarks in particle physics that compare a quantum model with BDT, SVM or neural baselines. No bibliographic database was searched, and studies were not screened in duplicate; the sample is therefore small and weighted towards particle physics, and it is not an estimate of how often published comparisons have a given property.
+
+\textbf{Inclusion.} A study enters \Cref{M-tab:literature} if it compares a quantum and a classical binary classifier on held-out test data and prints, for the same setting, the test size and the test AUC of both. 18 studies were read (arXiv versions): 4 report only regression errors, 9 do not meet the criterion (\Cref{tab:literature_screened}), and 5 enter, with 8 comparisons (best quantum against best classical model in the setting the authors emphasise). Two further candidates (arXiv 2610.17027 and 2503.23408) could not be retrieved and are not counted. The five included studies are cited in their published versions, and the values were transcribed from the arXiv versions. Two studies were checked against their published versions: Heredge et al.\ (test size, the AUCs of Table~1 and the definition of their uncertainty) and Belis et al.\ (test size and all three AUC pairs; the published text does not state the class balance or whether the $\pm$ values are standard deviations or standard errors, and it gives the VQC more precisely as $0.662\pm0.015$). For Grossi et al., the published version confirms the wording (``similar'') and a test set of 1{,}000 records, but its AUC tables could not be extracted; the AUCs are those of the arXiv version. The row uses the counts of Table~I of the arXiv version, 521 genuine and 478 fraudulent test records (999, against 1{,}000 in the text of both versions; the difference does not change the rounded values of \Cref{M-tab:literature}). The split was run ``in five separate trials, preserving the same fraudulent to genuine transaction ratio'', and whether the trials share one test set is not stated; the row treats the AUCs as coming from one test set of 999, which gives the wider interval. Wu et al.\ and Kulkarni et al.\ are transcribed from arXiv; their published versions were not accessed, and only their bibliographic data were checked (Crossref).
+
+\textbf{Quantities.} For each comparison the paired Hanley--McNeil standard error at the pooled test size, with the mean of the two AUCs, the printed class balance (0.5 when it is not printed) and an AUC correlation of 0.75 or 0.5, gives an approximate 95\,\% interval, the smallest equivalence margin the data would accept (the bound of \Cref{tab:tost}), and the MDE of \Cref{tab:hm_mde}; test cases are treated as independent, as in every one of these studies. Four of the studies print per-model uncertainties that can be set against this approximation, for one AUC on one test set. Wu et al.\ give standard deviations of 0.03--0.06 over their ten test sets of 100 events, against a Hanley--McNeil standard error of 0.042; the 0.001 of Heredge et al., a standard deviation divided by $\sqrt{10}$, implies 0.003 per test set of 10{,}000, against 0.004; Belis et al.\ give $\pm0.01$--0.02 over five test sets of 720 and Grossi et al.\ $\pm0.01$ over their trials, against 0.020 and 0.013, but neither states whether these are standard deviations or standard errors. The approximation is compatible with the spread the studies print: within the printed range (Wu et al.) or slightly above it (Heredge et al.) where the definition is known; this is a check of plausibility, not a confirmation. Two-decimal AUCs make a difference uncertain by up to $\pm0.01$, which adds to the smallest margins of those rows: in the worst case the six claims of similarity are compatible only with margins of $\pm0.020$ to $\pm0.046$. In Heredge et al.\ the ten test sets are drawn at random from one pool, so the pooled size of 100{,}000 overstates the independent information; with one test set of 10{,}000 the interval still excludes zero. The pooled size matters most for Wu et al., whose ten test sets of 100 events the authors describe as independent datasets without detailing how they were built: with one test set of 100 the ttH interval would include zero. The row therefore uses the pooled size of 1{,}000, as the authors' description supports, and does not carry the note of Heredge et al. \Cref{tab:literature_screened} lists the studies that were read but could not be used. One of them prints a test size without a classical AUC for that setting: the VQC of Terashi et al.\ (2020; arXiv 2002.09935), tested on 40 events (20 per class) with AUC 0.555, has an MDE of 0.18 for a paired difference. The four weather and climate studies of the main text (da Silva et al., Pastori et al., Fellner et al., Marchisio et al.) compare regression errors, for which an interval needs per-case predictions.
+
+\begin{table}[htbp]
+\centering
+\caption{Binary-classification QML studies screened but not used in \Cref{M-tab:literature}, with the reason.}
+\label{tab:literature_screened}
+{\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{5.2cm}X@{}}
+\toprule
+\textbf{Study} & \textbf{Reason} \\
+\midrule
+Terashi et al.\ (2020), arXiv 2002.09935 & VQC: no classical AUC at the same setting (MDE in the text); QCL: AUCs only in figures (``comparable'') \\
+Wu et al.\ (2021b), arXiv 2104.05059 & AUCs only in figures \\
+Blance and Spannowsky (2021), arXiv 2010.07335 & Accuracy only; classical baseline shown only as a ROC curve \\
+Gianelle et al.\ (2022), arXiv 2202.13943 & Tagging power; test sets of 40{,}000 and 290{,}000 jets; values only in figures \\
+Alvi et al.\ (2023), arXiv 2206.08391 & Anomaly detection; AUC only in a figure; no advantage found \\
+Schuhmacher et al.\ (2023), arXiv 2301.10787 & Validation AUC; test-set size not printed \\
+Bowles et al.\ (2024), arXiv 2403.07059 & Test accuracy on mostly synthetic data; no uncertainty for the differences \\
+El Alami et al.\ (2024), arXiv 2412.19441 & No classical baseline \\
+Tudisco et al.\ (2025), arXiv 2505.20804 & Precision and recall only; test size not printed \\
+\bottomrule
+\end{tabularx}}
+\end{table}
+
+\section{Pre-Analysis Plan Template}
+\label{app:pap}
+
+The analyses of this paper were not pre-registered; only the predictions for the second panel and the external benchmark were recorded in advance (\path{audit/prediction_*.txt}). The template below fixes before any test prediction is seen the decisions that the protocol (\Cref{M-tab:protocol}) treats as substantive. It is also in the repository (\path{docs/pre_analysis_plan_template.md}), to be committed with a timestamp that the author does not control, such as a Zenodo or OSF deposit.
+
+\begin{enumerate}
+\item \textbf{Estimand.} Metric; single run or mean over $S$ seeds; population of test cases (e.g.\ new years at the same sites); what is conditioned on (training data, fitted models).
+\item \textbf{Statements and their interval.} For each comparison, whether it is about the fitted models (decided by the primary cluster interval) or about a procedure or architecture (decided only if an interval that resamples seeds and clusters also excludes zero).
+\item \textbf{Clusters and primary procedure.} The cluster unit, the number of clusters, the primary procedure and its reference distribution; the sensitivity analyses (e.g.\ clusters of consecutive periods, wild cluster bootstrap); the cluster/iid ratio below which the standard error is floored at the iid one, or the mechanism expected to produce low ratios.
+\item \textbf{Calibration.} The simulation that will check the primary procedure on the test design: mechanisms, true differences, number of replications, and the coverage band that counts as calibrated.
+\item \textbf{Families and multiplicity.} The primary comparisons, grouped in families, and the correction (e.g.\ Holm); everything else declared secondary.
+\item \textbf{Resolution.} The MDE of each primary comparison, computed from the test size, the prevalence and an assumed AUC and correlation (\Cref{tab:hm_mde}) and inflated by a design effect for the clusters, with its expected uncertainty.
+\item \textbf{Equivalence.} The smallest difference of interest and the equivalence margin, chosen by relevance and independently of the MDE.
+\item \textbf{References and controls.} The base-rate reference, any operational reference, and, for quantum models, the classical controls at the circuit interface and the planted signals with their strengths and null.
+\item \textbf{Robustness rules.} Which checks (e.g.\ omitted clusters, consecutive-period clusters, causal refits) turn a resolved difference into an exploratory one.
+\item \textbf{Predictions.} The resolution and the verdicts expected, recorded with the plan.
+\end{enumerate}
+
+\section{Changes from the Earlier Version of the Analysis}
+\label{app:v1}
+% ============================================================
+
+The earlier version (archived in \path{results_v1/}) differed in the data pipeline and in the software environment: the monthly panel came from an inner join of the five daily files, so a day missing in any variable removed its precipitation and 23\,\% of the test months (7.5\,\% of the training months) were labelled from incomplete totals; missing precipitation and sunshine were set to zero and covariates were filled forward and backward over any gap; months with fewer than 10 joined days were dropped and the remaining months concatenated into windows; ET$_0$ used a constant wind; the tree ensembles had manual hyperparameters (an automated Random Forest search moved the AUC by 0.002); and runs used scikit-learn 1.6.1 or 1.9.1 and unrecorded XGBoost versions. That version also reported a full label audit (eight label scenarios), runs in a canonical pipeline with other architectures (logistic regression, gradient boosting, a quantum-kernel SVM, encoding and bottleneck ablations) and a degradation-based positive control; these are not repeated here. \Cref{tab:v1v2} compares the headline numbers.
+
+\begin{table}[htbp]
+\centering
+\caption{Headline numbers of the earlier version (v1) and of this version (v2).}
+\label{tab:v1v2}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{lcc}
+\toprule
+\textbf{Quantity} & \textbf{v1} & \textbf{v2} \\
+\midrule
+Test windows; $P_{60}$ & 528; 28.1\,mm & 529; 29.9\,mm \\
+Climatology AUC & 0.681 & 0.685 \\
+Random Forest / XGBoost / LSTM (15-seed AUC) & 0.683 / 0.662 / 0.668 & 0.678 / 0.668 / 0.664 \\
+LSTM+QNN / LSTM+QTL & 0.663 / 0.664 & 0.659 / 0.655 \\
+RF $-$ LSTM+QNN ($p$ DeLong; cluster/iid) & $+0.020$ (0.074; 0.57) & $+0.020$ (0.088; 0.72) \\
+RF $-$ LSTM ($p$) & $+0.015$ (0.189) & $+0.015$ (0.186) \\
+RF $-$ XGBoost ($p$) & $+0.021$ (0.054) & $+0.010$ (0.205) \\
+Full Fourier-1 $-$ LSTM+QNN ($p$) & $+0.013$ (0.003; resolved) & $+0.008$ (0.064; not resolved) \\
+Linear-4D $-$ LSTM+QNN & $-0.009$ & $-0.003$ \\
+SEAS5 lead 1 $-$ climatology (year-block CI) & $+0.050$ $[+0.011,+0.081]$, resolved & $+0.043$ $[-0.005,+0.086]$, not resolved \\
+Random Forest Brier skill (as trained) & $-0.008$ & $-0.046$ \\
+Second panel: RF $-$ XGBoost; LSTM $-$ LSTM+QNN & $+0.031$, $+0.014$ (both resolved) & $+0.004$, $+0.011$ (neither resolved) \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+\newpage
+\begin{thebibliography}{99}
+
+\bibitem[Bell \& McCaffrey(2002)]{bell2002}
+Bell, R. M., \& McCaffrey, D. F. (2002). Bias reduction in standard errors for linear regression with multi-stage samples. \textit{Survey Methodology}, 28(2), 169--181.
+
+\bibitem[DeLong et al.(1988)]{delong1988}
+DeLong, E. R., DeLong, D. M., \& Clarke-Pearson, D. L. (1988). Comparing the areas under two or more correlated receiver operating characteristic curves: A nonparametric approach. \textit{Biometrics}, 44(3), 837--845. \url{https://doi.org/10.2307/2531595}
+
+\bibitem[Field \& Welsh(2007)]{field2007}
+Field, C. A., \& Welsh, A. H. (2007). Bootstrapping clustered data. \textit{Journal of the Royal Statistical Society: Series B (Statistical Methodology)}, 69(3), 369--390. \url{https://doi.org/10.1111/j.1467-9868.2007.00593.x}
+
+\bibitem[Hanley \& McNeil(1983)]{hanley1983}
+Hanley, J. A., \& McNeil, B. J. (1983). A method of comparing the areas under receiver operating characteristic curves derived from the same cases. \textit{Radiology}, 148(3), 839--843. \url{https://doi.org/10.1148/radiology.148.3.6878708}
+
+\bibitem[K\"unsch(1989)]{kunsch1989}
+K\"unsch, H. R. (1989). The jackknife and the bootstrap for general stationary observations. \textit{The Annals of Statistics}, 17(3), 1217--1241. \url{https://doi.org/10.1214/aos/1176347265}
+\bibitem[Lakens(2017)]{lakens2017}
+Lakens, D. (2017). Equivalence tests: A practical primer for $t$ tests, correlations, and meta-analyses. \textit{Social Psychological and Personality Science}, 8(4), 355--362. \url{https://doi.org/10.1177/1948550617697177}
+
+
+\bibitem[P\'erez-Salinas et al.(2020)]{perez2020}
+P\'erez-Salinas, A., Cervera-Lierta, A., Gil-Fuster, E., \& Latorre, J. I. (2020). Data re-uploading for a universal quantum classifier. \textit{Quantum}, 4, 226. \url{https://doi.org/10.22331/q-2020-02-06-226}
+
+\bibitem[Schuirmann(1987)]{schuirmann1987}
+Schuirmann, D. J. (1987). A comparison of the two one-sided tests procedure and the power approach for assessing the equivalence of average bioavailability. \textit{Journal of Pharmacokinetics and Biopharmaceutics}, 15(6), 657--680. \url{https://doi.org/10.1007/BF01068419}
+
+\bibitem[Webb(2023)]{webb2023}
+Webb, M. D. (2023). Reworking wild bootstrap-based inference for clustered errors. \textit{Canadian Journal of Economics}, 56(3), 839--858. \url{https://doi.org/10.1111/caje.12661}
+
+\end{thebibliography}
+
+\end{document}

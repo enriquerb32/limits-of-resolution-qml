@@ -1,0 +1,689 @@
+\documentclass[11pt,a4paper]{article}
+
+% Essential Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{placeins}
+\usepackage{microtype}
+\usepackage{siunitx}
+\usepackage{adjustbox}
+\usepackage[authoryear,round]{natbib}
+\usepackage{parskip}
+\usepackage{setspace}
+\usepackage{tabularx}
+\usepackage{lineno}
+\onehalfspacing
+
+\IfFileExists{newtxtext.sty}{\usepackage{newtxtext, newtxmath}}{\usepackage{mathptmx}}
+\usepackage[font=small, labelfont=bf, margin=1cm]{caption}
+\usepackage{authblk}
+\usepackage{xurl}
+\usepackage{xr}% xr, not xr-hyper: xr-hyper with cleveref printed the file name after every cross-document reference
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{cleveref}
+\externaldocument[S-]{supp}
+\emergencystretch=2em
+% let large tables share a page with text instead of leaving half-empty float pages
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.8}
+
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,calc}
+\definecolor{primaryblue}{HTML}{2A78D6}
+\definecolor{inkgray}{HTML}{52514E}
+\definecolor{paleblue}{HTML}{EAF2FC}
+\definecolor{palegray}{HTML}{F2F1EE}
+
+
+% Fail compilation if a figure is missing (prevent silent placeholder boxes)
+\graphicspath{{figs/}{./}}
+\newcommand{\safefig}[2]{\IfFileExists{#1}{\includegraphics[width=#2]{#1}}{\IfFileExists{figs/#1}{\includegraphics[width=#2]{figs/#1}}{\PackageError{safefig}{figure file \detokenize{#1} not found. Run scripts/make_paper_figs.py first.}{}}}}
+
+% Page Geometry
+\geometry{top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
+
+\title{\textbf{Limits of Resolution in Small Machine-Learning Benchmarks: Calibrated Inference for Clustered Test Sets}}
+
+\author[1,*]{Enrique Real}
+\affil[1]{Independent Researcher, Alicante, Spain. ORCID: \href{https://orcid.org/0009-0006-3862-9797}{0009-0006-3862-9797}}
+\affil[*]{\textit{Corresponding author: enriquerb32@gmail.com}}
+\renewcommand\Affilfont{\itshape\small}
+
+\date{November 2026}
+
+\begin{document}
+\maketitle
+\linenumbers
+
+
+\begin{abstract}
+Small machine-learning benchmarks, including most quantum machine learning (QML) studies, rank models by AUC differences of a few hundredths without asking whether the test set resolves them. We propose a protocol that makes it explicit: state the estimand, calibrate inference on the design, separate seed from sampling error, and report the minimum detectable difference (MDE) of the deciding procedure. The case study forecasts wet months at four Mediterranean stations (529 test station-months, 19 years) with classical models and hybrids feeding four angles to a noiseless 4-qubit circuit. One AUC has a standard error of about 0.024, above classical seed variability. Under CR2 inference calibrated on the design, the MDE of 15-seed means is 0.018--0.025 AUC (0.022--0.032 AUC under independence): independent information, not row count, sets the resolution. On an external benchmark with clustered units, DeLong intervals covered a fixed reference difference in 55--63\,\% of draws, CR2 in 94--99.8\,\%. No learned model resolvably beat climatology; no circuit advantage over interface controls was detected, nor equivalence of \texttt{LSTM+QNN} established. Published QML claims of similarity, reanalysed illustratively, imply unstated margins up to $\pm0.04$ AUC. The protocol needs only archived predictions, applies to any metric with per-case influence values, and is implemented in \texttt{qml\_resolution}.
+
+\bigskip
+
+\noindent \textbf{Keywords:} Benchmarking, Statistical Power, Minimum Detectable Effect, Cluster-Robust Inference, Seed Variance, Quantum Machine Learning, Precipitation Forecasting.
+\end{abstract}
+
+\newpage
+
+% ============================================================
+\section{Introduction}
+% ============================================================
+
+Many comparisons in machine learning are decided by a difference of a few hundredths of AUC on a few hundred test cases. Whether such a difference means anything is mostly a property of the evaluation, not of the models: it depends on how many test cases there are, on how dependent they are, and on the inferential procedure used to compare them. This paper asks how large a difference a small benchmark with clustered test cases can resolve, and with which inference, and turns the answer into a reporting protocol that needs only archived predictions.
+
+\textbf{Why it matters.} A single training run confounds initialization luck with architectural merit \citep{henderson2018,bouthillier2021}, and a test on one fixed test set ignores the variance of the training procedure \citep{dietterich1998,nadeau2003}. The standard error of one AUC is set by the size and prevalence of the test set (about 0.024 for the 529 test cases studied here); it is several times the variation between training seeds of the classical models and falls only as $N^{-1/2}$, so more seeds do not remove it. When test cases come in groups (sites, years, patients, documents), the effective sample is smaller than the row count, and an inference that treats rows as independent can be confidently wrong. Underpowered comparisons and ignored clustering have been documented in NLP \citep{card2020,dror2018}, neuroimaging \citep{varoquaux2018} and language-model evaluation \citep{miller2024}. Machine learning has tests for comparing classifiers across data sets \citep{demsar2006,benavoli2017}, and forecast verification has tests for precipitation forecasts and ROC areas \citep{hamill1999,mason2002} and resampling tests for autocorrelated data \citep{wilks1997}. Survey sampling and cluster-randomized trials have long quantified how much grouping inflates variance \citep{kish1965,donner2000}. These tools are rarely applied to the test set of a single benchmark. Throughout, ``noise'' means statistical variability, not hardware noise.
+
+\textbf{The gap.} Quantum machine learning (QML), proposed among other uses for weather and climate modelling \citep{schwabe2025op}, is a field where this matters. Applied weather and climate QML studies \citep{pastori2026,dasilva2026,fellner2026} often report a quantum model as better than, or as potentially outperforming, classical baselines on the basis of point estimates; \citet{marchisio2026}, for instance, report a 15.4\,\% lower MSE than a parameter-matched classical neuron with one value per model. We do not claim that such effects are spurious, only that the evidence reported cannot separate them from sampling and seed noise. Whether quantum advantage is even the right goal for such studies is itself debated \citep{schuld2022}. QML benchmarks add two difficulties: baselines of unequal capacity \citep{bowles2024}, and variational circuits whose training is sensitive to initialization \citep{mcclean2018}. They also offer a check that is rarely used: a circuit that encodes its inputs as angles computes a truncated Fourier series of them \citep{schuld2021fourier}, so a classical model with the same spectrum is the natural control for a claimed quantum contribution \citep{schreiber2023,landman2023}, and trainable variational models are often classically simulable \citep{cerezo2025,gilfuster2025}.
+
+\textbf{The case study.} A panel of four Western Mediterranean stations is used to forecast one month ahead whether a month will be wet. The panel is not chosen because it is representative of meteorology but because it has, in small, what makes benchmark comparisons hard to read: a few hundred test cases grouped in 19 calendar years, base rates that differ across sites and seasons, a test composition that changes over time, and differences between models of a few hundredths. Those are the conditions of most applied QML benchmarks. It is also a regime of low signal: no learned model is resolvably better than a month$\times$station climatology, and with a label that removes the base rates none discriminates (\Cref{sec:reference}). That is where a resolution protocol matters most, because every observed difference lies near the noise. With four qubits behind a four-dimensional bottleneck no circuit advantage is expected \citep{schuld2021fourier,schreiber2023}; the quantum case therefore tests whether the protocol and its controls show that directly, not whether quantum models help. The quantum models are deliberately small: a classical network compresses the inputs to four angles that feed a 4-qubit variational circuit, simulated without noise. The panel is a testbed for evaluation methodology, not an operational forecasting system.
+
+\textbf{Contributions.} The paper's contribution is not a new estimator but a design-and-reporting workflow that makes the resolution of a small clustered benchmark explicit before architectural claims are made. Each tool is standard; what is new is that each is checked on the design of the study instead of assumed, and that the checks form a protocol (\Cref{fig:inference_map}). The precipitation panel and the quantum models are the examples that show why it is needed.
+The main contribution is \textbf{a reporting protocol and the package \texttt{qml\_resolution}} (\Cref{tab:protocol}). The protocol needs only archived predictions, labels, cluster labels and seeds, and applies to any metric with per-case influence values (here the AUC and the Brier score); the package implements its inferential items. Its components are:
+\begin{enumerate}
+        \item \textbf{Inference chosen by calibration on the design}: every candidate procedure is simulated on the real test design, and the primary one, CR2 with Bell--McCaffrey degrees of freedom, is chosen among those that are calibrated (\Cref{sec:sampling,sec:simulation}).
+        \item \textbf{The MDE of the deciding procedure, with its own uncertainty}, as the measure of what the design can resolve (\Cref{sec:design}).
+        \item \textbf{Controls at the circuit's interface, checked with planted signals}: classical maps that replace only the circuit, an exact classical emulation of the trained circuits, and planted circuit signals that show what the controls can and cannot detect (\Cref{sec:applying}).
+        \item \textbf{The design effect of survey sampling \citep{kish1965} carried over to AUC benchmarks}: a simulation that calibrates how many rows per cluster are worth adding before only more clusters buy resolution (\Cref{sec:design}).
+        \item \textbf{An illustrative reanalysis of published QML comparisons}: the claims of similarity among them are compatible only with equivalence margins of up to $\pm0.04$ AUC, which none states (\Cref{sec:literature}).
+\end{enumerate}
+
+\begin{figure}[tbp]
+\centering
+\begin{tikzpicture}[
+  font=\small, node distance=4mm and 3mm,
+  box/.style={draw=inkgray, rounded corners=2pt, align=center, inner sep=4pt, text width=#1, fill=white, execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}},
+  box/.default=4.2cm,
+  prim/.style={box=#1, draw=primaryblue, line width=1.1pt, fill=paleblue},
+  prim/.default=4.2cm,
+  refb/.style={box=#1, draw=inkgray!60, dashed, fill=palegray},
+  refb/.default=4.2cm,
+  wide/.style={box=13.6cm, fill=white},
+  arr/.style={-{Stealth[length=2.2mm]}, draw=inkgray, line width=0.6pt},
+  q/.style={font=\small\itshape, text=inkgray, align=center, text width=4.2cm}]
+\node[wide] (data) {\textbf{Input:} test predictions of two models, 15 seeds each, on the same 529 station-months};
+\node[wide, below=of data] (est) {\textbf{1. Estimand:} the difference of seed-mean AUCs, for \emph{new years} at the same stations};
+\node[q, below=6mm of est, xshift=-4.7cm] (qa) {Which months are in the test set?};
+\node[q, below=6mm of est] (qb) {Which seed was used?};
+\node[q, below=6mm of est, xshift=4.7cm] (qc) {Could the design see a difference?};
+\node[prim, below=2mm of qa] (cr2) {\textbf{Primary interval: CR2}\\ 19 year clusters; calibrated on this design (\Cref{fig:calibration})};
+\node[refb, below=of cr2] (dl) {\textbf{Reference: DeLong}\\ assumes independence; does not decide};
+\node[box, below=2mm of qb] (tw) {\textbf{Years$\times$seeds bootstrap}\\ adds the variation between training runs};
+\node[box, below=2mm of qc] (mde) {\textbf{Minimum detectable}\\\textbf{difference}\\ design sensitivity, not a threshold};
+\node[wide, anchor=north, yshift=-6mm] (holm) at (dl.south -| tw.south) {\textbf{2. Multiplicity:} Holm on the CR2 $p$-values within the two primary families};
+\node[prim=13.6cm, below=of holm] (dec) {\textbf{3. Decision:} \emph{resolved} only if the CR2 interval excludes zero (and passes Holm in the primary families); \emph{not resolved} is not equality};
+\node[refb=13.6cm, below=of dec] (rob) {\textbf{4. Robustness:} consecutive-year blocks $\cdot$ one year left out $\cdot$ two-station subset $\cdot$ other cluster procedures $\cdot$ CR2 floored at DeLong when cluster/iid is implausibly low};
+\draw[arr] (data) -- (est);
+\draw[arr] (est.south) -- ++(0,-2mm) -| (qa.north);
+\draw[arr] (est.south) -- (qb.north);
+\draw[arr] (est.south) -- ++(0,-2mm) -| (qc.north);
+\draw[arr] (cr2.west) -- ++(-2.5mm,0) |- (holm.west);
+\draw[arr] (tw.south) -- (holm.north);
+\draw[arr] (holm) -- (dec);
+\draw[arr] (dec) -- (rob);
+\draw[arr, dashed, draw=inkgray!60] (cr2) -- (dl);
+\end{tikzpicture}
+\caption{How a comparison between two models is decided. The three columns separate the sources of uncertainty: the test sample, the training seed and the design. Only the primary interval (blue frame), with the Holm correction in the primary families, decides whether a difference is resolved; the grey boxes are references and robustness checks.}
+\label{fig:inference_map}
+\end{figure}
+
+\textbf{Terms.} A difference is \emph{resolved} when the interval of the primary procedure excludes zero (\Cref{sec:multiplicity}); \emph{not resolved} means that this test set and procedure cannot separate the two models, not that they are equal, and \emph{equivalence} is claimed only when an interval lies inside a stated margin. A procedure is \emph{calibrated} when its intervals cover the true difference at the nominal rate in a simulation of the design. A verdict is \emph{exploratory} when it fails the robustness checks of \Cref{fig:inference_map}. Under these terms the two differences that the unfloored CR2 interval resolves in the primary families, Random Forest against the LSTM and against \texttt{LSTM+QNN}, are exploratory, and the first is not resolved in the sensitivity check with the floor proposed in the protocol (\Cref{sec:multiplicity,sec:budget}); the paper does not rank architectures: no learned model is resolvably better than a month$\times$station climatology (\Cref{sec:reference}).
+
+% ============================================================
+\section{Data, Task and Models}
+% ============================================================
+
+\subsection{Dataset, Target and Split}
+\label{sec:dataset_merge}
+
+\textbf{Data.} Daily records of four AEMET stations on the Spanish Mediterranean coast, Alicante (8025), Barcelona Airport (0076), San Javier Airport (7031) and Valencia (8416) (\Cref{S-tab:station_coverage}), a region where much of the monthly precipitation falls in a few convective episodes \citep{romero1999,nieto2005}, were obtained from \textit{datosclima.es} under the AEMET Open Data framework (downloaded on 1 June 2026) and aggregated to calendar months per station.
+
+\textbf{Task.} Each window uses the 12 preceding months to predict whether the precipitation of the next month exceeds $P_{60}=\qty{29.9}{\milli\meter}$, the pooled 60th percentile of the 2{,}847 labelled station-months up to 1996; the precipitation records, and so the labels used for the threshold, start before the first training window (in 1924 at Barcelona and in 1937--1944 at the other stations). It has 35 features: 12 precipitation lags, 17 physical features built from pressure, temperature, wind, sunshine and FAO-56 reference evapotranspiration \citep{allen1998}, 2 cyclic month terms and 4 station indicators (\Cref{S-app:pipeline}). The label comes from the precipitation series alone and is defined when at most 3 days of the month are missing; every label used here has a complete record (\Cref{S-sec:lookahead}).
+
+\textbf{Split.} The split is chronological (\Cref{fig:design}): training 1938--1996 (2{,}332 windows), validation 1997--2007 (516) and test 2008--2026 (529; 40.6\,\% positive). After 2012 and 2011 the pressure records of Valencia and San Javier no longer give a complete set of predictors, so 83.4\,\% of the test windows come from Alicante and Barcelona. Test base rates differ between stations (27--55\,\%), so part of a pooled AUC reflects telling stations apart (\Cref{sec:reference}). All scaling and anomaly statistics use pre-1997 data only.
+
+\textbf{Lookahead.} Three imputation steps of the pipeline used later or full-record values (\Cref{S-sec:lookahead}). A truncation test shows that no test window is affected: rebuilt from the records available at the end of month $t-1$, all 529 test windows have the same inputs and the same eligibility. The lookahead reaches 24 training and 2 validation windows; retraining the five models of the primary families on a causal panel changes their test AUC by at most 0.002, which moves the two exploratory verdicts (\Cref{sec:budget}) and no other. The primary analysis uses the archived pipeline, which every model, control and reference shares and which was primary before the causal refits were made; the causal refit is a sensitivity check (\Cref{S-tab:causal}; code path \texttt{V2\_CAUSAL=1}).
+
+\begin{figure}[htbp]
+    \centering
+    \safefig{figs/fig_design.pdf}{0.95\textwidth}
+    \caption{Study design and its clusters. Bars: eligible windows per station and year of the target month (at most 12), coloured by partition. The 19 test years are the clusters of the primary inference; the covariate records of Valencia and San Javier stop giving complete predictors after 2012 and 2011, so only 2008--2011 (boxed) contain all four stations and the test period is dominated by Alicante and Barcelona.}
+    \label{fig:design}
+\end{figure}
+
+
+
+\subsection{Models and Fitting Sets}
+\label{sec:architectures}
+
+\textbf{Models.} Two references, a month$\times$station climatology fitted on the training partition and the ECMWF SEAS5 seasonal forecast (\Cref{sec:seas5}), are compared with three classical models, Random Forest \citep{breiman2001}, XGBoost and a standalone bidirectional LSTM (10{,}103 parameters), and with two hybrid quantum--classical models simulated without noise in PennyLane (exact expectation values). The tree ensembles were tuned on the validation AUC with declared search spaces (50 trials each); early stopping keeps only 2 to 121 trees in XGBoost across the 15 seeds, so it is a small, heavily regularized ensemble (\Cref{S-app:hyperparams}).
+
+\Cref{S-fig:architecture} shows the hybrid \texttt{LSTM+QNN}. An LSTM summarizes the 12 precipitation lags; its state and the 35 features are projected to four angles $q\in[0,\pi]^4$, which a 4-qubit circuit with two re-uploading layers maps to four readouts $\langle Z_j\rangle$, followed by LayerNorm and a linear output. The circuit computes a truncated Fourier series of the angles with frequencies up to 4 per coordinate \citep{schuld2021fourier}. The model has 2{,}613 parameters, 24 of them quantum. \texttt{LSTM+QTL} puts a quantum head on the frozen pre-trained LSTM of the same seed \citep{mari2020}. Circuit details are in \Cref{S-app:architectures,S-app:hybrids}.
+
+\textbf{Controls at the interface.} The controls keep everything of \texttt{LSTM+QNN} except the map applied to the four angles, so that a difference between a control and the hybrid can only come from that map (\Cref{S-fig:architecture}). The Linear-4D control has a linear $4\to4$ map (2{,}609 parameters against 2{,}613). Fourier surrogates apply a linear map to periodic functions of the angles, either separable ($[\sin kq,\cos kq]_{k\le d}$; \texttt{Fourier-1} to \texttt{Fourier-4}) or with all cross-coordinate products ($\prod_{j}\{1,\cos kq_j,\sin kq_j\}_{k\le d}$; \texttt{Full Fourier-1} and \texttt{-2}, with 81 and 625 features). Two controls keep the circuit with frozen random or zero weights. For \texttt{LSTM+QTL}, \texttt{QTL-classical} and \texttt{QTL tensor-81} replace its circuit by a linear map and by the 81 functions that span exactly what that circuit can compute. Comparisons of a hybrid with Random Forest or with the standalone LSTM are comparisons of whole pipelines and say nothing about the circuit.
+
+\textbf{Fitting sets, seeds and environment.} All models use the same 2{,}332 training rows; the neural and hybrid models and XGBoost use the 516 validation rows for early stopping; all are scored on the same 529 test rows, with 15 seeds each. All results come from one execution in a pinned environment (Python 3.12, PyTorch 2.15.0 CPU, PennyLane 0.45.1, scikit-learn 1.9.1, XGBoost 2.0.3; lock file with hashes in the repository; \Cref{S-tab:software_env}).
+
+\textbf{Metrics.} The primary metric is the ROC-AUC, because it is what the QML benchmarks under discussion report and because paired inference for it is well developed. Probabilistic skill is reported with the Brier score \citep{brier1950}, the Brier skill score against the climatology and the calibration error, before and after recalibration (\Cref{sec:reference}). The inference of \Cref{sec:framework} applies to any metric with per-case influence values; \Cref{S-app:brier} repeats the primary contrasts on the Brier score.
+
+% ============================================================
+\section{Statistical Framework}
+\label{sec:framework}
+% ============================================================
+
+\subsection{Estimand}
+\label{sec:estimand}
+
+For models $A$ and $B$ with test probabilities $p_{A,s}$, $p_{B,s}$ from seeds $s=1,\dots,S$ ($S=15$), the statistic is the difference between seed-averaged test AUCs,
+\begin{equation}
+\hat\Delta=\frac1S\sum_{s}\widehat{\mathrm{AUC}}(p_{A,s})-\frac1S\sum_{s}\widehat{\mathrm{AUC}}(p_{B,s}).
+\end{equation}
+Both models are scored on the same cases, so they are compared paired \citep{diebold1995,delsole2014}. The estimand is the difference of seed-averaged AUCs for new years at these stations, with the historical mixture of eligible station-months, conditional on the training data and the fitted models. Variation due to the choice of training set, which can dominate comparisons of learning algorithms \citep{bates2024}, is outside the estimand: the chronological split is fixed, as it is in operational use.
+
+\subsection{Sampling Uncertainty}
+\label{sec:sampling}
+
+The influence values of $\hat\Delta$ (the seed-averaged DeLong components, centered and divided by the number of positives or negatives) are summed within each calendar year $u$, giving $S_u$. The paired DeLong estimator \citep{delong1988} ignores that grouping and is reported as the reference under independence. The \textbf{primary procedure} is the Bell--McCaffrey CR2 estimator \citep{bell2002}, $\text{SE}_{\text{CR2}}=\{\sum_u S_u^2/(1-n_u/N)\}^{1/2}$, with a $t$ reference whose Bell--McCaffrey degrees of freedom are $\nu=15.9$ for the unequal year sizes of this test set\footnote{Code and results: \path{qml_resolution.cluster_robust_delta}.} \citep{pustejovsky2018,mackinnon2023}. The leverage correction $1-n_u/N$ is that of an unweighted mean; the influence values of an AUC weight positives by $1/n_1$ and negatives by $1/n_0$, so for $\hat\Delta$ the correction is an approximation, and its adequacy is checked by the calibration of \Cref{sec:simulation}, not assumed.
+
+\textbf{Why CR2.} Every candidate was calibrated on a simulation of the test design (\Cref{sec:simulation}). With independent years CR2 covers at 0.935--0.975 in every scenario; CR1 \citep{obuchowski1997}, the delete-one-year jackknife and the wild cluster bootstrap \citep{webb2023} are also calibrated within Monte Carlo error, whereas DeLong falls to 0.85 when there are year$\times$station effects and the percentile year-block bootstrap \citep{field2007} rejects a null difference in 6--13\,\% of replications. Among the calibrated procedures CR2 is chosen because it is analytic and deterministic, cheap enough for every contrast, and the best calibrated with ten clusters. With only 19 clusters any cluster variance estimate is noisy \citep{cameron2008}, which is why the MDE is reported with its uncertainty (\Cref{sec:design}).
+
+\textbf{When it fails.} No procedure built on calendar-year clusters is calibrated when serial correlation between years combines with year$\times$station effects (coverage 0.87--0.91 for every one). The panel gives no evidence of that regime (lag-1 autocorrelations of $S_u$ between $-0.49$ and $+0.25$; Ljung--Box $p>0.10$), but with 19 years only strong serial correlation would be detected, so clusters of two or three consecutive years \citep{kunsch1989} are a sensitivity check (\Cref{S-app:fewclusters}). Seed uncertainty, on which CR2 conditions, comes from a years$\times$seeds bootstrap. The ratio of the CR1 to the DeLong standard error (``cluster/iid'') summarizes the within-year dependence.
+
+\subsection{Seed Variability, Minimum Detectable Difference and Decisions}
+\label{sec:multiplicity}
+
+For a model with seed standard deviation $\sigma_{\text{seed}}$ and sampling standard error $\text{SE}$ of one AUC, the seed share is $\sigma_{\text{seed}}^2/(\sigma_{\text{seed}}^2+\text{SE}^2)$. The minimum detectable difference (MDE) at two-sided $\alpha=0.05$ and power 0.80 describes the sensitivity of the design to a true difference; it is not a threshold that an observed difference must exceed, and an observed gap below it can be significant. The MDE reported first is that of the procedure that takes the decision, $(t_{0.975,\nu}+t_{0.80,\nu})\,\text{SE}_{\text{CR2}}$; the DeLong MDE, $2.80\,\text{SE}_{\text{DeLong}}$, is the reference under independence.
+
+Holm correction is applied to the CR2 $p$-values within two families of three seed-mean comparisons (the classical models, and \texttt{LSTM+QNN} against Random Forest, the Linear-4D control and the LSTM); resolving a difference after correction needs the MDE at the first Holm level, $(t_{1-0.05/6,\nu}+t_{0.80,\nu})\,\text{SE}_{\text{CR2}}$. The second family asks where the main hybrid stands against the best classical model, its circuit-free control and the standalone LSTM, so it mixes pipeline comparisons with one interface comparison; it is kept as analysed, because replacing it by a family of interface contrasts after seeing the results would itself be a post hoc choice. As a sensitivity check, Holm over the interface contrasts alone (\texttt{LSTM+QNN} against Linear-4D and the three Fourier surrogates of \Cref{S-tab:controls}) resolves none of them (smallest CR2 $p=0.158$). The remaining analyses, about forty paired comparisons, are secondary and unadjusted. A difference is \emph{resolved} when its CR2 interval excludes zero and, in the two primary families, \emph{resolved after Holm} when its CR2 $p$-value passes the Holm step; agreement of DeLong is a diagnostic, not part of the decision. None of these analyses was pre-registered.
+
+\textbf{A floor for implausibly small cluster errors.} CR2 is calibrated over replications, but not given a low cluster/iid ratio (\Cref{sec:budget}). Item 1 of the protocol (\Cref{tab:protocol}) therefore proposes, for analyses planned with it, to decide with the CR2 standard error floored at the DeLong one, $\max(\text{SE}_{\text{CR2}},\text{SE}_{\text{DeLong}})$ with the same degrees of freedom, when the cluster/iid ratio is at or below the 5th percentile of its distribution simulated on this test design with independent cases, 0.71, and no mechanism that produces such a ratio has been shown\footnote{Code and results: \path{exp63_floor_threshold.py}.}; the MDE that item 2 asks for is then that of the floored procedure. In the ten calibrated mechanisms of \Cref{S-app:cancellation_sim} this rule covers at 0.95--0.98 overall and at 0.89--0.99 among the replications that trigger it, where CR2 covers at 0.73--0.89. The rule is post hoc: it was derived from this panel after the primary analysis, for which the unfloored CR2 interval had been fixed. In this paper, therefore, the unfloored CR2 interval decides and the floor is a sensitivity check; on another design the trigger has to be calibrated before the rule is applied. The rule is also needlessly conservative where a ratio below 1 is legitimate, as in stratified test sets or designs with a negative intraclass correlation by construction; there the mechanism should be shown instead.
+
+\textbf{Which interval decides which statement.} The estimand conditions on the fitted models, so the CR2 interval decides statements about the models as trained: whether these 15-seed ensembles differ on new years. A statement about a training procedure or an architecture, such as ``training the circuit helps'' or ``one model family is better'', also involves the variation between training runs that CR2 holds fixed. Such a statement is made only when the years$\times$seeds interval, which resamples years and seeds jointly, also excludes zero. For the classical models the two intervals nearly coincide, because their seed variability is small (\Cref{tab:budget}); they part where the seed share is large, as for the hybrids and the frozen circuits.
+
+% ============================================================
+\section{Results}
+% ============================================================
+
+\Cref{sec:budget,sec:simulation,sec:design} measure what the first panel can resolve; \Cref{sec:applying,sec:reference} apply that resolution to the quantum case study and to its references; \Cref{sec:replication,sec:external} test the conclusions on a second panel and on an external benchmark; \Cref{tab:verdicts} summarizes the verdicts.
+
+\subsection{The Noise Budget}
+\label{sec:budget}
+
+Two things make an AUC uncertain: which test months happen to be in the test set (sampling error) and which random seed was used for training (seed variability). \Cref{tab:budget} puts both on the same scale. For every model the sampling error is the larger one: one AUC is uncertain by about $\pm0.024$ (one standard error) whatever the model. Seed variability is small for the tree ensembles and the LSTM, but not for the hybrids, where it accounts for 14--25\,\% of the variance. A benchmark of variational models therefore has to report both sources, and adding seeds removes only the smaller one.
+
+\begin{table}[htbp]
+\centering
+\caption{Noise budget for one AUC (15 seeds per model, 529 test rows). iid: DeLong; block: calendar-year block bootstrap ($B=2{,}000$, 19 years). Seed share: $\sigma_{\text{seed}}^2/(\sigma_{\text{seed}}^2+\text{SE}^2)$, with the DeLong or the block standard error.}
+\label{tab:budget}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Quantity} & \textbf{Random Forest} & \textbf{XGBoost} & \textbf{Standalone LSTM} & \textbf{LSTM+QNN} & \textbf{LSTM+QTL} \\
+\midrule
+Mean AUC (15 seeds) & 0.6784 & 0.6684 & 0.6638 & 0.6587 & 0.6548 \\
+SE of one AUC, iid / block & 0.023 / 0.026 & 0.024 / 0.027 & 0.024 / 0.027 & 0.024 / 0.026 & 0.024 / 0.027 \\
+SD across seeds & 0.0011 & 0.0081 & 0.0051 & 0.0139 & 0.0097 \\
+\textbf{Seed share, iid / block} & \textbf{0.2\,\%} / 0.2\,\% & \textbf{10.6\,\%} / 8.2\,\% & \textbf{4.5\,\%} / 3.4\,\% & \textbf{25.2\,\%} / 21.6\,\% & \textbf{14.2\,\%} / 11.3\,\% \\
+\bottomrule
+\end{tabular}}%
+}
+\end{table}
+
+Comparing two models on the same test months cancels much of the sampling error, because both models face the same easy and hard months. \Cref{tab:paired_ci} and \Cref{fig:paired_ci} show what remains for 15-seed means: the smallest difference that this test set detects with 80\,\% power under the primary procedure (the MDE) is 0.018--0.024 AUC for the classical models (0.022--0.031 under independence, and 0.021--0.029 at the first Holm step), while the observed differences are 0.005--0.015. No classical difference survives the Holm correction. One is resolved by the primary procedure before correction: Random Forest against the LSTM ($+0.015$; CR2 interval $[+0.001,+0.028]$, $p=0.041$, above the Holm threshold of 0.017), which DeLong does not reject ($p=0.186$) and which the floor of the sensitivity check leaves unresolved (below). With a single run per model, whether Random Forest is declared better depends mostly on which seeds happen to be compared (\Cref{S-app:single_seed}).
+
+\begin{table}[htbp]
+\centering
+\caption{Paired comparison of 15-seed means of the classical models (529 test rows). DeLong: paired standard error on seed-averaged components and two-sided $p$-value, the reference under independence. CR2: the primary interval (calendar-year clusters, Bell--McCaffrey $\nu=15.9$) and its $p$-value; Holm first-step threshold 0.017. Years$\times$seeds: bootstrap interval ($B=2{,}000$). Cluster/iid: CR1 over DeLong standard error. MDE: 80\,\%-power MDE of CR2, $(t_{0.975,\nu}+t_{0.80,\nu})\,\text{SE}_{\text{CR2}}$, and in parentheses of DeLong ($2.80\times$SE). $^{\dagger}$Exploratory (\Cref{sec:budget}): resolved by unfloored CR2 before but not after Holm; not resolved in the sensitivity check with the floor of protocol item 1 (ratio below 0.71; floored $p=0.204$, MDE 0.033); not resolved with two-year clusters, reversed by omitting single years, changed by the causal refit, not replicated on the second panel.}
+\label{tab:paired_ci}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{lccccccc}
+\toprule
+Difference & $\hat\Delta$ & SE (DeLong) & $z$ ($p$) & CR2 95\,\% CI ($p$) & Years$\times$seeds 95\,\% CI & Cluster/iid & MDE CR2 (DeLong) \\
+\midrule
+RF $-$ XGBoost & $+0.0100$ & 0.0079 & $1.27$ (0.205) & $[-0.003,+0.023]$ (0.110) & $[-0.004,+0.021]$ & 0.75 & 0.018 (0.022) \\
+RF $-$ LSTM & $+0.0146$ & 0.0110 & $1.32$ (0.186) & $[+0.001,+0.028]$ (0.041)$^{\dagger}$ & $[+0.001,+0.029]$ & 0.59 & 0.020 (0.031) \\
+XGBoost $-$ LSTM & $+0.0046$ & 0.0104 & $0.44$ (0.662) & $[-0.013,+0.022]$ (0.580) & $[-0.011,+0.024]$ & 0.77 & 0.024 (0.029) \\
+\bottomrule
+\end{tabular}}%
+}
+\end{table}
+
+\begin{figure}[tbp]
+    \centering
+    \safefig{figs/fig_forest.pdf}{0.88\textwidth}
+    \caption{Paired differences of 15-seed mean test AUC (\Cref{tab:paired_ci,tab:qnn_paired,S-tab:controls}) with 95\,\% intervals: the primary CR2 interval (blue squares), which alone decides, and two references, DeLong (grey circles) and the years$\times$seeds bootstrap (light grey triangles); 529 test rows, $B=2{,}000$. Intervals are pointwise, unfloored and not multiplicity-adjusted; no difference of the two Holm families passes the correction. $^{\dagger}$Exploratory (\Cref{sec:budget}); with the floor of protocol item 1, a sensitivity check here, RF $-$ LSTM is not resolved.}
+    \label{fig:paired_ci}
+\end{figure}
+
+\textbf{Why the procedures disagree, and how secure the two verdicts are.} DeLong and CR2 differ only for Random Forest against the neural and hybrid models, whose cluster standard error is 59--78\,\% of the DeLong one (column ``Cluster/iid''): in the years in which Random Forest gains on the LSTM at one station it tends to lose at another, so the station contributions cancel within each year (\Cref{S-app:cancellation}). No mechanism we could build produces that pattern (\Cref{S-app:cancellation_sim})\footnote{Code and results: \path{exp61_cancellation_calibration.py}, \path{exp62_floored_cr2_observed.py}.}: a ratio of 0.59 over years of about 28 rows implies an intraclass correlation of the influence values of $-0.024$, close to its lower bound of $-0.037$; random within-year effects raise the ratio whatever their signs across stations, and a seasonal pattern that recurs every year lowers its median only to 0.83. A ratio this low is therefore mostly a low draw of the cluster variance from 19 years, and given such a draw CR2 undercovers: in ten mechanisms under which it is calibrated (coverage 0.947--0.955 overall), it covers 0.78--0.90 among replications with a ratio $\le0.72$ and 0.70--0.86 with a ratio $\le0.59$. Flooring its standard error at the iid one keeps 0.92--0.99 there, at the cost of being conservative overall (0.96--0.99). \textbf{Sensitivity to the floor of item 1} (\Cref{sec:multiplicity}). The verdicts of the paper are those of the unfloored CR2 interval, the procedure fixed before this analysis. With the floor, Random Forest against the LSTM, whose ratio of 0.59 is below the trigger of 0.71, would \emph{not be resolved} (floored $p=0.204$; MDE of the floored procedure 0.033). Random Forest against \texttt{LSTM+QNN} (ratio 0.72) lies just above the trigger and would remain resolved before Holm, although CR2 still undercovers at such ratios; a trigger of 0.75 would floor it too ($p=0.107$), a verdict that was already exploratory. Flooring every contrast with a ratio below 1, both would be no longer resolved ($p=0.204$ and 0.107), and no other verdict would change. These two verdicts are the least secure of the paper. They also fail with clusters of two consecutive years (\Cref{S-app:fewclusters}); leaving out a single test year reverses the first for 9 of the 19 years; and with causal imputation Random Forest against the LSTM is no longer resolved (CR2 $p=0.070$ on the 529 common rows) while Random Forest against \texttt{LSTM+QNN} passes the Holm correction ($p=0.009$), though not with clusters of three consecutive years ($p=0.076$; \Cref{S-tab:causal}; all checks in \Cref{S-fig:sensitivity}).
+
+\subsection{Simulation with Known Truth}
+\label{sec:simulation}
+
+\Cref{fig:calibration} shows the calibration that selects the primary procedure: two binormal scorers on the 529 station-months of the test set (or on variants with 10 or 38 years and two or four stations per year), with year, scorer-specific and year$\times$station effects, a prevalence dipole between stations and, in two scenarios, AR(1) years (design in \Cref{S-app:fewclusters}). With independent years CR2 covers at 0.935--0.975 in every cell, while DeLong undercovers as soon as there are year$\times$station effects or a dipole (down to 0.845); with AR(1) years combined with year$\times$station effects no procedure built on calendar-year clusters is calibrated (\Cref{sec:sampling}).
+
+\begin{figure}[htbp]
+    \centering
+    \safefig{figs/fig_calibration.pdf}{0.95\textwidth}
+    \caption{Calibration of the candidate procedures on the design of the test set: coverage of the 95\,\% interval for the difference for new years in each of 30 simulation cells (scenarios $\times$ test-set variants $\times$ true difference; 600 replications each). Filled dots: independent years; hollow dots: AR(1) dependence between consecutive years; hollow diamonds: AR(1) combined with year$\times$station effects, the only regime in which no procedure built on calendar-year clusters is calibrated. Shaded band: 95\,\% Monte Carlo interval around 0.95. The primary procedure, CR2 with Bell--McCaffrey degrees of freedom (top row, blue), covers at 0.935--0.975 in every cell with independent years.}
+    \label{fig:calibration}
+\end{figure}
+
+\subsection{Resolution and Test-Set Size}
+\label{sec:design}
+
+The resolution limits of \Cref{sec:budget} can be estimated before a benchmark is run. The Hanley--McNeil approximation \citep{hanley1982,hanley1983} gives the MDE of a paired difference, under independence, from the AUC, the class counts and the correlation between the AUCs of the two models (\Cref{S-tab:hm_mde}). With the DeLong correlations of single-run AUCs measured here, 0.78--0.91\footnote{Code and results: \path{exp46_auc_correlation.py}.}, it reproduces the empirical single-run MDEs (0.045 and 0.036 against 0.046 and 0.035; \Cref{S-app:resolution}).
+
+
+\textbf{The MDE is itself uncertain.} It inherits the noise of a variance estimated from 19 clusters. Under the Satterthwaite approximation that defines the Bell--McCaffrey degrees of freedom, a 95\,\% interval for the MDE runs from about 0.7 to 1.5 times its point value, for Random Forest against \texttt{LSTM+QNN} 0.025 $[0.018,0.038]$; a bootstrap over years gives $[0.011,0.035]$ (\Cref{S-tab:mde_ci})\footnote{Code and results: \path{exp57_mde_ci_equivalence.py}.}. Equivalently, at the reported MDE the power of the design lies between 0.44 and 0.96 at the ends of that interval. An MDE from 19 clusters locates the resolution within a factor of about two; it is a planning quantity, not a sharp boundary.
+
+\textbf{Clusters against rows.} Subsets of the test years add rows and clusters together, so they cannot say which of the two buys resolution. A simulation with known truth separates them (\Cref{fig:clusters_rows}): the mechanisms of \Cref{sec:simulation} on designs with $K=10$ to 76 independent clusters of $m=12$ to 96 rows. With independent test cases the MDE falls as $(Km)^{-1/2}$, and rows and clusters are interchangeable. With dependence within a cluster, added rows buy less: fitting $\operatorname{Var}(\hat\Delta)=a/(Km)+b/K$ across designs, the number of rows per cluster at which the two terms are equal, $a/b$, is about 110 with year$\times$station effects and 290--460 with scorer-specific or serially correlated year effects; beyond it only more clusters lower the MDE. This is the design effect $1+(m-1)\rho$ of survey sampling and cluster-randomized trials \citep{kish1965,donner2000}, with $a/b=(1-\rho)/\rho$: the fitted ratios correspond to an equivalent intraclass correlation of about 0.009 and 0.002--0.003, small values that still dominate the variance once clusters hold a few hundred rows. What the simulation adds is the calibration of this rule for paired AUC differences, and of the procedures that use it, on the mechanisms of the case study. CR2 covers at 0.930--0.967 and rejects a null difference in 3.3--7.0\,\% of replications in all 128 cells, whereas DeLong rejects it in up to 17.6\,\% under year$\times$station effects, so its extra power there is not real. Independent information, not row count, sets the resolution.
+
+\begin{figure}[tbp]
+    \centering
+    \safefig{figs/fig_clusters_rows.pdf}{0.95\textwidth}
+    \caption{Resolution of a test design against its number of independent clusters $K$ and rows per cluster $m$ (simulation with known truth, \protect\path{exp54_power_clusters_rows.py}; 1{,}000 replications per design). True 80\,\%-power MDE: $2.80\times$ the standard deviation of the estimated AUC difference over replications, a property of the design whatever procedure is used. Dotted: the $N^{-1/2}$ scaling from $m=12$. Mechanisms of \Cref{sec:simulation}; with independent cases rows and clusters are interchangeable, with dependence within a cluster added rows buy less.}
+    \label{fig:clusters_rows}
+\end{figure}
+
+\subsection{Case Study: Hybrid Quantum Models under the Noise Budget}
+\label{sec:applying}
+
+The 15-seed AUCs of all models and controls are in \Cref{S-tab:case_all}: the climatology scores highest (0.685), Random Forest is the best learned model (0.678), and both hybrids (0.659 and 0.655) score below it and below the standalone LSTM (0.664). The question of this section is not which model is best, which the test set cannot resolve, but whether the circuit contributes anything that a classical map at the same place in the model could not.
+
+\begin{table}[htbp]
+\centering
+\caption{Paired comparisons of \texttt{LSTM+QNN}, the Holm family of the hybrids (15-seed means; procedures and notation as in \Cref{tab:paired_ci}; first-step threshold 0.017). \texttt{LSTM+QTL} in \Cref{S-tab:qtl_paired}. $^{\dagger}$Exploratory, as in \Cref{tab:paired_ci}: with a ratio of 0.72, just above the floor trigger, resolved by CR2 before Holm (floored, $p=0.107$); not resolved after Holm or with clusters of two consecutive years, changed by the causal refit (resolved after Holm, $p=0.009$), and not replicated on the second panel.}
+\label{tab:qnn_paired}
+{\small
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+Difference & $\hat\Delta$ & SE (DeLong) & $z$ ($p$) & CR2 95\,\% CI ($p$) & Years$\times$seeds 95\,\% CI & Cluster/iid & MDE CR2 (DeLong) \\
+\midrule
+RF $-$ LSTM+QNN & $+0.0197$ & 0.0115 & $1.71$ (0.088) & $[+0.002,+0.037]$ (0.031)$^{\dagger}$ & $[+0.002,+0.040]$ & 0.72 & 0.025 (0.032) \\
+Linear-4D $-$ LSTM+QNN & $-0.0034$ & 0.0059 & $-0.58$ (0.565) & $[-0.017,+0.010]$ (0.608) & $[-0.019,+0.011]$ & 1.09 & 0.019 (0.016) \\
+LSTM $-$ LSTM+QNN & $+0.0051$ & 0.0057 & $0.90$ (0.368) & $[-0.006,+0.016]$ (0.324) & $[-0.008,+0.019]$ & 0.88 & 0.015 (0.016) \\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\textbf{Against classical pipelines.} Random Forest scores 0.020 above \texttt{LSTM+QNN} (\Cref{tab:qnn_paired}), a difference resolved by the primary procedure (CR2 $p=0.031$; its ratio of 0.72 is just above the floor trigger) but not after the Holm step, and exploratory (\Cref{sec:budget}); it says nothing about the circuit, because it compares whole pipelines. \texttt{LSTM+QTL} behaves alike (\Cref{S-tab:qtl_paired}).
+
+\textbf{Against controls at the interface.} \texttt{LSTM+QNN} is not distinguished from the same model with a linear map in place of the circuit (Linear-4D), nor \texttt{LSTM+QTL} from the same model with a linear head or with the 81-function head that spans exactly what its circuit can compute. Under the primary procedure the MDEs of these comparisons are 0.012--0.019 (0.011--0.016 under independence).
+
+\textbf{Does training the circuit help, and does it help because it is quantum?} Freezing the circuit at random or zero weights lowers the AUC by 0.012--0.013, a difference resolved by the primary procedure (CR2 $p=0.010$--0.014) with which DeLong agrees (\Cref{S-tab:controls}); only the years$\times$seeds interval, which includes the larger seed variation of the frozen models, reaches zero. These trained circuits are therefore resolvably better than these frozen ones, but that training the circuit helps, a statement about the procedure, is not resolved (\Cref{sec:multiplicity}). The Fourier surrogates, classical maps that apply sines and cosines of the same four angles, all score as well as the trained circuit or slightly better, and no difference is resolved.
+
+\textbf{Equivalence.} Not resolved is not equal, so we asked whether the circuit is equivalent to its classical controls. With a margin of 0.01 AUC, the smallest difference of interest recorded for the external benchmark (\Cref{sec:external}) after the main analysis of this panel, and so not chosen from the equivalence results but not blind to them, two one-sided CR2 tests do not establish equivalence of \texttt{LSTM+QNN} with Linear-4D or with any Fourier surrogate (TOST $p=0.11$--0.39); the smallest margins the data would accept are 0.013--0.018 AUC. Only \texttt{LSTM+QTL} and its linear head are equivalent within $\pm0.01$ (TOST $p=0.047$; post hoc, unadjusted; \Cref{S-tab:tost}). What the trained circuit adds can thus be obtained from a classical periodic map of the same four angles, within a resolution of about 0.015 AUC, not shown to be zero.
+
+\textbf{What the circuit computes, and whether it can be replaced.} Each readout is a trigonometric polynomial with frequencies up to 4 per angle, so its values on a grid of $9^4$ angles determine it exactly: the reconstructed polynomials reproduce the logits to $3\times10^{-14}$ and the AUC exactly (\Cref{S-app:spectrum,S-app:emulation})\footnote{Code and results: \path{exp52_emulation_substitution.py}.}. With the LSTM and projection of each seed frozen, a circuit trained from scratch on the same angles (15-seed mean AUC 0.652) is below the separable Fourier-2 map (0.664; CR2 $p=0.002$) and the 81- and 625-function tensor maps (0.668 and 0.667; $p=0.001$ and 0.013).
+
+\textbf{Would the controls detect a circuit contribution?} With nothing to learn beyond the base rates, no circuit advantage could appear, so we planted signals generated by ``teacher'' circuits with the architecture of \texttt{LSTM+QNN} and fixed random weights (10 configurations, two of them nulls; \Cref{S-app:teacher,S-tab:teacher_main})\footnote{Code and results: \path{exp50_teacher_grid.py}.}. With the primary procedure, the trained circuit is above the Linear-4D map in 6 of the 10 configurations, never above the separable Fourier-2 map (which is above it in 2), and below the 81-function tensor surrogate in all 10; no contrast rejects under the null. The design therefore has demonstrated power only against Linear-4D: because the circuit never exceeds the Fourier and tensor surrogates, it cannot show that an advantage over them would have been detected (finite-shot readouts in \Cref{S-app:shots}).
+
+\subsection{References: Climatology, Base Rates and SEAS5}
+\label{sec:reference}
+
+\textbf{Climatology.} A month$\times$station climatology fitted on the training partition reaches AUC 0.685 and a Brier score of 0.2184. No learned model reaches it in AUC: Random Forest scores 0.007 lower and the other models 0.017--0.030 lower, and none of these differences is resolved under the primary procedure (\Cref{S-tab:seas5}; CR2 $p\ge0.06$). On the Brier score every model has negative skill against the climatology, as trained (all models were trained with positive-class weighting) and after recalibrating models and climatology with the same Platt map ($-0.016$ to $-0.042$; \Cref{S-tab:brier}). With the primary procedure on the Brier difference, the standalone LSTM, Linear-4D and \texttt{LSTM+QNN} are resolvably worse than the recalibrated climatology (CR2 $p=0.010$--0.028; secondary, unadjusted), although with the floor of \Cref{sec:multiplicity} the LSTM is not (ratio 0.66, $p=0.095$), and after recalibration no difference of the primary families passes Holm (\Cref{S-app:brier}).
+
+\textbf{Base rates.}\label{sec:stationmonth} Because the threshold is pooled across stations whose base rates differ, a pooled AUC partly rewards telling stations and seasons apart \citep{hamill2006}. Counting only pairs of months from the same station, every learned model loses 0.020--0.032 AUC and the climatology has the highest value (0.667; \Cref{S-tab:within}). With a label defined by the training 60th percentile of each station and calendar month, no model discriminates: the 15-seed mean AUCs lie between 0.505 and 0.514, against 0.479 for the climatology, and no paired difference is distinguished from zero (CR2 $p\ge0.72$ between models and $p\ge0.14$ against the climatology; \Cref{S-app:baserates}). The pooled AUCs of 0.65--0.68 are consistent with the models reproducing the seasonal and geographic base rates.
+
+\textbf{An operational reference.}\label{sec:seas5} ECMWF SEAS5 \citep{johnson2019seas5,c3s_seasonal_monthly} enters as a further model (\Cref{S-app:seas5}): 25 members interpolated to the stations, with an exceedance probability specified before the analysis and, since member fractions are not fair scores \citep{ferro2014}, Platt recalibration for probabilistic scores. At lead 2, the lead available before the target month, SEAS5 is not distinguished from the climatology ($-0.010$, CR2 $[-0.038,+0.019]$), and Random Forest and \texttt{LSTM+QNN} are not distinguished from SEAS5 ($+0.003$ and $-0.017$; CR2 $p=0.84$ and 0.25). We did not detect incremental skill: adding a model to a combination of SEAS5 and the climatology changes the AUC by $-0.008$ to $-0.001$ at lead 2 (CR2 $p\ge0.25$; \Cref{S-tab:seas5_blends}), and an increment of 0.010--0.019 AUC at lead 2 would have been detected with probability 0.8. Lead 1, issued after the statistical models, is in \Cref{S-app:seas5}. The climatology remains the reference that a statistical model at this lead would first have to beat.
+
+\subsection{Out-of-Panel Re-test}
+\label{sec:replication}
+
+On a second panel the null results held, the ranking did not, and row count alone underpredicted the MDE of the procedure that decides. We repeated the protocol on a second Western Mediterranean panel, Palma de Mallorca airport, Tortosa, Alcantarilla and Almería airport, with the same code path, labels, split years and models (\Cref{S-app:panel2}). All four stations cover the test period, so the test set has 884 station-months (34.7\,\% positive), and the shorter histories leave 1{,}694 training rows. The panel shares the region and the 19 test years with the first, so it is a re-test, not an independent replication. Before the analysis we recorded the resolution the protocol predicts (\path{audit/prediction_panel2.txt}, 10 November 2026, commit \texttt{cc64abb} of the public repository): MDEs of 0.025--0.035 for paired 15-seed means, scaled from an earlier version of the pipeline (\Cref{S-app:v1}); the per-contrast $N^{-1/2}$ predictions in \Cref{S-tab:panel2} were computed afterwards.
+
+Under independence the scaling replicated (DeLong MDEs within a factor 0.79--1.26 of their $N^{-1/2}$ predictions; \Cref{S-tab:panel2}). Under the procedure that takes the decision it did not: the CR2 MDEs of the six comparisons between complete models are 0.019--0.035, 1.36--1.67 times their $N^{-1/2}$ predictions, because the dependence within years is stronger (cluster/iid ratios 0.91--1.35 against 0.59--1.09): row count alone did not predict the resolution. The null results replicated (the climatology scores 0.716, and with the station$\times$month label every model scores 0.499--0.523; \Cref{S-tab:panel2_sm}); the ranking did not: the six models lie within 0.014 of one another, Random Forest is no longer above the hybrid ($+0.001$), and with the primary procedure (CR2, $\nu=17.7$) no comparison is resolved ($p\ge0.107$)\footnote{Code and results: \path{local_panel2_cr2.json}.}; a truncation test changes no verdict (\Cref{S-app:panel2}). Differences below the MDE of one panel need not keep their sign on another.
+
+\subsection{External Benchmark: Coverage with Clustered Test Units}
+\label{sec:external}
+
+With clustered test units and models that do discriminate, iid inference covered a fixed reference difference in fewer than two thirds of small test sets, and the calibrated cluster procedure in at least 94\,\%. Both panels have little signal, so we asked how the inference behaves when the models do discriminate and the test units are clustered. The design, the contrasts, a margin of relevance of 0.01 AUC and five predictions were committed before any model was fitted (\path{audit/prediction_external.txt}, commit \texttt{1e88a96}, 18 November 2026; \Cref{S-app:external}). Commit dates are set by the author and are not an independent timestamp. The data are the 20{,}640 block groups of California Housing \citep{pace1997}, the target a median house value above the training median, the clusters spatial cells of $0.25^\circ$, and the split is by cell (182 test cells, 10{,}282 rows). Logistic regression, Random Forest, XGBoost and a multilayer perceptron (5 seeds) reach test AUCs of 0.905, 0.921, 0.919 and 0.914.
+
+Spatial dependence dominates the uncertainty. On the whole test set the CR2 standard error is 4.4--6.6 times the DeLong one, so that Random Forest against logistic regression ($+0.017$) is not resolved with 10{,}282 rows (CR2 $[-0.016,+0.049]$, $\nu=13.5$), although DeLong gives $[+0.012,+0.021]$. In 1{,}000 small test sets of 19 cells (median 570 rows, like the first panel), drawn from the 39 test cells with 10--60 rows, DeLong covers the difference on those 39 cells in only 55--63\,\% of draws and resolves the three contrasts in 61, 87 and 48\,\%, including one whose reference difference lies within the margin; CR2 covers in 94--99.8\,\% and resolves in 0.2--10.5\,\%. With all 182 test cells as the reference (post hoc), DeLong covers in 41--45\,\%, CR2 in 96--98\,\%. Three of the five recorded predictions failed, because the reference population of 39 cells was too small to resolve Random Forest against logistic regression (power of CR2 4\,\%, not 80\,\%). The benchmark is therefore a test of coverage and of false decisions, not of power.
+
+\subsection{Summary of the Verdicts}
+\label{sec:verdicts}
+
+\Cref{tab:verdicts} separates the statements that the evidence supports from those that remain exploratory or unresolved.
+
+\begin{table}[htbp]
+\centering
+\caption{Verdicts of the paper, with the evidence for each, the checks it passed or failed, and its status in the terms of the Introduction. Established: a methodological statement supported within the stated assumptions. Resolved, not resolved and exploratory as defined there. ``For these models'': a statement about the 15 fitted models of each family, decided by the CR2 interval; a statement about the procedure (that training or an architecture helps) also needs the years$\times$seeds interval to exclude zero (\Cref{sec:multiplicity}). Item 1: the floor of \Cref{tab:protocol}.}
+\label{tab:verdicts}
+{\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{4.1cm}>{\raggedright\arraybackslash}p{2.3cm}X>{\raggedright\arraybackslash}p{2.3cm}@{}}
+\toprule
+\textbf{Statement} & \textbf{Evidence} & \textbf{Robustness} & \textbf{Status} \\
+\midrule
+Sampling error exceeds seed variability for every model & \Cref{tab:budget} & Seed share 0.2--25\,\% with DeLong and block standard errors & Established \\
+CR2 is calibrated on this design & \Cref{fig:calibration} & 0.935--0.975 with independent years; 0.88--0.91 with AR(1) and year$\times$station effects & Established for independent years \\
+MDE of 15-seed means is 0.018--0.025 AUC under CR2 & \Cref{tab:paired_ci,tab:qnn_paired} & 95\,\% interval about 0.7--1.5 times the point value (\Cref{S-tab:mde_ci}); 0.033 for RF $-$ LSTM with the floor (sensitivity) & Established, with that uncertainty \\
+Independent information, not row count, sets the resolution & \Cref{fig:clusters_rows}, \Cref{S-tab:panel2} & 128 simulated designs; second-panel CR2 MDE 1.36--1.67 times its $N^{-1/2}$ prediction & Established in simulation, consistent on the re-test \\
+iid inference over-decides with clustered test units & \Cref{sec:external} & Recorded design: DeLong coverage 55--63\,\%, CR2 94--99.8\,\% (all test cells, post hoc: 41--45\,\% and 96--98\,\%); 3 of 5 recorded predictions failed & Established for this benchmark \\
+No circuit advantage over interface controls & \Cref{tab:qnn_paired,S-tab:controls} & Equivalence at $\pm0.01$ not established; on planted signals the circuit is above Linear-4D in 6 of 10, never above Fourier-2, below the tensor-81 surrogate in 10 of 10 (power shown only against Linear-4D) & Not resolved \\
+The 15 trained circuits score above the 15 frozen ones & \Cref{S-tab:controls} & Blocks of 1--3 years and every omitted year & Resolved for these models (secondary) \\
+Training the circuit helps (a statement about the procedure) & \Cref{S-tab:controls} & Years$\times$seeds interval reaches zero & Not resolved \\
+Random Forest above the LSTM and \texttt{LSTM+QNN} & \Cref{tab:paired_ci,tab:qnn_paired} & Resolved by unfloored CR2 before Holm; fails Holm, two-year clusters, single omitted years, causal refit and re-test; floored CR2 $p=0.204$ and 0.107, the floor of item 1 triggered for the LSTM only (ratio 0.59 against 0.72) & Exploratory; against the LSTM not resolved with the floor (sensitivity) \\
+No learned model better than the climatology & \Cref{S-tab:seas5,S-tab:brier}, \Cref{S-tab:brier_inference} & Point estimates below it in AUC, same on the re-test; on the recalibrated Brier score the LSTM, Linear-4D and \texttt{LSTM+QNN} are resolvably worse (CR2 $p=0.010$--0.028; secondary, unadjusted), the LSTM not with the floor ($p=0.095$) & Not resolved in AUC; Linear-4D and \texttt{LSTM+QNN} worse in Brier (secondary) \\
+No incremental skill over SEAS5 at lead 2 & \Cref{S-tab:seas5_blends} & MDE of the increments 0.010--0.019 AUC & Not resolved \\
+\bottomrule
+\end{tabularx}}
+\end{table}
+
+% ============================================================
+\section{Discussion}
+% ============================================================
+
+\subsection{What a Benchmark of This Size Can Conclude}
+
+The case study has low signal: no learned model beats the climatology, and the differences between them lie at or near the resolution of the design (\Cref{tab:verdicts}). Its value lies in what the protocol shows about the evaluation, not in a ranking of architectures, and the protocol keeps those differences from being read as superiority, equivalence or failure of an architecture. Three lessons go beyond this panel. Test-sampling variability exceeds seed variability for every model, but for variational hybrids the seed share is large enough (14--25\,\%) that both sources must be reported. Near the MDE the verdict depends on the procedure and even on the fitting pipeline, so the choice of procedure is a substantive assumption about the dependence between test cases, to be made before the analysis and calibrated on the design. And calibration on average is not enough: CR2 covers at 0.95 over replications of this design but only at 0.78--0.90 among those whose cluster/iid ratio is 0.72 or lower, so a cluster standard error far below the iid one is a warning, not a gain in resolution. Nothing in the protocol is specific to precipitation or to quantum models: it uses predictions, labels and cluster labels, and the external benchmark shows the same failure of iid inference with spatial clusters; its settings, such as the floor trigger, come from a calibration that has to be repeated on each design. The results do not show that tree ensembles beat quantum or neural models on tabular data \citep{grinsztajn2022}, since Random Forest does not reach the climatology and its advantage over the LSTM and \texttt{LSTM+QNN} is exploratory, nor that variational circuits, DeLong or the cluster procedures fail in general.
+
+For the quantum results, three findings fit together: the hybrids are not distinguished from circuit-free controls at the same interface, each trained circuit is reproduced exactly by a classical Fourier expansion, and on planted circuit signals the Fourier and tensor controls are at least as good as the trained circuit. For a 4-qubit circuit this is expected \citep{schreiber2023,sweke2025}; the point is that the benchmark shows it directly. A quantum contribution cannot be read from a comparison of a hybrid with a classical pipeline; it has to be tested against classical surrogates matched in interface and capacity, with planted signals that show against which controls the comparison has power, here only the linear one. Because the readouts of these circuits lie in the span of a Fourier basis with the same spectrum (the $9^4$ functions of the exact emulation), only training or inductive bias, not expressivity, could separate the circuit from the Fourier surrogates; circuits whose spectrum makes that basis intractable are the relevant next test. These findings are limited to small, noiseless circuits behind a low-dimensional classical bottleneck.
+
+\subsection{The Resolution of Published QML Comparisons}
+\label{sec:literature}
+
+The same question can be asked of published work with only the numbers a paper prints. The reanalysis is illustrative, not a systematic review: from a targeted search (\Cref{S-app:literature}) we screened 18 QML studies that compare a quantum model with a classical one. The four weather and climate studies cited in the Introduction report regression errors, which cannot be reanalysed without per-case predictions; of the 14 binary-classification studies, 5 (four of them in particle physics) print a held-out test size and a quantum and a classical test AUC for the same setting, giving 8 comparisons (\Cref{tab:literature})\footnote{Code and results: \path{exp60_literature_reanalysis.py}.}. For each, \Cref{tab:literature} gives an approximate 95\,\% interval for the reported difference from the paired Hanley--McNeil standard error, treating test cases as independent, and the smallest equivalence margin those data would accept (the TOST bound of \Cref{S-tab:tost}); the correlation between the two AUCs is set to 0.75, just below the 0.78--0.91 measured between the models of this paper (\Cref{sec:design}), and, when the AUCs are means over several test sets, the pooled test size is used. Both choices give the narrowest intervals: the most favourable reading for a claim of similarity, judged by its margin, and the least conservative for excluding zero. Six comparisons are stated as similarity (``comparable'', ``similar''). They would be compatible only with margins of $\pm0.010$ to $\pm0.040$ AUC ($\pm0.015$ to $\pm0.046$ with a correlation of 0.5, and $\pm0.020$ to $\pm0.046$ in the worst case of rounding of AUCs printed with two decimals). In two of them the interval excludes zero in favour of the classical model at a correlation of 0.75, though not at 0.5. The two claims of superiority have intervals that exclude zero; \citet{kulkarni2023}, however, test theirs across 30 training runs on one fixed test set, which measures seed variability and not test sampling (\Cref{sec:budget}). In these examples, the problem the protocol addresses is not that published differences are spurious, but that similarity is stated without the margin it implies: four of the five studies report per-model uncertainties, but none of the eight comparisons reports an interval for the difference.
+
+\begin{table}[htbp]
+\centering
+\caption{Published QML-versus-classical AUC comparisons (best quantum minus best classical model, as printed, in the setting the authors emphasise). Test size: test cases per test set, times the number of independent test sets averaged. 95\,\% CI: $\hat\Delta\pm1.96\,\text{SE}$ with the paired Hanley--McNeil standard error at the pooled test size and an AUC correlation of 0.75, test cases treated as independent. Smallest margin: smallest equivalence margin the data would accept, $\max(|\text{lo}_{90}|,|\text{hi}_{90}|)$, at a correlation of 0.75 (in parentheses 0.5). MDE: 80\,\%-power MDE of the same paired difference, a measure of design sensitivity. Two-decimal AUCs add up to $\pm0.01$ to the smallest margin (\Cref{S-app:literature}). $^{a}$Class balance not printed; 0.5 assumed. $^{b}$Test sets redrawn at random from one pool, so the pooled size overstates the independent information; the interval excludes zero also for one test set. $^{c}$Table I of the arXiv version (521 genuine, 478 fraud); the text says 1{,}000. $^{\mathrm{P}}$Values checked against the published version; $^{\mathrm{X}}$values transcribed from the arXiv version (for Grossi et al.\ the published version confirms the wording and the test size only). Search, inclusion and screened studies in \Cref{S-app:literature}.}
+\label{tab:literature}
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}Xcccccc>{\raggedright\arraybackslash}p{1.55cm}@{}}
+\toprule
+\textbf{Study} & \textbf{Comparison} & \textbf{Test size} & \textbf{Prev.} & $\hat\Delta$ & \textbf{95\,\% CI} & \shortstack{\textbf{Smallest}\\\textbf{margin}} & \textbf{MDE} & \textbf{Authors' wording} \\
+\midrule
+\citet{wu2021}$^{\mathrm{X}}$ & VQC (10 qubits) vs SVM / BDT & 10$\times$100 & 0.5$^{a}$ & $-0.020$ & $[-0.039,-0.001]$ & 0.036 (0.042) & 0.026 & comparable \\
+\citet{wu2021}$^{\mathrm{X}}$ & VQC (10 qubits) vs SVM & 10$\times$100 & 0.5$^{a}$ & $+0.010$ & $[-0.008,+0.028]$ & 0.025 (0.032) & 0.026 & performs similarly \\
+\citet{belis2021}$^{\mathrm{P}}$ & QSVM, 16 features vs SVM (RBF) & 5$\times$720 & 0.5$^{a}$ & $+0.010$ & $[-0.003,+0.023]$ & 0.021 (0.025) & 0.018 & similar or better \\
+\citet{belis2021}$^{\mathrm{P}}$ & QSVM, 64 features vs logistic regression & 5$\times$720 & 0.5$^{a}$ & $+0.000$ & $[-0.012,+0.012]$ & 0.010 (0.015) & 0.018 & similar or better \\
+\citet{belis2021}$^{\mathrm{P}}$ & VQC, 8 features vs random forest & 5$\times$720 & 0.5$^{a}$ & $+0.000$ & $[-0.012,+0.012]$ & 0.010 (0.015) & 0.018 & similar or better \\
+\citet{grossi2022}$^{\mathrm{X}}$ & QSVM vs XGBoost & 999$^{c}$ & 0.48 & $-0.024$ & $[-0.043,-0.005]$ & 0.040 (0.046) & 0.027 & similar \\
+\citet{heredge2021}$^{\mathrm{P}}$ & QSVM (separate-particle circuit, Bloch encoding) vs SVM (RBF) & 10$\times$10{,}000$^{b}$ & 0.5$^{a}$ & $+0.055$ & $[+0.053,+0.057]$ & 0.057 (0.057) & 0.003 & best average AUC \\
+\citet{kulkarni2023}$^{\mathrm{X}}$ & CNN with VQC layer vs CNN & 624 & 0.62 & $+0.109$ & $[+0.084,+0.134]$ & 0.130 (0.139) & 0.036 & statistically significant \\
+\bottomrule
+\end{tabularx}}
+\end{table}
+
+\subsection{Implications for Benchmark Design}
+\label{sec:design_implications}
+
+Test sizes should be planned for a smallest difference of interest fixed in advance, not for the observed gaps. The MDE of a planned comparison follows from the test size, the prevalence and an assumed AUC and correlation before any model is trained (\Cref{S-tab:hm_mde}); for grouped test cases it must be inflated by the design effect $1+(m-1)\rho$ of \Cref{sec:design}, with $\rho$ taken from earlier data or a pilot, because the second panel shows that $N^{-1/2}$ scaling alone underpredicts the resolution of the procedure that decides (\Cref{sec:replication}). If the differences of interest are below the MDE, more seeds do not help; only more independent clusters do. The validation partition has the same limit: on its 516 validation rows (36.6\,\% positive) one AUC has a Hanley--McNeil standard error of about 0.025, and two configurations can be told apart only when they differ by about 0.030--0.048 AUC\footnote{Code and results: \path{exp46_auc_correlation.py}.}, so hyperparameter search and early stopping operate below the resolution of the test set.
+
+\subsection{Recommended Reporting Protocol}
+\label{sec:protocol}
+
+\Cref{tab:protocol} lists the practices that follow from the results. Items 1--4 and 10 need only the test probabilities of the models and are implemented in the package \texttt{qml\_resolution}; item 5 also needs validation predictions to recalibrate; items 6--8 concern how the models and labels are built, item 7 requires fitting the controls, and item 9 is a decision taken before the analysis. The decisions of items 1--3, 7 and 9 belong in a pre-analysis plan; \Cref{S-app:pap} gives a template, which this study, whose main analyses were not pre-registered, did not have. As a rule of thumb, DeLong suffices when the test cases are independent given the models; when they are grouped, the primary interval should be a small-sample cluster procedure such as CR2 with Bell--McCaffrey degrees of freedom, reported with the number of clusters, and with clusters of consecutive periods and the wild cluster bootstrap as sensitivity checks when the groups may be serially dependent.
+
+\begin{table}[htbp]
+\centering
+\caption{Reporting protocol for small benchmarks with dependent test cases; item 7 is specific to quantum models. The inferential items 1--4 are implemented in \texttt{qml\_resolution.report}: given archived test predictions per seed, labels and cluster labels, it returns for each declared pair the paired difference with the primary CR2 interval, DeLong, the clusters$\times$seeds interval (seeds drawn jointly only for declared shared components), the cluster/iid ratio, both MDEs, Holm-adjusted primary $p$-values within a declared family, and a power curve under stated assumptions (\texttt{python -m qml\_resolution.report}).}
+\label{tab:protocol}
+{\small
+\begin{tabularx}{\textwidth}{cX}
+\toprule
+\textbf{\#} & \textbf{Practice} \\
+\midrule
+1 & State the estimand (single run or seed average; the population of test cases, e.g.\ new years at the same sites; conditional on which sources) and, before the analysis, one primary procedure that respects the dependence over the natural cluster (here CR2 with Bell--McCaffrey degrees of freedom over calendar years); report DeLong as the reference under independence, and diagnose discrepancies, for example by splitting the cluster-robust variance into within- and cross-site terms, and the sensitivity to clusters of consecutive periods. When the cluster/iid ratio falls below the range that a calibration of the design with independent cases produces (here at or below its 5th percentile, 0.71, recalibrated for each design), either show a mechanism that produces it or decide with the standard error floored at the iid one, and report the MDE of the floored procedure; where a ratio below 1 is expected by construction, as in stratified test sets, show that mechanism instead. \\
+2 & Report the MDE of the procedure that takes the decision, and at the level of any multiplicity rule, as a measure of design sensitivity next to the intervals, with its uncertainty when the clusters are few; do not treat it as a significance threshold or classify gaps below it as uninformative, and plan test sizes for a smallest difference of interest fixed in advance. \\
+3 & Choose the primary procedure by its calibration in a simulation with known differences at the sample size, coverage pattern and dependence structure of the study, and apply multiplicity corrections to its $p$-values. \\
+4 & Report across-seed variability separately from test-sampling uncertainty; treat seed-level tests as statements about optimization, not generalization; and claim that a training procedure or an architecture is better only when an interval that resamples both seeds and test clusters excludes zero. \\
+5 & Include a climatological (or base-rate) reference with a proper scoring rule, and report skill relative to it after recalibrating both the models and the reference on held-out data; where the label has strong base rates, also report skill with a label that removes them. Where an operational dynamical forecast exists, include it as a model and test whether the statistical model adds to it. \\
+6 & Fit all model families on the same rows and tune them with a declared search of comparable budget, or state and quantify the asymmetry; compute the MDE of the validation partition too, since model selection on it is subject to the same resolution limit; run all models in one pinned software environment. \\
+7 & Add classical controls at the same low-dimensional interface as the quantum circuit: one with a matched parameter count, Fourier surrogates with the spectrum of the circuit including its cross-coordinate products, and the circuit with frozen weights; check with several planted circuit signals, at several strengths and with a null, how often a trained circuit is distinguished from each control, and report these detection rates; attribute differences to the circuit only through these controls. \\
+8 & Build labels from the target variable alone, with an explicit completeness rule, and keep the predictors' missing data out of the label. \\
+9 & Choose equivalence margins by scientific relevance, independently of the MDE and of the results, and treat an interval wider than the margin as inconclusive. \\
+10 & When the target threshold is pooled across heterogeneous sites, report a within-site AUC, so that skill is not credited for separating sites with different base rates. \\
+\bottomrule
+\end{tabularx}
+}
+\end{table}
+
+\subsection{Limitations}
+\label{sec:limitations}
+
+The cluster procedures rely on 19 calendar years, only four of which contain all four stations, and the MDE is uncertain by a factor of about two. The primary analysis uses the archived pipeline, whose imputation looked ahead for 24 training and 2 validation windows; only the models of the primary families were refitted causally. The quantum comparisons concern 4-qubit circuits in noiseless simulation behind a 4-dimensional bottleneck; the interface controls, the equivalence margin and the floor of protocol item 1 were fixed after the main analysis, the floor from this very panel, and the planted-signal controls use five seeds and four teachers. 83\,\% of the test windows come from two stations, because the record itself has no daily pressure for the other two after 2010--2012: the \textit{datosclima.es} series agree exactly with the AEMET OpenData service\footnote{Code and results: \path{exp59_aemet_opendata_check.py}; 2008--2012, largest difference of the daily pressure extremes 0.0\,hPa.}, and station inhomogeneities remain \citep{alexandersson1986,peterson1998}. Only the tree ensembles were tuned automatically, and all models except the climatology were trained with positive-class weighting. Noise during training \citep{wang2021noise} and hardware execution were not studied. The two panels share the region and the test years, and the external benchmark, not evaluated prospectively, had a reference population too small to resolve its main contrast.
+
+\FloatBarrier
+% ============================================================
+\section{Conclusions}
+% ============================================================
+
+On 529 correlated test station-months the test sample, not the training seed, limits what a small benchmark can conclude: the MDE of 15-seed means under the primary procedure is 0.018--0.025 AUC between complete models (0.033 for Random Forest against the LSTM with the floor of the sensitivity check) and 0.012--0.019 at the circuit interface, and beyond a number of rows per cluster set by the dependence only more clusters lower it. The inference matters as much as the size: on an external benchmark with clustered test units, DeLong intervals covered the reference difference of the recorded design in only 55--63\,\% of draws, against 94--99.8\,\% for the calibrated cluster procedure (41--45\,\% and 96--98\,\% against all test cells, post hoc); the benchmark tested coverage, not power. Calibration on average does not protect a single contrast: when the cluster standard error falls far below the iid one, CR2 undercovers. Flooring it at the iid one, a rule derived from this panel after the primary analysis and to be calibrated on each design before use, leaves unresolved Random Forest against the LSTM, the only classical difference that CR2 resolved. In the quantum case study no advantage over the interface controls was detected in this design: the hybrids are not distinguished from classical controls at the same interface, the trained circuits are reproduced exactly by a classical Fourier expansion, and no learned model is resolvably better than a climatology. In the published comparisons we reanalysed illustratively, similarity was stated without the equivalence margin it implies.
+
+The protocol needs only archived predictions, labels, cluster labels and seeds, and applies to any metric with per-case influence values; \texttt{qml\_resolution} implements its inferential items. For QML benchmarking, and for any small benchmark with dependent test cases, the consequence is practical: state the estimand, choose and calibrate the inference on the design before the analysis, compute the MDE of that procedure before ranking architectures, report seed and sampling error separately, compare against base-rate references and against classical controls at the same interface, state an equivalence margin before claiming similarity, and decide whether a difference is resolved from its interval, not from its size relative to the MDE.
+
+\section*{Data and Code Availability}
+\label{sec:data_availability}
+Code, the processed monthly panel and the archived test predictions of every model and seed are available at \url{https://github.com/enriquerb32/limits-of-resolution-qml}. The results of this paper come from the \texttt{v2} pipeline (\path{code/etl_v2.py}, \path{code/local_experiments/dataset_v2.py}), run end to end by \path{run_v2.ps1} in the environment fixed by \path{requirements-v2.lock}; the results of an earlier version of the pipeline, whose labels were partly built from incomplete records, are kept in \path{results_v1/}, and \Cref{S-app:v1} lists the changes. The daily records are AEMET open data obtained through \textit{datosclima.es}; only aggregated monthly data are redistributed, with attribution to AEMET. The daily series of the second panel (AEMET stations B278, 9981A, 7228 and 6325O) were obtained in the same way. SEAS5 data were obtained from the Copernicus Climate Change Service Climate Data Store \citep{c3s_seasonal_monthly} under the Licence to Use Copernicus Products; the station-interpolated members are archived in the repository. The repository README maps every table and figure to its command and output file, and \path{scripts/build_traceability_v2.py} checks the numerical claims of the paper against the archived results (after \path{exp42_v2_summary.py} and \path{exp43_v2_tables.py}, which compute the summary statistics from the archived predictions).
+
+\section*{Declaration of Generative AI in Scientific Writing}
+During the preparation of this manuscript, the author used Claude (Anthropic; Opus models), through the Claude app, Claude Code and the Antigravity IDE, for editorial language polishing, LaTeX formatting and structural drafting, and for drafting analysis scripts that the author ran and checked. No reported test statistic, empirical metric or benchmark result was generated by AI models; the numerical results come from the released scripts. The author assumes full scientific and editorial responsibility for the content.
+
+\section*{Author Contributions}
+E.R. conceived the study, curated the data, developed the models, performed the statistical analysis, and wrote the manuscript.
+
+\section*{Competing Interests}
+The author is a trainee meteorologist of the Spanish State Meteorological Agency (AEMET). This research was carried out independently of this position and does not represent the views of AEMET. The author declares no other competing financial or non-financial interests.
+
+\section*{Funding}
+This research received no external funding.
+
+\section*{Acknowledgements}
+The author acknowledges the State Meteorological Agency of Spain (AEMET) for providing the underlying meteorological station records under open-data terms.
+
+\newpage
+\begin{thebibliography}{99}
+
+\bibitem[Alexandersson(1986)]{alexandersson1986}
+Alexandersson, H. (1986). A homogeneity test applied to precipitation data. \textit{International Journal of Climatology}, 6(6), 661--675. \url{https://doi.org/10.1002/joc.3370060607}
+
+\bibitem[Allen et al.(1998)]{allen1998}
+Allen, R. G., Pereira, L. S., Raes, D., \& Smith, M. (1998). \textit{Crop evapotranspiration---Guidelines for computing crop water requirements---FAO Irrigation and drainage paper 56}. FAO, Rome.
+
+\bibitem[Bates et al.(2024)]{bates2024}
+Bates, S., Hastie, T., \& Tibshirani, R. (2024). Cross-validation: What does it estimate and how well does it do it? \textit{Journal of the American Statistical Association}, 119(546), 1434--1445. \url{https://doi.org/10.1080/01621459.2023.2197686}
+
+\bibitem[Bell \& McCaffrey(2002)]{bell2002}
+Bell, R. M., \& McCaffrey, D. F. (2002). Bias reduction in standard errors for linear regression with multi-stage samples. \textit{Survey Methodology}, 28(2), 169--181.
+
+\bibitem[Belis et al.(2021)]{belis2021}
+Belis, V., Gonz\'alez-Castillo, S., Reissel, C., Vallecorsa, S., Combarro, E. F., Dissertori, G., \& Reiter, F. (2021). Higgs analysis with quantum classifiers. \textit{EPJ Web of Conferences}, 251, 03070. \url{https://doi.org/10.1051/epjconf/202125103070}
+
+\bibitem[Benavoli et al.(2017)]{benavoli2017}
+Benavoli, A., Corani, G., Dem\v{s}ar, J., \& Zaffalon, M. (2017). Time for a change: A tutorial for comparing multiple classifiers through Bayesian analysis. \textit{Journal of Machine Learning Research}, 18(77), 1--36.
+
+\bibitem[Bouthillier et al.(2021)]{bouthillier2021}
+Bouthillier, X., Delaunay, P., Bronzi, M., Trofimov, A., Nichyporuk, B., Szeto, J., Sepah, N., Raff, E., Madan, K., Voleti, V., Ebrahimi Kahou, S., Michalski, V., Serdyuk, D., Arbel, T., Pal, C., Varoquaux, G., \& Vincent, P. (2021). Accounting for variance in machine learning benchmarks. \textit{Proceedings of Machine Learning and Systems}, 3, 747--769.
+
+\bibitem[Bowles et al.(2024)]{bowles2024}
+Bowles, J., Ahmed, S., \& Schuld, M. (2024). Better than classical? The subtle art of benchmarking quantum machine learning models. \textit{arXiv preprint arXiv:2403.07059}. \url{https://arxiv.org/abs/2403.07059}
+
+\bibitem[Breiman(2001)]{breiman2001}
+Breiman, L. (2001). Random forests. \textit{Machine Learning}, 45(1), 5--32. \url{https://doi.org/10.1023/A:1010933404324}
+
+\bibitem[Brier(1950)]{brier1950}
+Brier, G. W. (1950). Verification of forecasts expressed in terms of probability. \textit{Monthly Weather Review}, 78(1), 1--3. \url{https://doi.org/10.1175/1520-0493(1950)078<0001:VOFEIT>2.0.CO;2}
+
+\bibitem[Cameron et al.(2008)]{cameron2008}
+Cameron, A. C., Gelbach, J. B., \& Miller, D. L. (2008). Bootstrap-based improvements for inference with clustered errors. \textit{The Review of Economics and Statistics}, 90(3), 414--427. \url{https://doi.org/10.1162/rest.90.3.414}
+
+\bibitem[Card et al.(2020)]{card2020}
+Card, D., Henderson, P., Khandelwal, U., Jia, R., Mahowald, K., \& Jurafsky, D. (2020). With little power comes great responsibility. In \textit{Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)} (pp. 9263--9274). \url{https://doi.org/10.18653/v1/2020.emnlp-main.745}
+
+\bibitem[Cerezo et al.(2025)]{cerezo2025}
+Cerezo, M., Larocca, M., Garc\'ia-Mart\'in, D., Diaz, N. L., Braccia, P., Fontana, E., Rudolph, M. S., Bermejo, P., Ijaz, A., Thanasilp, S., Anschuetz, E. R., \& Holmes, Z. (2025). Does provable absence of barren plateaus imply classical simulability? \textit{Nature Communications}, 16, 7907. \url{https://doi.org/10.1038/s41467-025-63099-6}
+
+\bibitem[Copernicus Climate Change Service(2018)]{c3s_seasonal_monthly}
+Copernicus Climate Change Service, Climate Data Store (2018). Seasonal forecast monthly statistics on single levels. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). \url{https://doi.org/10.24381/cds.68dd14c3} (data retrieved through the CDS API on 9--10 November 2026).
+
+\bibitem[da Silva et al.(2026)]{dasilva2026}
+da Silva, M. H. F., de Jesus, G. F., Nascimento, C. M. S., da Silva, V. L., \& Cruz, C. S. (2026). Exploring quantum machine learning for weather forecasting. \textit{Brazilian Journal of Physics}, 56, 22. \url{https://doi.org/10.1007/s13538-025-01941-4}
+
+\bibitem[DeLong et al.(1988)]{delong1988}
+DeLong, E. R., DeLong, D. M., \& Clarke-Pearson, D. L. (1988). Comparing the areas under two or more correlated receiver operating characteristic curves: A nonparametric approach. \textit{Biometrics}, 44(3), 837--845. \url{https://doi.org/10.2307/2531595}
+
+\bibitem[DelSole \& Tippett(2014)]{delsole2014}
+DelSole, T., \& Tippett, M. K. (2014). Comparing forecast skill. \textit{Monthly Weather Review}, 142(12), 4658--4678. \url{https://doi.org/10.1175/MWR-D-14-00045.1}
+
+\bibitem[Dem\v{s}ar(2006)]{demsar2006}
+Dem\v{s}ar, J. (2006). Statistical comparisons of classifiers over multiple data sets. \textit{Journal of Machine Learning Research}, 7, 1--30.
+
+\bibitem[Diebold \& Mariano(1995)]{diebold1995}
+Diebold, F. X., \& Mariano, R. S. (1995). Comparing predictive accuracy. \textit{Journal of Business \& Economic Statistics}, 13(3), 253--263. \url{https://doi.org/10.1080/07350015.1995.10524599}
+
+\bibitem[Dietterich(1998)]{dietterich1998}
+Dietterich, T. G. (1998). Approximate statistical tests for comparing supervised classification learning algorithms. \textit{Neural Computation}, 10(7), 1895--1923. \url{https://doi.org/10.1162/089976698300017197}
+
+\bibitem[Donner \& Klar(2000)]{donner2000}
+Donner, A., \& Klar, N. (2000). \textit{Design and Analysis of Cluster Randomization Trials in Health Research}. London: Arnold.
+
+\bibitem[Dror et al.(2018)]{dror2018}
+Dror, R., Baumer, G., Shlomov, S., \& Reichart, R. (2018). The hitchhiker's guide to testing statistical significance in natural language processing. In \textit{Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics} (pp. 1383--1392). \url{https://doi.org/10.18653/v1/P18-1128}
+
+\bibitem[Ferro(2014)]{ferro2014}
+Ferro, C. A. T. (2014). Fair scores for ensemble forecasts. \textit{Quarterly Journal of the Royal Meteorological Society}, 140(683), 1917--1923. \url{https://doi.org/10.1002/qj.2270}
+
+\bibitem[Fellner et al.(2026)]{fellner2026}
+Fellner, T., Kreplin, D. A., Tovey, S., \& Holm, C. (2026). Quantum vs. classical: A comprehensive benchmark study for predicting time series with variational quantum machine learning. \textit{Machine Learning: Science and Technology}, 7(1), 010501. \url{https://doi.org/10.1088/2632-2153/ae365f}
+
+\bibitem[Field \& Welsh(2007)]{field2007}
+Field, C. A., \& Welsh, A. H. (2007). Bootstrapping clustered data. \textit{Journal of the Royal Statistical Society: Series B (Statistical Methodology)}, 69(3), 369--390. \url{https://doi.org/10.1111/j.1467-9868.2007.00593.x}
+
+\bibitem[Gil-Fuster et al.(2025)]{gilfuster2025}
+Gil-Fuster, E., Gyurik, C., P\'erez-Salinas, A., \& Dunjko, V. (2025). On the relation between trainability and dequantization of variational quantum learning models. In \textit{International Conference on Learning Representations (ICLR 2025)}. \url{https://arxiv.org/abs/2406.07072}
+
+\bibitem[Grinsztajn et al.(2022)]{grinsztajn2022}
+Grinsztajn, L., Oyallon, E., \& Varoquaux, G. (2022). Why do tree-based models still outperform
+deep learning on typical tabular data? \textit{Advances in Neural Information Processing
+Systems (NeurIPS)}, 35, 507--520.
+
+\bibitem[Grossi et al.(2022)]{grossi2022}
+Grossi, M., Ibrahim, N., Radescu, V., Loredo, R., Voigt, K., von Altrock, C., \& Rudnik, A. (2022). Mixed quantum--classical method for fraud detection with quantum feature selection. \textit{IEEE Transactions on Quantum Engineering}, 3, 1--12. \url{https://doi.org/10.1109/TQE.2022.3213474}
+
+\bibitem[Hamill(1999)]{hamill1999}
+Hamill, T. M. (1999). Hypothesis tests for evaluating numerical precipitation forecasts. \textit{Weather and Forecasting}, 14(2), 155--167. \url{https://doi.org/10.1175/1520-0434(1999)014<0155:HTFENP>2.0.CO;2}
+
+\bibitem[Hamill \& Juras(2006)]{hamill2006}
+Hamill, T. M., \& Juras, J. (2006). Measuring forecast skill: Is it real skill or is it the varying climatology? \textit{Quarterly Journal of the Royal Meteorological Society}, 132(621C), 2905--2923. \url{https://doi.org/10.1256/qj.06.25}
+
+\bibitem[Hanley \& McNeil(1982)]{hanley1982}
+Hanley, J. A., \& McNeil, B. J. (1982). The meaning and use of the area under a receiver operating characteristic (ROC) curve. \textit{Radiology}, 143(1), 29--36. \url{https://doi.org/10.1148/radiology.143.1.7063747}
+
+\bibitem[Hanley \& McNeil(1983)]{hanley1983}
+Hanley, J. A., \& McNeil, B. J. (1983). A method of comparing the areas under receiver operating characteristic curves derived from the same cases. \textit{Radiology}, 148(3), 839--843. \url{https://doi.org/10.1148/radiology.148.3.6878708}
+
+\bibitem[Henderson et al.(2018)]{henderson2018}
+Henderson, P., Islam, R., Bachman, P., Pineau, J., Precup, D., \& Meger, D. (2018). Deep reinforcement learning that matters. In \textit{Proceedings of the AAAI Conference on Artificial Intelligence}, 32(1), 3207--3214. \url{https://doi.org/10.1609/aaai.v32i1.12007}
+
+\bibitem[Heredge et al.(2021)]{heredge2021}
+Heredge, J., Hill, C., Hollenberg, L., \& Sevior, M. (2021). Quantum support vector machines for continuum suppression in B meson decays. \textit{Computing and Software for Big Science}, 5, 27. \url{https://doi.org/10.1007/s41781-021-00075-x}
+
+\bibitem[Johnson et al.(2019)]{johnson2019seas5}
+Johnson, S. J., Stockdale, T. N., Ferranti, L., Balmaseda, M. A., Molteni, F., Magnusson, L., Tietsche, S., Decremer, D., Weisheimer, A., Balsamo, G., Keeley, S. P. E., Mogensen, K., Zuo, H., \& Monge-Sanz, B. M. (2019). SEAS5: the new ECMWF seasonal forecast system. \textit{Geoscientific Model Development}, 12(3), 1087--1117. \url{https://doi.org/10.5194/gmd-12-1087-2019}
+
+
+\bibitem[Kish(1965)]{kish1965}
+Kish, L. (1965). \textit{Survey Sampling}. New York: Wiley.
+
+\bibitem[Kulkarni et al.(2023)]{kulkarni2023}
+Kulkarni, V., Pawale, S., \& Kharat, A. (2023). A classical--quantum convolutional neural network for detecting pneumonia from chest radiographs. \textit{Neural Computing and Applications}, 35(21), 15503--15510. \url{https://doi.org/10.1007/s00521-023-08566-1}
+
+\bibitem[K\"unsch(1989)]{kunsch1989}
+K\"unsch, H. R. (1989). The jackknife and the bootstrap for general stationary observations. \textit{The Annals of Statistics}, 17(3), 1217--1241. \url{https://doi.org/10.1214/aos/1176347265}
+
+\bibitem[Landman et al.(2023)]{landman2023}
+Landman, J., Thabet, S., Dalyac, C., Mhiri, H., \& Kashefi, E. (2023). Classically approximating variational quantum machine learning with random Fourier features. In \textit{International Conference on Learning Representations (ICLR 2023)}. \url{https://arxiv.org/abs/2210.13200}
+
+\bibitem[MacKinnon et al.(2023)]{mackinnon2023}
+MacKinnon, J. G., Nielsen, M. \O., \& Webb, M. D. (2023). Cluster-robust inference: A guide to empirical practice. \textit{Journal of Econometrics}, 232(2), 272--299. \url{https://doi.org/10.1016/j.jeconom.2022.04.001}
+
+\bibitem[Marchisio et al.(2026)]{marchisio2026}
+Marchisio, A., Ebrahim, A., Innan, N., Kashif, M., \& Shafique, M. (2026). QLIF-CAST: Quantum Leaky-Integrate-and-Fire for time-series weather forecasting. \textit{arXiv preprint arXiv:2605.18333}. \url{https://arxiv.org/abs/2605.18333}
+
+
+\bibitem[Mari et al.(2020)]{mari2020}
+Mari, A., Bromley, T. R., Izaac, J., Schuld, M., \& Killoran, N. (2020). Transfer learning in hybrid classical-quantum neural networks. \textit{Quantum}, 4, 340. \url{https://doi.org/10.22331/q-2020-10-28-340}
+
+\bibitem[Mason \& Graham(2002)]{mason2002}
+Mason, S. J., \& Graham, N. E. (2002). Areas beneath the relative operating characteristics (ROC) and relative operating levels (ROL) curves: Statistical significance and interpretation. \textit{Quarterly Journal of the Royal Meteorological Society}, 128(584), 2145--2166. \url{https://doi.org/10.1256/003590002320603584}
+
+\bibitem[McClean et al.(2018)]{mcclean2018}
+McClean, J. R., Boixo, S., Smelyanskiy, V. N., Babbush, R., \& Neven, H. (2018). Barren plateaus in quantum neural network training landscapes. \textit{Nature Communications}, 9(1), 4812. \url{https://doi.org/10.1038/s41467-018-07090-4}
+
+\bibitem[Miller(2024)]{miller2024}
+Miller, E. (2024). Adding error bars to evals: A statistical approach to language model evaluations. arXiv:2411.00640. \url{https://doi.org/10.48550/arXiv.2411.00640}
+
+\bibitem[Nadeau \& Bengio(2003)]{nadeau2003}
+Nadeau, C., \& Bengio, Y. (2003). Inference for the generalization error. \textit{Machine Learning}, 52(3), 239--281. \url{https://doi.org/10.1023/A:1024068626366}
+
+\bibitem[Nieto et al.(2005)]{nieto2005}
+Nieto, R., Gimeno, L., de la Torre, L., Ribera, P., Gallego, D., Garc\'ia-Herrera, R., Garc\'ia, J. A., Nu\~nez, M., Reda\~no, A., \& Lorente, J. (2005). Climatological features of cutoff low systems in the Northern Hemisphere. \textit{Journal of Climate}, 18(16), 3085--3103. \url{https://doi.org/10.1175/JCLI3386.1}
+
+\bibitem[Obuchowski(1997)]{obuchowski1997}
+Obuchowski, N. A. (1997). Nonparametric analysis of clustered ROC curve data. \textit{Biometrics}, 53(2), 567--578. \url{https://doi.org/10.2307/2533958}
+
+\bibitem[Pace \& Barry(1997)]{pace1997}
+Pace, R. K., \& Barry, R. (1997). Sparse spatial autoregressions. \textit{Statistics \& Probability Letters}, 33(3), 291--297. \url{https://doi.org/10.1016/S0167-7152(96)00140-X}
+
+\bibitem[Pastori et al.(2026)]{pastori2026}
+Pastori, L., Grundner, A., Eyring, V., \& Schwabe, M. (2026). Quantum neural networks for cloud cover parameterizations in climate models. \textit{Machine Learning: Earth}, 2, 015008. \url{https://doi.org/10.1088/3049-4753/ae4981}
+
+\bibitem[Peterson et al.(1998)]{peterson1998}
+Peterson, T. C., Easterling, D. R., Karl, T. R., Groisman, P., Nicholls, N., Plummer, N., Torok, S., Auer, I., Boehm, R., Gullett, D., Vincent, L., Heino, R., Tuomenvirta, H., Mestre, O., Szentimrey, T., Salinger, J., F\o rland, E. J., Hanssen-Bauer, I., Alexandersson, H., Jones, P., \& Parker, D. (1998). Homogeneity adjustments of in situ atmospheric climate data: A review. \textit{International Journal of Climatology}, 18(13), 1493--1517. \url{https://doi.org/10.1002/(SICI)1097-0088(19981115)18:13<1493::AID-JOC329>3.0.CO;2-T}
+
+\bibitem[Pustejovsky \& Tipton(2018)]{pustejovsky2018}
+Pustejovsky, J. E., \& Tipton, E. (2018). Small-sample methods for cluster-robust variance estimation and hypothesis testing in fixed effects models. \textit{Journal of Business \& Economic Statistics}, 36(4), 672--683. \url{https://doi.org/10.1080/07350015.2016.1247004}
+
+\bibitem[Romero et al.(1999)]{romero1999}
+Romero, R., Ramis, C., Sumner, G. N., \& Alonso, S. (1999). Daily precipitation patterns in the Spanish Mediterranean area: an objective classification. \textit{International Journal of Climatology}, 19(1), 95--112. \url{https://doi.org/10.1002/(SICI)1097-0088(199901)19:1<95::AID-JOC344>3.0.CO;2-9}
+
+\bibitem[Schuld \& Killoran(2022)]{schuld2022}
+Schuld, M., \& Killoran, N. (2022). Is quantum advantage the right goal for quantum machine learning? \textit{PRX Quantum}, 3(3), 030101. \url{https://doi.org/10.1103/PRXQuantum.3.030101}
+
+\bibitem[Schuld et al.(2021)]{schuld2021fourier}
+Schuld, M., Sweke, R., \& Meyer, J. J. (2021). Effect of data encoding on the expressive power of variational quantum machine learning models. \textit{Physical Review A}, 103(3), 032430. \url{https://doi.org/10.1103/PhysRevA.103.032430}
+
+\bibitem[Schreiber et al.(2023)]{schreiber2023}
+Schreiber, F. J., Eisert, J., \& Meyer, J. J. (2023). Classical surrogates for quantum learning models. \textit{Physical Review Letters}, 131(10), 100803. \url{https://doi.org/10.1103/PhysRevLett.131.100803}
+
+\bibitem[Schwabe et al.(2025a)]{schwabe2025op}
+Schwabe, M., Pastori, L., de Vega, I., Gentine, P., Iapichino, L., Lahtinen, V., Leib, M., Lorenz, J. M., \& Eyring, V. (2025a). Opportunities and challenges of quantum computing for climate modelling. \textit{Environmental Data Science}, 4, e35. \url{https://doi.org/10.1017/eds.2025.10010}
+
+
+\bibitem[Sweke et al.(2025)]{sweke2025}
+Sweke, R., Recio-Armengol, E., Jerbi, S., Gil-Fuster, E., Fuller, B., Eisert, J., \& Meyer, J. J. (2025). Potential and limitations of random Fourier features for dequantizing quantum machine learning. \textit{Quantum}, 9, 1640. \url{https://doi.org/10.22331/q-2025-02-20-1640}
+
+\bibitem[Varoquaux(2018)]{varoquaux2018}
+Varoquaux, G. (2018). Cross-validation failure: Small sample sizes lead to large error bars. \textit{NeuroImage}, 180, 68--77. \url{https://doi.org/10.1016/j.neuroimage.2017.06.061}
+
+\bibitem[Wang et al.(2021)]{wang2021noise}
+Wang, S., Fontana, E., Cerezo, M., Sharma, K., Sone, A., Cincio, L., \& Coles, P. J. (2021). Noise-induced barren plateaus in variational quantum algorithms. \textit{Nature Communications}, 12, 6961. \url{https://doi.org/10.1038/s41467-021-27045-6}
+
+\bibitem[Webb(2023)]{webb2023}
+Webb, M. D. (2023). Reworking wild bootstrap-based inference for clustered errors. \textit{Canadian Journal of Economics}, 56(3), 839--858. \url{https://doi.org/10.1111/caje.12661}
+
+\bibitem[Wilks(1997)]{wilks1997}
+Wilks, D. S. (1997). Resampling hypothesis tests for autocorrelated fields. \textit{Journal of Climate}, 10(1), 65--82. \url{https://doi.org/10.1175/1520-0442(1997)010<0065:RHTFAF>2.0.CO;2}
+
+\bibitem[Wu et al.(2021)]{wu2021}
+Wu, S. L., Chan, J., Guan, W., Sun, S., Wang, A., Zhou, C., Livny, M., Carminati, F., Di Meglio, A., Li, A. C. Y., Lykken, J., Spentzouris, P., Chen, S. Y.-C., Yoo, S., \& Wei, T.-C. (2021). Application of quantum machine learning using the quantum variational classifier method to high energy physics analysis at the LHC on IBM quantum computer simulator and hardware with 10 qubits. \textit{Journal of Physics G: Nuclear and Particle Physics}, 48(12), 125003. \url{https://doi.org/10.1088/1361-6471/ac1391}
+
+\end{thebibliography}
+
+\end{document}

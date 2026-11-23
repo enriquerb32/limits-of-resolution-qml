@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Mallorca",
+    "indicativo": "B278",
+    "lat": 39.56,
+    "alt": 5.0
+  },
+  {
+    "name": "Tortosa",
+    "indicativo": "9981A",
+    "lat": 40.82,
+    "alt": 50.0
+  },
+  {
+    "name": "Alcantarilla",
+    "indicativo": "7228",
+    "lat": 37.96,
+    "alt": 75.0
+  },
+  {
+    "name": "Almeria",
+    "indicativo": "6325O",
+    "lat": 36.85,
+    "alt": 21.0
+  }
+]
+

@@ -1,0 +1,90 @@
+{
+  "LSTM+QNN (4q, 2L)": {
+    "name": "LSTM+QNN (4q, 2L)",
+    "wires": 4,
+    "raw_depth": 2,
+    "native_depth": 18,
+    "dag_depth": 18,
+    "total_gates": 48,
+    "single_qubit": 40,
+    "cnots": 8,
+    "gate_breakdown": {
+      "RY": 16,
+      "RZ": 24,
+      "CNOT": 8
+    }
+  },
+  "LbL-QNN (4q, 3L)": {
+    "name": "LbL-QNN (4q, 3L)",
+    "wires": 4,
+    "raw_depth": 3,
+    "native_depth": 27,
+    "dag_depth": 27,
+    "total_gates": 72,
+    "single_qubit": 60,
+    "cnots": 12,
+    "gate_breakdown": {
+      "RY": 24,
+      "RZ": 36,
+      "CNOT": 12
+    }
+  },
+  "QTL (4q, 2L)": {
+    "name": "QTL (4q, 2L)",
+    "wires": 4,
+    "raw_depth": 2,
+    "native_depth": 13,
+    "dag_depth": 13,
+    "total_gates": 36,
+    "single_qubit": 28,
+    "cnots": 8,
+    "gate_breakdown": {
+      "RY": 12,
+      "RZ": 16,
+      "CNOT": 8
+    }
+  },
+  "QKSVM (4q)": {
+    "name": "QKSVM (4q)",
+    "wires": 4,
+    "raw_depth": 2,
+    "native_depth": 2,
+    "dag_depth": 2,
+    "total_gates": 8,
+    "single_qubit": 8,
+    "cnots": 0,
+    "gate_breakdown": {
+      "RY": 8
+    }
+  },
+  "Amplitude Embedding (4q, 2L)": {
+    "name": "Amplitude Embedding (4q, 2L)",
+    "wires": 4,
+    "raw_depth": 2,
+    "native_depth": 27,
+    "dag_depth": 27,
+    "total_gates": 50,
+    "single_qubit": 28,
+    "cnots": 22,
+    "gate_breakdown": {
+      "RY": 12,
+      "CNOT": 22,
+      "RZ": 16
+    }
+  },
+  "Re-uploading-3x4D (4q, 3L)": {
+    "name": "Re-uploading-3x4D (4q, 3L)",
+    "wires": 4,
+    "raw_depth": 3,
+    "native_depth": 27,
+    "dag_depth": 27,
+    "total_gates": 72,
+    "single_qubit": 60,
+    "cnots": 12,
+    "gate_breakdown": {
+      "RY": 24,
+      "RZ": 36,
+      "CNOT": 12
+    }
+  }
+}

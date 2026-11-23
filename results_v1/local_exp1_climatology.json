@@ -1,0 +1,279 @@
+{
+  "unconditional_base_rate_train": 0.40167179938407394,
+  "brier_score_unconditional_ref": 0.242163035684288,
+  "month_x_station_climatology": {
+    "auc": 0.6796345962926192,
+    "pr_auc": 0.6026047482186421,
+    "brier_score": 0.22240663640363825,
+    "brier_skill_score": 0.08158305095913365,
+    "acc_th05": 0.6117424242424242,
+    "f1_th05": 0.5474613686534217,
+    "fpr_th05": 0.36012861736334406,
+    "rc_p90_th05": 0.6530612244897959,
+    "rc_p90_ci_95": [
+      0.513111941757657,
+      0.7707560724411232
+    ],
+    "rc_acp_n20_th05": 0.6,
+    "rc_acp_ci_95": [
+      0.3865814992347542,
+      0.7811934687282198
+    ]
+  },
+  "month_only_climatology": {
+    "auc": 0.6745225006297508,
+    "pr_auc": 0.5701867418685894,
+    "brier_score": 0.2221457071749873,
+    "brier_skill_score": 0.08266054500323339
+  },
+  "lookup_table": {
+    "Alicante": {
+      "1": {
+        "n_train": 55,
+        "pos_train": 19,
+        "freq_train": 0.34545454545454546
+      },
+      "2": {
+        "n_train": 55,
+        "pos_train": 17,
+        "freq_train": 0.3090909090909091
+      },
+      "3": {
+        "n_train": 55,
+        "pos_train": 15,
+        "freq_train": 0.2727272727272727
+      },
+      "4": {
+        "n_train": 56,
+        "pos_train": 29,
+        "freq_train": 0.5178571428571429
+      },
+      "5": {
+        "n_train": 56,
+        "pos_train": 23,
+        "freq_train": 0.4107142857142857
+      },
+      "6": {
+        "n_train": 56,
+        "pos_train": 17,
+        "freq_train": 0.30357142857142855
+      },
+      "7": {
+        "n_train": 56,
+        "pos_train": 2,
+        "freq_train": 0.03571428571428571
+      },
+      "8": {
+        "n_train": 56,
+        "pos_train": 6,
+        "freq_train": 0.10714285714285714
+      },
+      "9": {
+        "n_train": 57,
+        "pos_train": 26,
+        "freq_train": 0.45614035087719296
+      },
+      "10": {
+        "n_train": 57,
+        "pos_train": 34,
+        "freq_train": 0.5964912280701754
+      },
+      "11": {
+        "n_train": 56,
+        "pos_train": 27,
+        "freq_train": 0.48214285714285715
+      },
+      "12": {
+        "n_train": 56,
+        "pos_train": 20,
+        "freq_train": 0.35714285714285715
+      }
+    },
+    "Barcelona": {
+      "1": {
+        "n_train": 30,
+        "pos_train": 15,
+        "freq_train": 0.5
+      },
+      "2": {
+        "n_train": 30,
+        "pos_train": 14,
+        "freq_train": 0.4666666666666667
+      },
+      "3": {
+        "n_train": 32,
+        "pos_train": 22,
+        "freq_train": 0.6875
+      },
+      "4": {
+        "n_train": 33,
+        "pos_train": 25,
+        "freq_train": 0.7575757575757576
+      },
+      "5": {
+        "n_train": 32,
+        "pos_train": 23,
+        "freq_train": 0.71875
+      },
+      "6": {
+        "n_train": 31,
+        "pos_train": 18,
+        "freq_train": 0.5806451612903226
+      },
+      "7": {
+        "n_train": 31,
+        "pos_train": 8,
+        "freq_train": 0.25806451612903225
+      },
+      "8": {
+        "n_train": 31,
+        "pos_train": 20,
+        "freq_train": 0.6451612903225806
+      },
+      "9": {
+        "n_train": 30,
+        "pos_train": 23,
+        "freq_train": 0.7666666666666667
+      },
+      "10": {
+        "n_train": 32,
+        "pos_train": 25,
+        "freq_train": 0.78125
+      },
+      "11": {
+        "n_train": 33,
+        "pos_train": 21,
+        "freq_train": 0.6363636363636364
+      },
+      "12": {
+        "n_train": 33,
+        "pos_train": 17,
+        "freq_train": 0.5151515151515151
+      }
+    },
+    "San_Javier": {
+      "1": {
+        "n_train": 44,
+        "pos_train": 15,
+        "freq_train": 0.3409090909090909
+      },
+      "2": {
+        "n_train": 44,
+        "pos_train": 13,
+        "freq_train": 0.29545454545454547
+      },
+      "3": {
+        "n_train": 44,
+        "pos_train": 15,
+        "freq_train": 0.3409090909090909
+      },
+      "4": {
+        "n_train": 44,
+        "pos_train": 16,
+        "freq_train": 0.36363636363636365
+      },
+      "5": {
+        "n_train": 44,
+        "pos_train": 15,
+        "freq_train": 0.3409090909090909
+      },
+      "6": {
+        "n_train": 45,
+        "pos_train": 6,
+        "freq_train": 0.13333333333333333
+      },
+      "7": {
+        "n_train": 45,
+        "pos_train": 1,
+        "freq_train": 0.022222222222222223
+      },
+      "8": {
+        "n_train": 45,
+        "pos_train": 3,
+        "freq_train": 0.06666666666666667
+      },
+      "9": {
+        "n_train": 45,
+        "pos_train": 15,
+        "freq_train": 0.3333333333333333
+      },
+      "10": {
+        "n_train": 45,
+        "pos_train": 28,
+        "freq_train": 0.6222222222222222
+      },
+      "11": {
+        "n_train": 45,
+        "pos_train": 20,
+        "freq_train": 0.4444444444444444
+      },
+      "12": {
+        "n_train": 45,
+        "pos_train": 16,
+        "freq_train": 0.35555555555555557
+      }
+    },
+    "Valencia": {
+      "1": {
+        "n_train": 57,
+        "pos_train": 21,
+        "freq_train": 0.3684210526315789
+      },
+      "2": {
+        "n_train": 57,
+        "pos_train": 23,
+        "freq_train": 0.40350877192982454
+      },
+      "3": {
+        "n_train": 57,
+        "pos_train": 20,
+        "freq_train": 0.3508771929824561
+      },
+      "4": {
+        "n_train": 57,
+        "pos_train": 27,
+        "freq_train": 0.47368421052631576
+      },
+      "5": {
+        "n_train": 57,
+        "pos_train": 24,
+        "freq_train": 0.42105263157894735
+      },
+      "6": {
+        "n_train": 57,
+        "pos_train": 13,
+        "freq_train": 0.22807017543859648
+      },
+      "7": {
+        "n_train": 58,
+        "pos_train": 6,
+        "freq_train": 0.10344827586206896
+      },
+      "8": {
+        "n_train": 58,
+        "pos_train": 17,
+        "freq_train": 0.29310344827586204
+      },
+      "9": {
+        "n_train": 58,
+        "pos_train": 37,
+        "freq_train": 0.6379310344827587
+      },
+      "10": {
+        "n_train": 58,
+        "pos_train": 39,
+        "freq_train": 0.6724137931034483
+      },
+      "11": {
+        "n_train": 57,
+        "pos_train": 31,
+        "freq_train": 0.543859649122807
+      },
+      "12": {
+        "n_train": 58,
+        "pos_train": 26,
+        "freq_train": 0.4482758620689655
+      }
+    }
+  }
+}

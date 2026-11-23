@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this benchmark, code, or data in your research, please cite it as below."
+title: "Limits of Resolution in Small Machine-Learning Benchmarks: Calibrated Inference for Clustered Test Sets"
+authors:
+  - family-names: "Real"
+    given-names: "Enrique"
+    orcid: "https://orcid.org/0009-0006-3862-9797"
+    affiliation: "Independent Researcher, Alicante, Spain"
+version: "2.0.0"
+date-released: "2026-11-23"
+url: "https://github.com/enriquerb32/limits-of-resolution-qml"
+repository-code: "https://github.com/enriquerb32/limits-of-resolution-qml"
+license: "MIT"
+keywords:
+  - "quantum machine learning"
+  - "benchmarking"
+  - "minimum detectable effect"
+  - "statistical power"
+  - "seed variance"
+  - "precipitation forecasting"
+  - "climatology"

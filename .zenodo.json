@@ -1,0 +1,34 @@
+{
+  "title": "Limits of Resolution in Small Machine-Learning Benchmarks: Calibrated Inference for Clustered Test Sets (reproducibility package)",
+  "upload_type": "software",
+  "version": "2.0.0",
+  "description": "<p>Code, data and archived results accompanying the paper <em>Limits of Resolution in Small Machine-Learning Benchmarks: Calibrated Inference for Clustered Test Sets</em>.</p><p>The package contains <code>qml_resolution</code>, a small typed Python library (NumPy and SciPy only) for rank AUC, seed-averaged paired DeLong tests, cluster bootstrap and jackknife for clustered test sets, CR2 inference and minimum detectable differences; and the research pipeline of the paper: data processing, classical and hybrid quantum models (PennyLane + PyTorch), the 15-seed experiments, the archived per-seed validation and test probabilities of every model, and the analyses behind every table and figure.</p><p>The case study is a four-station Western Mediterranean monthly precipitation panel (windows 1938-2026; test years 2008-2026, 529 station-months in 19 calendar-year clusters). The analyses separate the test-set sampling error of AUC comparisons (DeLong and calendar-year cluster procedures) from the variance across training seeds. Tests check every number printed in the main-text tables against the archives.</p>",
+  "creators": [
+    {
+      "name": "Real, Enrique",
+      "affiliation": "Independent Researcher, Alicante, Spain",
+      "orcid": "0009-0006-3862-9797"
+    }
+  ],
+  "access_right": "open",
+  "license": "MIT",
+  "keywords": [
+    "Quantum Machine Learning",
+    "Benchmarking",
+    "Minimum Detectable Effect",
+    "Statistical Power",
+    "Seed Variance",
+    "Cluster-Robust Inference",
+    "DeLong Test",
+    "Precipitation Forecasting",
+    "Climatology"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/enriquerb32/limits-of-resolution-qml",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ],
+  "notes": "Licenses: code under the MIT License; the aggregated monthly panels, archived results and paper text under CC BY 4.0 with attribution to AEMET (daily records obtained through datosclima.es, not redistributed). The station-interpolated ECMWF SEAS5 members in data/seas5/ are derived from Copernicus Climate Change Service information and are distributed under the Licence to Use Copernicus Products (see LICENSE-DATA). Per-seed probabilities of all 15 seeds of every model are archived in results/json/; results of the earlier (v1) pipeline are kept unchanged in results_v1/."
+}

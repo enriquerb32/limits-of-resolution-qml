@@ -1,0 +1,90 @@
+{
+  "Barcelona": {
+    "first": "1924-03-01",
+    "last": "2026-05-31",
+    "days": 37347,
+    "missing_share": {
+      "precip": 0.053,
+      "pmax": 0.3657,
+      "tmax": 0.1582,
+      "sol": 0.3113,
+      "veloc_kmh": 0.053
+    },
+    "non_numeric_tokens": {
+      "pmin:": 11777,
+      "pmax:": 11684,
+      "sol:": 9650,
+      "tmax:": 3935,
+      "tmin:": 3871,
+      "precip:": 2,
+      "racha_kmh:": 2,
+      "veloc_kmh:": 2
+    }
+  },
+  "Valencia": {
+    "first": "1937-11-01",
+    "last": "2026-05-31",
+    "days": 32354,
+    "missing_share": {
+      "precip": 0.0,
+      "pmax": 0.1856,
+      "tmax": 0.0011,
+      "sol": 0.0197,
+      "veloc_kmh": 0.0
+    },
+    "non_numeric_tokens": {
+      "pmax:": 6010,
+      "pmin:": 6010,
+      "sol:": 638,
+      "tmin:": 44,
+      "tmax:": 39,
+      "precip:": 2,
+      "racha_kmh:": 2,
+      "veloc_kmh:": 2
+    }
+  },
+  "Alicante": {
+    "first": "1938-09-01",
+    "last": "2026-05-15",
+    "days": 32034,
+    "missing_share": {
+      "precip": 0.0004,
+      "pmax": 0.0164,
+      "tmax": 0.003,
+      "sol": 0.0047,
+      "veloc_kmh": 0.0004
+    },
+    "non_numeric_tokens": {
+      "pmin:": 520,
+      "pmax:": 518,
+      "sol:": 141,
+      "tmin:": 89,
+      "tmax:": 88,
+      "precip:": 2,
+      "racha_kmh:": 2,
+      "veloc_kmh:": 2
+    }
+  },
+  "San_Javier": {
+    "first": "1944-08-01",
+    "last": "2026-05-31",
+    "days": 29889,
+    "missing_share": {
+      "precip": 0.0002,
+      "pmax": 0.2548,
+      "tmax": 0.0201,
+      "sol": 0.0905,
+      "veloc_kmh": 0.1273
+    },
+    "non_numeric_tokens": {
+      "pmin:": 7617,
+      "pmax:": 7615,
+      "sol:": 2701,
+      "tmax:": 602,
+      "tmin:": 590,
+      "precip:": 2,
+      "racha_kmh:": 2,
+      "veloc_kmh:": 2
+    }
+  }
+}

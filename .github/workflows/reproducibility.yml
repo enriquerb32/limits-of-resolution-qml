@@ -1,0 +1,44 @@
+name: Reproducibility
+
+# Full environment from the hashed lockfile: figures, traceability audit, quantum-circuit
+# tests and end-to-end checks of the statistical scripts against the archived results.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies from lockfile
+        run: |
+          python -m pip install --upgrade pip uv
+          uv pip install --system --require-hashes --index-strategy unsafe-best-match -r requirements-v2.lock
+          uv pip install --system pytest pytest-cov
+          uv pip install --system --no-deps -e .
+
+      - name: Reproduction checks (figures, partition, parameter counts, traceability)
+        run: make check
+
+      - name: Full test suite (library, quantum circuit and controls, manuscript tables, archived-result regressions)
+        run: pytest

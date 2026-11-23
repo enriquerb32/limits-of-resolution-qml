@@ -1,0 +1,100 @@
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+out/
+
+# Tool caches and coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Local review & work-in-progress notes
+pass*.txt
+backup_*/
+audit.md
+changes.md
+decisions_pending.md
+unresolved.md
+todo_experiments.md
+summary_for_*.md
+inventory.md
+TODO_AUTOR.md
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Large checkpoints (if hosted on Zenodo instead of Git LFS)
+# checkpoints/*.pt
+
+# Local helper scripts (the v2 pipeline entry point is tracked)
+*.ps1
+!/run_v2.ps1
+
+# Raw Daily Weather Data (not redistributed; only aggregated monthly panel is redistributed)
+datos_limpios_multiestacion.csv
+**/datos_limpios_multiestacion.csv
+# daily records of the second panel (written by exp32_second_panel.py --step etl); its monthly panel is tracked
+results/panel2/*/datos.csv
+precip_raw.csv
+**/precip_raw.csv
+month_rows.csv
+month_rows_raw.csv
+**/month_rows.csv
+**/month_rows_raw.csv
+test_probe.txt
+**/test_probe.txt
+test_meta.csv
+years_te.npy
+**/years_te.npy
+!results/test_meta.csv
+!results/years_te.npy
+
+# Local duplicates inside code/local_experiments/
+code/local_experiments/*.json
+code/local_experiments/*.npz
+code/local_experiments/*.csv
+code/local_experiments/*.npy
+code/local_experiments/make_figs.py
+
+# Exploratory scratch notebooks
+notebooks/
+*.ipynb
+
+
+# v2
+.venv-v2/
+code/local_experiments/datos_limpios_multiestacion.csv
+checkpoints/exp31*/
+
+# external benchmark data (scikit-learn cache; downloaded by exp53_external_benchmark.py, not redistributed)
+data/external/
+
+# Internal revision notes (kept locally, not published)
+audit/private/
