@@ -7,9 +7,10 @@ small test sets are independent draws from a population, and the reference is co
 SAME population, so large that its Monte Carlo error is negligible. v1 is NOT replaced: it was recorded before any fit
 (commit 1e88a96) and stays in the paper as recorded, with its over-coverage stated; v2 is added as the corrected design.
 How it differs from the simulations of the paper (Figures 4 and 5): those use binormal scores on an abstract cluster
-design; here the covariates, the spatial cells with their real unequal sizes, and the four fitted models are real, so
-the dependence between test cases and between the models' errors comes from real spatial structure, and only the
-labels are generated.
+design. Here we retain the observed covariates, unequal cell sizes, and the predictions of four fixed fitted models.
+Labels are simulated, including any residual within-cell dependence, and cell draws are independent by construction.
+What the real data keep is the dependence between the models' scores; their errors also depend on the simulated
+labels.
 What it tests: coverage and false decisions of the inference, not which model is better. The generating model is an
 XGBoost fit, so it favours XGBoost by construction; no ranking of the four models is read from this benchmark.
 
@@ -22,23 +23,33 @@ Step 1 - the generator (training cells only):
           cells. The slope makes the models' errors differ between cells (scorer-specific cell effects), the mechanism
           under which DeLong under-covered in the panel simulation; s_v = s_u / 2 is a judgement, not an estimate.
   Labels: y = 1[ f(x)(1 + v_c) + u_c + logistic noise > 0 ].
-Step 1b - the scale s_u, three scenarios fixed here:
-  S0  s_u = 0 (no cell effects): an iid control, under which DeLong should also be calibrated.
-  S2  s_u = s*: the value that reproduces the dependence observed in v1. v1 found a CR2 standard error 4.4-6.6 times
-      the DeLong one on whole test cells; s* is the value on the grid 0.10, 0.15, ..., 2.00 whose median ratio
-      SE_CR2 / SE_DeLong, for the AUC difference between f and its best linear approximation (least squares of f on
-      the standardized features, no labels involved), over 200 label draws on the 259 TRAINING cells, is closest to
-      5.5. Computed before step 2 and written to the output; if no grid value reaches 4.4, the largest is used and
-      this is reported.
+Step 1b - the scale s_u, three scenarios fixed here (s_v = s_u / 2 in all of them):
+  S0  s_u = s_v = 0: no residual dependence of the labels given the covariates, and no other shared random term
+      (u_c and v_c are both identically zero). This is NOT an iid design (cases in a cell share covariates, and the
+      models' scores remain dependent within cells) and NOT a null of the AUC difference.
+  S2  s_u = s*: the value that reproduces the dependence observed in v1, where on the 182 whole test cells the CR2
+      standard error was 4.4-6.6 times the DeLong one. Calibration pilot, with seeds disjoint from steps 2-4: for each
+      s_u on the grid 0.25, 0.50, ..., 2.00, the four models (seed 0) are fitted on one synthetic label draw of the
+      training and validation cells; then, over 200 synthetic label draws on the 182 test-cell covariate blocks (the
+      cell-size distribution of v1; covariates only, no real outcome), the median ratio SE_CR2 / SE_DeLong of the
+      declared contrasts C1-C3 is computed. s* is the grid value whose ratio, averaged over C1-C3, is closest to 5.5,
+      the midpoint of v1. If no grid value reaches 4.4, the largest is used and this is reported. The ratio is
+      calibrated directly; no intraclass correlation of labels is used to translate it, since with unequal cell
+      sizes a mean cell size does not carry the ratio over.
   S1  s_u = s* / 2: intermediate dependence.
+  s_u is then frozen. The ratio that results in the small tests of step 4 is reported, without requiring it to
+  match v1.
 Step 2 - models (seeds 0-4), per scenario, fitted on synthetic labels of the training and validation cells, one label
   draw (seed 2027): LR, RF, XGB and MLP with the settings of v1. Frozen afterwards.
 Step 3 - one population for reference and tests: the 39 test cells with 10-60 rows (as in v1). A synthetic cell is
-  one of these 39 covariate blocks drawn WITH replacement, with fresh u_c, v_c and labels, so cells are i.i.d. draws
-  from a single population and there is no finite-population correction. Reference sample: 20,000 synthetic cells
-  (seed 3001) from this population, disjoint from every small test by construction. True difference of a contrast:
-  the 5-seed mean AUC difference on the pooled reference sample (rows weighted as in the small tests); its Monte Carlo
-  SE must be below 0.001 (otherwise the reference sample is enlarged, not the design changed). The true differences
+  one of these 39 covariate blocks drawn WITH replacement. A block can therefore appear more than once, in a small
+  test or in the reference; each appearance receives its own cluster ID and its own independently generated u_c, v_c
+  and labels, so cells are i.i.d. draws from a single population and there is no finite-population correction.
+  Results refer to this population of 39 blocks, not to California or to all test cells.
+  Reference: 20,000 synthetic cells (seed 3001) simulated independently from the SAME population as the small tests.
+  True difference of a contrast: the 5-seed mean AUC difference on the pooled reference sample; its Monte Carlo SE is
+  estimated by 20 independent batches of 1,000 cells and reported, and must be below 0.001 (otherwise the reference
+  sample is enlarged, not the design changed). The true differences
   cannot be known before the models of step 2 exist; they are computed and recorded in audit/truth_external_v2.json,
   in a SECOND commit and an independent timestamped deposit, before any small test of step 4 is scored. The
   difference of C0 is zero by construction.
@@ -56,7 +67,8 @@ Predictions (per scenario unless stated):
 P1  The true difference of C1 exceeds the margin in every scenario (LR is misspecified for f).
 P2  CR2 coverage of the true difference is 0.93-0.97 for every contrast in every scenario (2,000 draws: MC SE about
     0.005).
-P3  DeLong coverage is 0.93-0.97 for every contrast in S0, and below 0.90 for every contrast in S2.
+P3  In S2, DeLong covers the true difference less often than CR2 for every contrast. (DeLong coverage in S0 and S1
+    is reported as a diagnostic; no threshold is set for it, since no independent pilot justifies one.)
 P4  For C0, CR2 rejects in 3-7 % of draws in every scenario; DeLong rejects in more than 7 % in S2.
 P5  For contrasts whose true difference is within the margin, CR2 resolves in at most 10 % of draws; resolutions with
     the wrong sign are at most 2.5 % of draws for CR2 in every contrast.

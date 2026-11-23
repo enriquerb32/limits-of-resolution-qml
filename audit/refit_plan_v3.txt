@@ -1,0 +1,69 @@
+Refit v3 of the first panel - plan fixed before the new runs (2026-11-23)
+==========================================================================
+Status of this plan: the results of the archived pipeline (v2) are known to the author, so this is a plan fixed before
+the NEW runs, not a blind confirmation of the original panel. Its purpose is to remove the two main objections of the
+review of 2026-11-23: a primary pipeline with known lookahead (point 4) and an unequal training budget between the
+circuit, its controls and the trees (point 5). Every deviation from this plan will be listed in the supplement.
+
+1. Pipeline
+  * Primary: causal imputation (V2_CAUSAL=1): every predictor of the window for target month t uses data up to the
+    end of t-1 only. The archived pipeline (v2) becomes a sensitivity analysis; the archived-versus-causal comparison
+    is kept, on the common rows and on the full causal sample.
+  * Clean run: a new worktree with empty results/, logs_v2/ and checkpoints/exp31/; only input data are copied
+    (cleaned daily CSV, second-panel daily files, SEAS5 member files). Tree hyperparameters are re-tuned on the causal
+    pipeline (the archived v2_tuned_params.json is not read). After each phase, an audit checks that every output was
+    written after the phase started and that no archived prediction, checkpoint or resume file was read.
+  * Splits, seeds 0-14, labels (pooled training 60th percentile) and test rows as in v2.
+
+2. Training budget (one search, the same for every neural model)
+  Models searched: LSTM, LSTM+QNN, LSTM+QTL, Linear-4D, Fourier-1 to -4 (separable), Full Fourier-1, -2 and -4
+  (tensor bases of 81, 625 and 6,561 functions of the four angles). Frozen circuits are not searched (they take the
+  LSTM+QNN setting).
+  * Optuna TPE, 30 trials per model, sampler seed 0; one training seed per trial (seed 100, outside the final 0-14).
+  * Selection metric: validation AUC of the trial (the metric used to tune the trees).
+  * Search space, identical for every model: learning rate log-uniform [1e-3, 3e-2]; weight decay log-uniform
+    [1e-5, 1e-2]; maximum epochs {25, 50, 100}; early-stopping patience {6, 15}; batch size {16, 32}. Dropout keeps the
+    value of the shared LSTM backbone (not searched, since it is common to the circuit and its controls).
+  * Final fits: the selected setting, 15 seeds, each the best of 3 random starts by validation loss (restarts for
+    every model, not only the circuit).
+  * The range of the search space was informed by a pilot on planted signals (exp64_circuit_budget_pilot.py, circuit
+    head only, results archived); the pilot did not use the panel labels.
+  * Trees: Optuna TPE, 50 trials, validation AUC, on the causal pipeline, as in v2.
+
+3. Primary metrics and decision rules
+  * Two co-primary metrics: the pooled AUC (as before) and the within-station AUC (positive-negative pairs of the same
+    station only; per-station AUCs averaged with weights n_pos x n_neg). The within-station AUC removes comparisons
+    between stations, not the seasonality within each station; the station x month threshold stays a separate
+    sensitivity analysis.
+  * Inference for both: CR2 with Bell-McCaffrey degrees of freedom over calendar years, on 15-seed means; the
+    within-station AUC difference uses its own influence values, summed by year.
+  * A difference between two models is called resolved only if BOTH co-primary CR2 intervals exclude zero with the
+    same sign (an intersection-union rule, valid at level 0.05 without a further correction). Holm is applied within
+    each of the two primary families, separately for each metric; resolved after Holm requires both metrics to pass.
+    If only one metric resolves, the difference is reported as metric-dependent, not resolved.
+  * Equivalence: TOST with CR2 and margin 0.01 AUC, on both metrics; equivalence is claimed only if both pass.
+  * Floor of protocol item 1 and two- or three-year clusters: sensitivity analyses, as in v2.
+
+4. Circuit versus controls, and recovery of the teacher
+  * Full Fourier-4 is a containment control: with the same interface and post-processing, its basis contains the
+    outputs of the LSTM+QNN circuit, but its free linear map can represent more functions. It is not a control of equal
+    expressivity or capacity.
+  * Main teacher test: the repeated planted-signal control of exp50 (teacher score through the same LayerNorm as the
+    students, same angles; candidates 0-3, oracle test AUC 0.70 and 0.85, two nulls). The single teacher of exp38 uses
+    a score WITHOUT LayerNorm and is not used as the main test. Heads: circuit, Linear-4D, Fourier-2, Full Fourier-1
+    and Full Fourier-4, each with the setting selected in section 2, 5 seeds.
+  * A head 'recovers' the teacher in a configuration if its 5-seed mean test AUC is at least the oracle AUC - 0.03.
+  * Circuit versus Full Fourier-4: paired CR2 difference of 5-seed means per configuration.
+  * Interpretation rules, fixed now:
+    - both recover: their performance is compared under the fixed budget, and nothing more;
+    - one does not recover: the difference is reported as a property of the training procedure, not as a limit of
+      expressivity;
+    - contrast not resolved: inconclusive, unless TOST with margin 0.01 AUC establishes equivalence.
+  * On the panel, a quantum contribution is claimed only if the circuit is resolved above every interface control
+    (both co-primary metrics, Holm over the interface contrasts). Exact emulation is a property of the spectrum and is
+    not evidence for or against a contribution.
+
+5. What does not change
+  The second panel, SEAS5 and the external benchmarks are not refitted under this plan (the external benchmark v2 has
+  its own record, audit/prediction_external_v2.txt). If the results are null or inconclusive, no further round of
+  experiments is opened.
