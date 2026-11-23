@@ -13,3 +13,10 @@ truth_external_v2.json  (external benchmark v2, true differences and a priori MD
   git blob     d7bcddbe48a7586f89871d0dd9c606f82ae3911b
   SHA-256      0226c4eb01ffd40a6a7ea3fff6484504aad8f9c480900680c2a88d0b77219c46
   Deposited 2026-11-23, before any small test of step 4 was drawn or scored.
+
+refit_plan_v3.txt  (refit v3 of the first panel, plan amended after the circuit-budget pilot)
+  Zenodo DOI   10.5281/zenodo.24466944   https://doi.org/10.5281/zenodo.24466944
+  commit       adfcd21
+  git blob     0a7efff0f94f54a054d05cd347b3335defe870ed
+  SHA-256      af10258ea877b4670fdbc3acb3064d2635fe72df187730a2ee2732d3ecfbd893
+  Deposited 2026-11-23, before any run of the refit.
