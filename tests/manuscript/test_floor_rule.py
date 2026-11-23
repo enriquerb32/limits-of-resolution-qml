@@ -137,7 +137,9 @@ def test_primary_floor_separation_and_scope() -> None:
     abstract = MAIN_TEXT.split("\\begin{abstract}")[1].split("\\end{abstract}")[0]
     assert "nor equivalence of \\texttt{LSTM+QNN} established" in abstract  # LSTM+QTL is nominally equivalent (S)
     # the abstract cites the corrected design (known truth); the recorded v1 design stays in Sec. 4.7 and S7
-    assert "against a known truth, DeLong intervals covered it in 51--89\\,\\% of draws, CR2 in 90--98\\,\\%" in abstract
+    assert (
+        "against a known truth, DeLong intervals covered it in 51--89\\,\\% of draws, CR2 in 90--98\\,\\%" in abstract
+    )
     assert "94--99.8" not in abstract
     assert "41--63" not in MAIN_TEXT
     fig1 = MAIN_TEXT.split("\\node[prim=13.6cm, below=of holm] (dec)")[1].split("\\draw")[0]

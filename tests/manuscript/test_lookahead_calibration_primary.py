@@ -416,7 +416,11 @@ def test_external_benchmark_v2() -> None:
     assert "cell size" in sc["clarifications"]["small_test_ratio"]
     for text in (MAIN_TEXT, SUPP_TEXT):
         in_text(text, "0.51--0.93", "doi:10.5281/zenodo.24461908")
-    in_text(MAIN_TEXT, "DeLong in 51--89\\,\\%", "CR2 covers the true difference of the three contrasts in 90--98\\,\\%")
+    in_text(
+        MAIN_TEXT,
+        "DeLong in 51--89\\,\\%",
+        "CR2 covers the true difference of the three contrasts in 90--98\\,\\%",
+    )
     in_text(SUPP_TEXT, "mainly an effect of cell size, not of the number of clusters")
 
 
