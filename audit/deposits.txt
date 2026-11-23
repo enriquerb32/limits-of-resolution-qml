@@ -6,3 +6,10 @@ prediction_external_v2.txt  (external benchmark v2, design and predictions, reco
   git blob     48fc4905294072f013ffed578e5e621b7dde0024
   SHA-256      44a9c5664ba6e7165e2e3d870b61dc7cfceb35eb0f82edc09587ce73b4aadcec
   Deposited 2026-11-23, before the calibration of s_u, any model fit or any computation of the true differences.
+
+truth_external_v2.json  (external benchmark v2, true differences and a priori MDEs, computed before any small test)
+  Zenodo DOI   10.5281/zenodo.24461908   https://doi.org/10.5281/zenodo.24461908
+  commit       6311f78
+  git blob     d7bcddbe48a7586f89871d0dd9c606f82ae3911b
+  SHA-256      0226c4eb01ffd40a6a7ea3fff6484504aad8f9c480900680c2a88d0b77219c46
+  Deposited 2026-11-23, before any small test of step 4 was drawn or scored.

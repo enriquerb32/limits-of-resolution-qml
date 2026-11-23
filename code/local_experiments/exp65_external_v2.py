@@ -22,6 +22,7 @@ Interpretations of the record (where it does not fix a detail; written to the ou
   * 'Settings of v1': models fitted on the training rows, XGBoost early-stopped on the validation rows, as in exp53.
 
   python code/local_experiments/exp65_external_v2.py --step truth          (~20-40 min)
+  python code/local_experiments/exp65_external_v2.py --step score          (writes results/json/results_exp65_external_v2_score.json)
 """
 import argparse
 import json
@@ -289,20 +290,141 @@ def step_truth():
     print('wrote', TRUTH, OUT, NPZ, f"({res['minutes']:.1f} min)")
 
 
+SCORE = os.path.join(ROOT, 'results', 'json', 'results_exp65_external_v2_score.json')
+SCORE_CLARIFICATIONS = dict(
+    c0=('C0 is reported as a contrast like C1-C3 (coverage of its true difference, resolutions, wrong signs); P4 is '
+        'not evaluable as recorded, because the two RF fits use different training label draws (seeds 2027 and '
+        '2028), so conditional on the fitted models their true difference is not zero (truth, deviation '
+        'c0_not_null). Its CR2 and DeLong rejection rates are reported descriptively only.'),
+    s_star=('s* = 1.25: the mean ratio over C1-C3 was 6.26 at s_u = 1.25 and 4.73 at 1.00, at distances 0.76 and 0.77 '
+            'from 5.5, equal within Monte Carlo error (the calibration grid is non-monotonic by up to 1.0 between '
+            'neighbouring values; one training draw, 200 test draws per value). 1.25 was taken by the recorded '
+            'rule (closest) and gives a mean ratio inside the v1 range 4.4-6.6.'),
+    prevalence=('The record fixes no prevalence; the population of the 39 blocks has the prevalence of the reference '
+                '(truth), 0.37-0.39.'),
+    small_tests=('Step 4 draws, per scenario, from one generator with seed 3002 (restarted for each scenario): 19 '
+                 'block indices with replacement, then cell effects and labels of those cells. Each appearance of '
+                 'a block is its own cluster. Draws with a single class would be skipped and counted (none '
+                 'expected).'),
+    decisions=('Resolved: 95 % interval excludes 0. Wrong sign: resolved with the sign opposite to the true '
+               'difference. Coverage: the interval contains the true difference of the truth file. CR2 without the '
+               'floor rule (the record names CR2 only). Empirical MDE: 2.80 x SD of the 2,000 small-test estimates. '
+               'P2, P3 and P6 are evaluated on the declared contrasts C1-C3; P5 on those of C1-C3 within the margin '
+               '(wrong-sign part: all of C1-C3).'),
+)
+
+
+def check_deposited():
+    tracked = subprocess.run(['git', 'ls-files', '--error-unmatch', TRUTH], cwd=ROOT, capture_output=True)
+    if tracked.returncode:
+        raise SystemExit('audit/truth_external_v2.json must be committed (and deposited) before scoring')
+    dep = open(os.path.join(ROOT, 'audit', 'deposits.txt'), encoding='utf-8').read()
+    block = dep.split('truth_external_v2.json', 1)[1] if 'truth_external_v2.json' in dep else ''
+    if 'Zenodo DOI' not in block.split('\n\n', 1)[0]:
+        raise SystemExit('audit/deposits.txt must list the DOI of the deposit of truth_external_v2.json before scoring')
+    dirty = subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', TRUTH], cwd=ROOT).returncode
+    if dirty:
+        raise SystemExit('audit/truth_external_v2.json differs from the committed (deposited) version')
+
+
+def step_score():
+    import hashlib
+    from scipy.stats import t as student_t
+    check_deposited()
+    refuse_if_exists([SCORE])
+    truth = json.load(open(TRUTH, encoding='utf-8'))
+    if hashlib.sha256(open(NPZ, 'rb').read()).hexdigest() != truth['predictions_npz_sha256']:
+        raise SystemExit('predictions npz does not match the hash recorded in the truth file')
+    Z = np.load(NPZ)
+    block_n, f_blk = Z['block_rows'], Z['f_blocks']
+    starts = np.concatenate([[0], np.cumsum(block_n)[:-1]])
+    z95 = 1.959963984540054
+    out = dict(record='audit/prediction_external_v2.txt (commit b100bea; doi:10.5281/zenodo.24459864)',
+               truth='audit/truth_external_v2.json (commit 6311f78; doi:10.5281/zenodo.24461908)',
+               clarifications=SCORE_CLARIFICATIONS, draws=2000, scenarios={})
+    t0 = time.time()
+    for name, sc in truth['scenarios'].items():
+        s = sc['s_u']
+        P = {k.split('__', 1)[1]: Z[k] for k in Z.files if k.startswith(name + '__')}
+        rng = np.random.default_rng(3002)
+        rec = {c: dict(d=[], cr_lo=[], cr_hi=[], dl_lo=[], dl_hi=[], ratio=[]) for c in CONTRASTS}
+        n_rows, skipped = [], 0
+        for _ in range(2000):
+            pick = rng.integers(0, 39, SMALL_K)
+            rows = np.concatenate([np.arange(starts[b], starts[b] + block_n[b]) for b in pick])
+            cid = np.repeat(np.arange(SMALL_K), block_n[pick])
+            y = draw_labels(f_blk[rows], cid, s, rng)
+            if y.min() == y.max():
+                skipped += 1
+                continue
+            n_rows.append(int(rows.size))
+            for c, (a, b) in CONTRASTS.items():
+                cr = cluster_robust_delta(y, P[a][:, rows], P[b][:, rows], cid)
+                dl = paired_delong(y, P[a][:, rows], P[b][:, rows])
+                h = float(student_t.ppf(0.975, cr.df)) * cr.se_cr2
+                r = rec[c]
+                r['d'].append(cr.delta); r['cr_lo'].append(cr.delta - h); r['cr_hi'].append(cr.delta + h)
+                r['dl_lo'].append(dl.delta - z95 * dl.se); r['dl_hi'].append(dl.delta + z95 * dl.se)
+                r['ratio'].append(cr.se_cr2 / dl.se)
+        res = {}
+        for c in CONTRASTS:
+            r = {k: np.array(v) for k, v in rec[c].items()}
+            td = sc['truth'][c]['true_difference']
+            sign = np.sign(td)
+            row = dict(true_difference=td, mean_estimate=float(r['d'].mean()), sd_estimate=float(r['d'].std(ddof=1)),
+                       empirical_mde=float(2.80 * r['d'].std(ddof=1)), median_ratio_cr2_delong=float(np.median(r['ratio'])))
+            for m in ('cr', 'dl'):
+                lo, hi = r[m + '_lo'], r[m + '_hi']
+                res_ = (lo > 0) | (hi < 0)
+                wrong = (sign > 0) & (hi < 0) | (sign < 0) & (lo > 0)
+                key = 'cr2' if m == 'cr' else 'delong'
+                row[key] = dict(coverage=float(((lo <= td) & (td <= hi)).mean()), resolved=float(res_.mean()),
+                                wrong_sign=float(wrong.mean()), median_halfwidth=float(np.median((hi - lo) / 2)))
+            if c in DECLARED:
+                apm = sc['a_priori_mde'][c]['mde_a_priori']
+                row['a_priori_mde'] = apm
+                row['ratio_a_priori_to_empirical_mde'] = apm / row['empirical_mde']
+            res[c] = row
+        out['scenarios'][name] = dict(s_u=s, n_draws=len(n_rows), skipped_single_class=skipped,
+                                      median_rows=float(np.median(n_rows)), contrasts=res)
+        print(f'{name}: ' + ' | '.join(f"{c} cov CR2 {v['cr2']['coverage']:.3f} DL {v['delong']['coverage']:.3f} "
+                                       f"res {v['cr2']['resolved']:.3f} ratio {v['median_ratio_cr2_delong']:.2f}"
+                                       for c, v in res.items()), flush=True)
+    S = out['scenarios']
+    D = DECLARED
+    within = {k: [c for c in D if abs(S[k]['contrasts'][c]['true_difference']) < 0.01] for k in S}
+    out['predictions'] = dict(
+        P1=dict(holds={k: truth['scenarios'][k]['truth']['C1']['true_difference'] > 0.01 for k in S},
+                note='decided by the truth alone'),
+        P2=dict(coverage={k: {c: S[k]['contrasts'][c]['cr2']['coverage'] for c in D} for k in S},
+                holds=all(0.93 <= S[k]['contrasts'][c]['cr2']['coverage'] <= 0.97 for k in S for c in D)),
+        P3=dict(delong_minus_cr2={c: S['S2']['contrasts'][c]['delong']['coverage'] -
+                                  S['S2']['contrasts'][c]['cr2']['coverage'] for c in D},
+                holds=all(S['S2']['contrasts'][c]['delong']['coverage'] < S['S2']['contrasts'][c]['cr2']['coverage']
+                          for c in D)),
+        P4=dict(holds=None, note='not evaluable as recorded (C0 is not a null; see clarifications.c0)',
+                rejection_descriptive={k: dict(cr2=S[k]['contrasts']['C0']['cr2']['resolved'],
+                                               delong=S[k]['contrasts']['C0']['delong']['resolved']) for k in S}),
+        P5=dict(within_margin=within,
+                resolved_within_margin={k: {c: S[k]['contrasts'][c]['cr2']['resolved'] for c in within[k]} for k in S},
+                wrong_sign={k: {c: S[k]['contrasts'][c]['cr2']['wrong_sign'] for c in D} for k in S},
+                holds=all(S[k]['contrasts'][c]['cr2']['resolved'] <= 0.10 for k in S for c in within[k]) and
+                all(S[k]['contrasts'][c]['cr2']['wrong_sign'] <= 0.025 for k in S for c in D)),
+        P6=dict(ratio={k: {c: S[k]['contrasts'][c]['ratio_a_priori_to_empirical_mde'] for c in D} for k in S},
+                holds=all(0.7 <= S[k]['contrasts'][c]['ratio_a_priori_to_empirical_mde'] <= 1.4 for k in S for c in D)),
+    )
+    out['minutes'] = (time.time() - t0) / 60
+    json.dump(out, open(SCORE, 'w'), indent=2)
+    print(json.dumps({k: v.get('holds') for k, v in out['predictions'].items()}), 'wrote', SCORE)
+
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--step', choices=['truth', 'score'], required=True)
     a = ap.parse_args()
     if a.step == 'truth':
         step_truth()
     else:
-        tracked = subprocess.run(['git', 'ls-files', '--error-unmatch', TRUTH], cwd=ROOT, capture_output=True)
-        if tracked.returncode:
-            raise SystemExit('audit/truth_external_v2.json must be committed (and deposited) before scoring')
-        dep = open(os.path.join(ROOT, 'audit', 'deposits.txt'), encoding='utf-8').read()
-        block = dep.split('truth_external_v2.json', 1)[1] if 'truth_external_v2.json' in dep else ''
-        if 'Zenodo DOI' not in block.split('\n\n', 1)[0]:
-            raise SystemExit('audit/deposits.txt must list the DOI of the deposit of truth_external_v2.json before scoring')
-        raise SystemExit('step 4 is implemented after the truth has been deposited')
+        step_score()
 
 
 if __name__ == '__main__':
