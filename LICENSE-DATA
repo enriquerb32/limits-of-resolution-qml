@@ -13,7 +13,9 @@ Under the following terms:
 Full license text: https://creativecommons.org/licenses/by/4.0/legalcode
 
 Data Provenance Note:
-The underlying daily meteorological station records are sourced from the Spanish State Meteorological Agency (AEMET) via datosclima.es under the AEMET Open Data framework. The derived, aggregated spatiotemporal monthly panel and feature representations are distributed under this CC BY 4.0 license with attribution to AEMET as original data provider.
+The underlying daily meteorological station records are sourced from the Spanish State Meteorological Agency (AEMET) via datosclima.es under the AEMET Open Data framework. The derived, aggregated spatiotemporal monthly panel and feature representations are distributed under this CC BY 4.0 license with attribution to AEMET as original data provider, in the form its legal notice requires for value-added products:
+
+    Source: AEMET. Information elaborated using, among others, data from the Agencia Estatal de Meteorología.
 
 Exception: ECMWF SEAS5 data (data/seas5/):
 The file data/seas5/seas5_station_members.csv and the SEAS5-based archives derived from it (results/json/results_exp33_seas5_*) are not covered by the CC BY 4.0 license above. They contain station-interpolated members of the ECMWF SEAS5 seasonal forecast, "Seasonal forecast monthly statistics on single levels" (https://doi.org/10.24381/cds.68dd14c3), retrieved from the Copernicus Climate Change Service (C3S) Climate Data Store in November 2026, and are distributed under the Licence to Use Copernicus Products (https://apps.ecmwf.int/datasets/licences/copernicus/).

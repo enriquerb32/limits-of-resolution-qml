@@ -189,7 +189,7 @@ def test_brier_claims_in_text() -> None:
     assert worse == {"PureLSTM-CLIM", "CTRL_LINEAR4D-CLIM", "LSTM_QNN-CLIM"}
     ps = [rc["climatology"][k]["p_cr2"] for k in worse]
     assert (round(min(ps), 3), round(max(ps), 3)) == (0.010, 0.028)
-    in_text(MAIN_TEXT, "CR2 $p=0.010$--0.028")
+    in_text(MAIN_TEXT, "excludes zero ($p=0.010$--0.028)")
     in_text(SUPP_TEXT, "(worse by 0.0046)", "($+0.0012$, $p=0.44$)")  # in S
 
 

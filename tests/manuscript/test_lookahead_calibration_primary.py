@@ -199,7 +199,8 @@ def test_primary_mde_and_scope() -> None:
         "is 0.018--0.025 AUC (0.022--0.032 AUC under independence)",
         "0.018--0.024 AUC for the classical models "
         "(0.022--0.031 under independence, and 0.021--0.029 at the first Holm step)",
-        "the MDEs of these comparisons are 0.012--0.019 (0.011--0.016 under independence)",
+        "and of the hybrids against the standalone LSTM, are 0.012--0.019 (0.011--0.016 under independence)",
+        "for comparisons with a tree ensemble and 0.012--0.019 among the LSTM-based models",
     )
     sm = load("local_stationmonth_cr2.json")
     between = [v["p_cr2"] for k, v in sm.items() if not k.endswith("CLIM")]

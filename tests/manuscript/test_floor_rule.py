@@ -84,7 +84,7 @@ def test_floor_on_the_contrasts() -> None:
     assert (round(e62["RF-XGB"]["p_cr2"], 3), round(e62["RF-XGB"]["p_floor"], 3)) == (0.110, 0.224)
     in_text(
         MAIN_TEXT,
-        "between complete models (0.033 for Random Forest against the LSTM with the floor of the sensitivity check)",
+        "with a tree ensemble (0.033 for Random Forest against the LSTM with the floor of the sensitivity check)",
     )
     in_text(
         SUPP_TEXT,
@@ -111,7 +111,7 @@ def test_floor_on_brier() -> None:
     assert b["changed"] == ["recal/climatology/PureLSTM-CLIM"]
     v = b["recal/climatology/PureLSTM-CLIM"]
     assert round(v["ratio_cr1_iid"], 2) == 0.66 and round(v["p_cr2"], 3) == 0.016 and round(v["p_decision"], 3) == 0.095
-    in_text(MAIN_TEXT, "the LSTM is not (ratio 0.66, $p=0.095$)")
+    in_text(MAIN_TEXT, "the LSTM no longer qualifies (ratio 0.66, $p=0.095$)")
     in_text(SUPP_TEXT, "the LSTM is not ($p=0.095$", "(ratio 0.66; $p$ from 0.016 to 0.095)")
 
 

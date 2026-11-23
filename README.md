@@ -317,7 +317,7 @@ pdflatex main && pdflatex supp && pdflatex main && pdflatex supp
 
 ## 11. Data provenance
 
-Meteorological observations are from the historical archives of the Spanish State Meteorological Agency (AEMET), obtained through *datosclima.es* under AEMET's open-data reuse framework. Only aggregated monthly data are redistributed, with attribution to AEMET (CC BY 4.0, see `LICENSE-DATA`); the daily records are not part of the repository.
+Meteorological observations are from the historical archives of the Spanish State Meteorological Agency (AEMET), obtained through *datosclima.es* under AEMET's open-data reuse framework. Only aggregated monthly data are redistributed (CC BY 4.0, see `LICENSE-DATA`), with the attribution AEMET's legal notice requires for value-added products: "Source: AEMET. Information elaborated using, among others, data from the Agencia Estatal de Meteorología." The daily records are not part of the repository.
 
 | File | Content |
 |---|---|
