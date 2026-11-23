@@ -99,7 +99,8 @@ def test_section_openings_and_literature_table() -> None:
     in_text(
         MAIN_TEXT,
         "On a second panel the null results held, the ranking did not",
-        "iid inference covered a fixed reference difference in fewer than two thirds of small test sets",
+        "iid inference covered the true difference in 51--89\\,\\% of small test sets and the calibrated cluster "
+        "procedure in 90--98\\,\\%, close to nominal but not exact",
     )
     lit = MAIN_TEXT.split("\\label{tab:literature}")[1].split("\\end{table}")[0]
     assert "adjustbox" not in lit and "\\begin{tabularx}{\\textwidth}" in lit  # legible at text size, not scaled
@@ -135,7 +136,9 @@ def test_claim_wording() -> None:
 def test_primary_floor_separation_and_scope() -> None:
     abstract = MAIN_TEXT.split("\\begin{abstract}")[1].split("\\end{abstract}")[0]
     assert "nor equivalence of \\texttt{LSTM+QNN} established" in abstract  # LSTM+QTL is nominally equivalent (S)
-    assert "covered a fixed reference difference in 55--63\\,\\% of draws, CR2 in 94--99.8\\,\\%" in abstract
+    # the abstract cites the corrected design (known truth); the recorded v1 design stays in Sec. 4.7 and S7
+    assert "against a known truth, DeLong intervals covered it in 51--89\\,\\% of draws, CR2 in 90--98\\,\\%" in abstract
+    assert "94--99.8" not in abstract
     assert "41--63" not in MAIN_TEXT
     fig1 = MAIN_TEXT.split("\\node[prim=13.6cm, below=of holm] (dec)")[1].split("\\draw")[0]
     dec, rob = fig1.split("(rob)")

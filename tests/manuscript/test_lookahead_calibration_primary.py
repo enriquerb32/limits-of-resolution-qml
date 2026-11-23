@@ -384,11 +384,40 @@ def test_external_benchmark() -> None:
         "resolves in 0.2--10.5\\,\\%",
         "$\\nu=13.5$",
         "DeLong covers in 41--45\\,\\%, CR2 in 96--98\\,\\%",
-        "in only 55--63\\,\\% of draws",
-        "(41--45\\,\\% and 96--98\\,\\% against all test cells, post hoc)",
+        "(recorded design with a fixed reference: 55--63\\,\\% and a conservative 94--99.8\\,\\%)",
+        "(all test cells, post hoc: 41--45\\,\\% and 96--98\\,\\%)",
     )
     assert "wrong sign in 16" not in MAIN_TEXT
     in_text(SUPP_TEXT, "1.37--1.40 times the empirical one")
+
+
+def test_external_benchmark_v2() -> None:
+    """Corrected design (v2): printed numbers against the scored small tests and the deposited truth."""
+    sc = load("json/results_exp65_external_v2_score.json")
+    S = sc["scenarios"]
+    declared = ("C1", "C2", "C3")
+    cov = lambda m: [S[k]["contrasts"][c][m]["coverage"] for k in S for c in declared]  # noqa: E731
+    assert (round(100 * min(cov("cr2"))), round(100 * max(cov("cr2")))) == (90, 98)
+    assert (round(100 * min(cov("delong"))), round(100 * max(cov("delong")))) == (51, 89)
+    s2_dl = [S["S2"]["contrasts"][c]["delong"]["coverage"] for c in declared]
+    assert (round(100 * min(s2_dl)), round(100 * max(s2_dl))) == (51, 57)
+    inband = sum(0.93 <= v <= 0.97 for v in cov("cr2"))
+    assert inband == 6
+    ratio = [v for k in sc["predictions"]["P6"]["ratio"].values() for v in k.values()]
+    assert (round(min(ratio), 2), round(max(ratio), 2)) == (0.51, 0.93) and max(ratio) < 1
+    wrong = [v for k in sc["predictions"]["P5"]["wrong_sign"].values() for v in k.values()]
+    assert max(wrong) == pytest.approx(0.0185, abs=1e-9)  # 37 of 2,000 draws, printed as 1.9 %
+    se_ratio = [S[k]["contrasts"][c]["median_ratio_cr2_delong"] for k in S for c in S[k]["contrasts"]]
+    assert (round(min(se_ratio), 1), round(max(se_ratio), 1)) == (1.1, 2.7)
+    holds = {k: v["holds"] for k, v in sc["predictions"].items()}
+    assert holds["P2"] is False and holds["P3"] is True and holds["P4"] is None
+    assert holds["P5"] is True and holds["P6"] is False
+    assert holds["P1"] == {"S0": True, "S1": True, "S2": False}
+    assert "cell size" in sc["clarifications"]["small_test_ratio"]
+    for text in (MAIN_TEXT, SUPP_TEXT):
+        in_text(text, "0.51--0.93", "doi:10.5281/zenodo.24461908")
+    in_text(MAIN_TEXT, "DeLong in 51--89\\,\\%", "CR2 covers the true difference of the three contrasts in 90--98\\,\\%")
+    in_text(SUPP_TEXT, "mainly an effect of cell size, not of the number of clusters")
 
 
 # ------------------------------------------------------------------ exp50: repeated positive control

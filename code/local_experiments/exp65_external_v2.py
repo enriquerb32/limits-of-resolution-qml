@@ -311,6 +311,12 @@ SCORE_CLARIFICATIONS = dict(
                'floor rule (the record names CR2 only). Empirical MDE: 2.80 x SD of the 2,000 small-test estimates. '
                'P2, P3 and P6 are evaluated on the declared contrasts C1-C3; P5 on those of C1-C3 within the margin '
                '(wrong-sign part: all of C1-C3).'),
+    small_test_ratio=('Added after scoring, as a clarification of the explanation (not of any result): the median '
+                      'SE_CR2/SE_DeLong ratio of the small tests (1.1-2.7) is below the 4.4-6.6 of v1 and the 6.26 '
+                      'of the calibration mainly because of cell size, not the number of clusters: the 39 blocks of '
+                      '10-60 rows have a median of 27 rows, against about 56 per cell in the 182 test cells of the '
+                      'calibration, and the design effect grows with the rows per cell. S2 matches the dependence of '
+                      'v1 on whole test cells, not the ratio of the small tests.'),
 )
 
 

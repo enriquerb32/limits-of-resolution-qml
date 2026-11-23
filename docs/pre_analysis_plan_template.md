@@ -37,6 +37,9 @@ Date and deposit identifier: ______
   (`qml_resolution.paired_mde_hanley_mcneil`), times the square root of the design effect, √(1 + (m − 1)ρ), for
   clusters of m rows (the design effect multiplies the variance, not the standard error; critical values kept, under
   that approximation):
+- Conservative allowance: on the paper's corrected external benchmark this a priori MDE underestimated the empirical
+  one in all nine cases (factor 0.51-0.93), so size the test for a difference well below the smallest of interest or
+  take rho from the upper end of its plausible range:
 - Expected uncertainty of the MDE (few clusters):
 
 ## 7. Equivalence

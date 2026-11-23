@@ -102,8 +102,8 @@ def test_moved_tables_and_summary() -> None:
     assert "\\appendix" not in MAIN_TEXT
     rows = table_rows(TEX, "tab:verdicts")
     assert (
-        len([k for k in rows if k != "Statement"]) == 11
-    )  # the frozen-circuit row split by statement (models vs procedure)
+        len([k for k in rows if k != "Statement"]) == 12
+    )  # the frozen-circuit row split by statement (models vs procedure); the a priori MDE row (external v2)
     status = {k: v[-1] for k, v in rows.items() if k != "Statement"}
     assert sum("Exploratory" in s for s in status.values()) == 1
     assert status["Training the circuit helps (a statement about the procedure)"] == "Not resolved"
