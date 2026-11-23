@@ -8,6 +8,14 @@ authors:
     affiliation: "Independent Researcher, Alicante, Spain"
 version: "2.0.0"
 date-released: "2026-11-23"
+doi: "10.5281/zenodo.24451522"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.24451522"
+    description: "Concept DOI (all versions)"
+  - type: doi
+    value: "10.5281/zenodo.24451523"
+    description: "Version 2.0.0"
 url: "https://github.com/enriquerb32/limits-of-resolution-qml"
 repository-code: "https://github.com/enriquerb32/limits-of-resolution-qml"
 license: "MIT"

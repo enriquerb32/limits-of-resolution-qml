@@ -2,6 +2,7 @@
 
 Code, data and reproducibility package for **"Limits of Resolution in Small Machine-Learning Benchmarks: Calibrated Inference for Clustered Test Sets"** (Enrique Real, ORCID [0009-0006-3862-9797](https://orcid.org/0009-0006-3862-9797)).
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24451522.svg)](https://doi.org/10.5281/zenodo.24451522)
 [![CI](https://github.com/enriquerb32/limits-of-resolution-qml/actions/workflows/ci.yml/badge.svg)](https://github.com/enriquerb32/limits-of-resolution-qml/actions/workflows/ci.yml)
 [![Reproducibility](https://github.com/enriquerb32/limits-of-resolution-qml/actions/workflows/reproducibility.yml/badge.svg)](https://github.com/enriquerb32/limits-of-resolution-qml/actions/workflows/reproducibility.yml)
 [![Coverage: 100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](pyproject.toml)
@@ -333,7 +334,7 @@ Both v2 panels are written by `scripts/export_monthly_panel.py` from the daily f
 
 ## 12. Citation and licenses
 
-Cite the manuscript and the archived release (DOI to be added on release); see `CITATION.cff`.
+Cite the manuscript and the archived release on Zenodo: [doi:10.5281/zenodo.24451522](https://doi.org/10.5281/zenodo.24451522) (all versions; v2.0.0 is [doi:10.5281/zenodo.24451523](https://doi.org/10.5281/zenodo.24451523)). See `CITATION.cff`.
 
 * **Code:** [MIT License](LICENSE)
 * **Data and text:** [CC BY 4.0](LICENSE-DATA), subject to the AEMET attribution above
