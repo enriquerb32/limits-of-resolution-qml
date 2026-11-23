@@ -24,17 +24,28 @@ circuit, its controls and the trees (point 5). Every deviation from this plan wi
   * Re-evaluation: the 3 best configurations of the 30 trials are refitted with 3 seeds (101-103, outside the final
     0-14); the configuration with the highest mean validation AUC over those 3 seeds is selected (ties: lower mean
     validation loss). The same procedure for every model.
-  * Search space, identical for every model: learning rate log-uniform [1e-3, 3e-2]; weight decay log-uniform
-    [1e-5, 1e-2]; maximum epochs {25, 50, 100}; early-stopping patience {6, 15}; batch size {16, 32}. Dropout keeps the
-    value of the shared LSTM backbone (not searched, since it is common to the circuit and its controls).
+  * Search space, identical for every model: learning rate log-uniform [1e-3, 1e-1]; weight decay log-uniform
+    [1e-5, 1e-2]; maximum epochs {25, 50, 100, 200}; early-stopping patience {6, 15, 30}; batch size {16, 32}. Dropout
+    keeps the value of the shared LSTM backbone (not searched, since it is common to the circuit and its controls).
+    (Amended after the pilot, before deposit: the ranges were [1e-3, 3e-2], {25, 50, 100} and {6, 15}; the best pilot
+    values lay at their upper edges, see below.)
   * Declared exception: Full Fourier-4 maps 6,561 features to 4 outputs (about 26,000 parameters, for 2,332 training
     rows), so its weight decay is searched on log-uniform [1e-4, 1e-1] instead; everything else as above. Without the
     wider range the control would be handicapped by over-fitting rather than by its function class.
   * Final fits: the selected setting, 15 seeds, each the best of 3 random starts (restarts for every model, not only
     the circuit). Choice among the 3 starts: the highest validation AUC of the restored early-stopping checkpoint;
     ties: lower validation loss; the test set is never used for this choice.
-  * The range of the search space was informed by a pilot on planted signals (exp64_circuit_budget_pilot.py, circuit
-    head only, results archived); the pilot did not use the panel labels.
+  * The range of the search space was informed by a pilot on planted signals (exp64_circuit_budget_pilot.py, causal
+    pipeline, circuit head and Full Fourier-1; results in results/json/results_exp64_circuit_budget_pilot.json); the
+    pilot did not use the panel labels. Pilot: 4 teachers (exp50 candidates 0-3, LayerNorm teacher, oracle test AUC
+    0.85), 3 seeds, 96 fits. Mean test AUC of the circuit: 0.680 (lr 1e-3, 100 epochs, patience 15), 0.691 (lr 5e-3,
+    25 epochs, patience 6), 0.707 (lr 5e-3, 100/15), 0.721 (same, best of 3 starts by validation loss), 0.724 (lr 2e-2,
+    100/15); started at the teacher's weights, 0.847. No cold-started circuit fit (0 of 60) met the recovery criterion
+    of section 4, against 12 of 12 warm-started fits, so the teacher is representable and the shortfall is one of
+    optimisation. Full Fourier-1: 0.775-0.777 (1 of 24 single fits above the criterion, no 3-seed mean). The AUC
+    increased with the learning rate up to the largest value tried (2e-2, near the old upper bound 3e-2) and with the
+    longer budget (100 epochs, patience 15, the old upper values; epochs and patience were varied together), hence
+    the wider ranges above. Warm starts use the teacher and are a diagnostic only; they are not part of any search.
   * Trees: Optuna TPE, 50 trials, validation AUC, on the causal pipeline, as in v2.
 
 3. Primary metrics and decision rules
